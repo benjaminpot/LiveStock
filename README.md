@@ -36,7 +36,8 @@ ch main
 git status
 git add .
 git commit -m "I FINALLY FIX THE FXXKING BUG"
-git push  
+git push -u origin feature/xxx #第一次，之後直接 git push 就可以了
+ 
 
 # GitHub Pull Request
 # Review / Merge
