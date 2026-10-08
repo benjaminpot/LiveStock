@@ -10,9 +10,7 @@
 5. [Google Drive 大型素材管理](#5-google-drive-大型素材管理)
 6. [提交與上傳流程](#6-提交與上傳流程)
 7. [Pull Request 與合併](#7-pull-request-與合併)
-8. [多人協作注意事項](#8-多人協作注意事項)
-9. [常用 Git 指令](#9-常用-git-指令)
-10. [發生問題時](#10-發生問題時)
+8. [常用 Git 指令](#8-常用-Git-指令)
 
 ---
 
@@ -160,7 +158,8 @@ Environment Assets
 
 ---
 
-## 5. Google Drive 大型素材管理 （這部分之後再說吧，我再研究研究 :P）
+## 5. Google Drive 大型素材管理
+###（這部分之後再說吧，我再研究研究 :P）
 
 建議資料夾結構：
 
@@ -293,7 +292,8 @@ git branch -d feature/player-movement
 
 
 
-## 9. 常用 Git 指令 （不想打的話，VS code有按鈕可以直接按）
+## 8. 常用 Git 指令
+###（不想打的話，VS code有按鈕可以直接按）
 
 查看狀態：
 
