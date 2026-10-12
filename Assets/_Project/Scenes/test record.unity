@@ -635,6 +635,35 @@ MonoBehaviour:
     recordPosition: 1
     recordRotation: 1
     recordScale: 0
+  _metadata:
+    formatVersion: 1
+    recordingId: 
+    sessionName: 
+    createdUtc: 
+    completedUtc: 
+    unityVersion: 
+    sceneName: 
+    outputLocation: 
+    frameFormat: 
+    frameFileName: 
+    binaryFormatVersion: 0
+    byteOrder: 
+    binaryBytesPerFrame: 0
+    sampleRate: 0
+    usesUnscaledTime: 0
+    completed: 0
+    frameCount: 0
+    droppedSampleCount: 0
+    durationSeconds: 0
+    tracks: []
+  _startTime: 0
+  _nextSampleTime: 0
+  _sampleInterval: 0
+  _frameCount: 0
+  _droppedSampleCount: 0
+  _activeFrameFormat: 0
+  <IsRecording>k__BackingField: 0
+  <LastRecordingDirectory>k__BackingField: 
 --- !u!4 &430726184
 Transform:
   m_ObjectHideFlags: 0
