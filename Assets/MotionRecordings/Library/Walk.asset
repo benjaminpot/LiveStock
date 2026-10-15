@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18ff06d464a66944697eaf55962a54a8, type: 3}
+  m_Name: Walk
+  m_EditorClassIdentifier: Assembly-CSharp::LiveStock.MotionRecording.MotionRecordingAsset
+  motionName: walk
+  metadata: {fileID: 4900000, guid: 1e0781ff19c6ae7418045b5d668e070f, type: 3}
+  binaryFrames: {fileID: 4900000, guid: 9b9435dafbd2bec418f001370ff5720b, type: 3}

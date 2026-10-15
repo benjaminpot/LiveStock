@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18ff06d464a66944697eaf55962a54a8, type: 3}
+  m_Name: Idle
+  m_EditorClassIdentifier: Assembly-CSharp::LiveStock.MotionRecording.MotionRecordingAsset
+  motionName: idle
+  metadata: {fileID: 4900000, guid: 782e0e66d5c87af4e9f5850363bb3ea4, type: 3}
+  binaryFrames: {fileID: 4900000, guid: 2a588d42ade7cb44bb0afff6f1a8bca5, type: 3}

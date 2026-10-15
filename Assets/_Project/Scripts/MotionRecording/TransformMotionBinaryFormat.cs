@@ -114,6 +114,79 @@ namespace LiveStock.MotionRecording
             }
         }
 
+        public static List<TransformMotionFrame> ReadAllFrames(
+            string metadataJson,
+            byte[] frameBytes,
+            out TransformMotionMetadata metadata)
+        {
+            if (string.IsNullOrWhiteSpace(metadataJson))
+            {
+                throw new ArgumentException("Recording metadata JSON is required.", nameof(metadataJson));
+            }
+
+            if (frameBytes == null || frameBytes.Length == 0)
+            {
+                throw new ArgumentException("Recording frame bytes are required.", nameof(frameBytes));
+            }
+
+            metadata = JsonUtility.FromJson<TransformMotionMetadata>(metadataJson);
+            if (metadata == null || metadata.tracks == null)
+            {
+                throw new InvalidDataException("Recording metadata is missing its track definitions.");
+            }
+
+            if (!string.Equals(metadata.frameFormat, "binaryFloat32", StringComparison.Ordinal))
+            {
+                throw new InvalidDataException("The recording does not use the binaryFloat32 frame format.");
+            }
+
+            using (var stream = new MemoryStream(frameBytes, false))
+            using (var reader = new BinaryReader(stream))
+            {
+                ValidateHeader(reader, metadata);
+                return ReadFrames(reader, stream, metadata);
+            }
+        }
+
+        private static List<TransformMotionFrame> ReadFrames(
+            BinaryReader reader,
+            Stream stream,
+            TransformMotionMetadata metadata)
+        {
+            int bytesPerFrame = GetBytesPerFrame(metadata.tracks);
+            long completeFrameCount = (stream.Length - stream.Position) / bytesPerFrame;
+            int capacity = completeFrameCount > int.MaxValue ? int.MaxValue : (int)completeFrameCount;
+            var frames = new List<TransformMotionFrame>(capacity);
+
+            for (long frameNumber = 0; frameNumber < completeFrameCount; frameNumber++)
+            {
+                var frame = new TransformMotionFrame
+                {
+                    frameIndex = reader.ReadInt32(),
+                    time = reader.ReadDouble(),
+                    samples = new RecordedTransformSample[metadata.tracks.Length]
+                };
+
+                for (int trackIndex = 0; trackIndex < metadata.tracks.Length; trackIndex++)
+                {
+                    TransformTrackDefinition track = metadata.tracks[trackIndex];
+                    byte flags = reader.ReadByte();
+                    frame.samples[trackIndex] = new RecordedTransformSample
+                    {
+                        id = track.id,
+                        activeInHierarchy = (flags & 1) != 0,
+                        position = track.recordsPosition ? ReadVector3(reader) : Vector3.zero,
+                        rotation = track.recordsRotation ? ReadQuaternion(reader) : Quaternion.identity,
+                        localScale = track.recordsLocalScale ? ReadVector3(reader) : Vector3.one
+                    };
+                }
+
+                frames.Add(frame);
+            }
+
+            return frames;
+        }
+
         private static void ValidateHeader(BinaryReader reader, TransformMotionMetadata metadata)
         {
             byte[] magic = reader.ReadBytes(Magic.Length);

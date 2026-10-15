@@ -2683,7 +2683,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.TwoBoneIKConstraint
   m_Weight: 1
   m_Data:
-    m_Root: {fileID: 3774223657747103000}
+    m_Root: {fileID: 5852444285911094730}
     m_Mid: {fileID: 7286700302780456186}
     m_Tip: {fileID: 5020176410677400030}
     m_Target: {fileID: 3710971432810019606}
