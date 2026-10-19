@@ -71,7 +71,7 @@ namespace LiveStock.MotionRecording
                 throw new InvalidDataException("The recording does not use the binaryFloat32 frame format.");
             }
 
-            string frameFileName = string.IsNullOrEmpty(metadata.frameFileName) ? "frames.bin" : metadata.frameFileName;
+            string frameFileName = string.IsNullOrEmpty(metadata.frameFileName) ? "frames.bytes" : metadata.frameFileName;
             string framesPath = Path.Combine(recordingDirectory, frameFileName);
 
             using (var stream = new FileStream(framesPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

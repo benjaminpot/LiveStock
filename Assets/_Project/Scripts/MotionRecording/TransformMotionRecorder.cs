@@ -12,7 +12,7 @@ namespace LiveStock.MotionRecording
     public sealed class TransformMotionRecorder : MonoBehaviour
     {
         private const string MetadataFileName = "metadata.json";
-        private const string BinaryFramesFileName = "frames.bin";
+        private const string BinaryFramesFileName = "frames.bytes";
         private const string JsonFramesFileName = "frames.jsonl";
 
         [Header("Recording")]

@@ -30,7 +30,7 @@ The default **Project Root** setting writes recordings below:
 ```text
 <Unity project>/MotionRecordings/<timestamp>_<session>/
 ├── metadata.json
-└── frames.bin
+└── frames.bytes
 ```
 
 For this project that is normally:
@@ -42,7 +42,7 @@ C:\dataC\元宇宙遊戲設計\LiveStock\MotionRecordings\
 Select **Persistent Data Path** to use `Application.persistentDataPath/MotionRecordings` instead. A Quest/Android or other non-Editor build cannot write into the Unity project, so **Project Root** automatically falls back to `Application.persistentDataPath` there. The Inspector's **Open Recording Folder** button opens the effective location.
 
 - `metadata.json` describes the session, binary layout, and every recorded track.
-- `frames.bin` contains a small header followed by fixed-layout frames using little-endian Float32 transform values.
+- `frames.bytes` contains a small header followed by fixed-layout frames using little-endian Float32 transform values. The `.bytes` extension lets Unity import it as a `TextAsset`.
 - The metadata is written once at start and finalized at stop. If the app exits unexpectedly, complete binary frames remain recoverable, an incomplete final frame is ignored, and `completed` stays `false`.
 
 The binary frame layout is:
