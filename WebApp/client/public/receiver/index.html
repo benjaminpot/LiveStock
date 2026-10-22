@@ -1,22 +1,47 @@
 <!DOCTYPE HTML>
-<html>
+<html lang="zh-Hant">
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="css/style.css" />
-  <title>Receiver Sample</title>
+  <title>LiveStock 監視器</title>
 </head>
 
 <body>
 
   <div id="container">
-    <h1>Receiver Sample</h1>
+    <h1>LiveStock 監視器</h1>
 
     <div id="warning" hidden="true"></div>
 
-    <div id="player"></div>
+    <div class="cctv-screens">
+    <div class="cctv-screen">
+      <div id="player"></div>
+      <div id="cctvBlackout" role="status" hidden></div>
+    </div>
+    <div id="secondaryScreen" class="cctv-screen" hidden>
+      <video id="secondaryVideo" playsinline muted></video>
+      <div id="secondaryBlackout" class="cctv-blackout" role="status" hidden></div>
+    </div>
+    </div>
+
+    <section id="cctvPanel" aria-label="監視器控制">
+      <p data-connection role="status">尚未連線</p>
+      <p>目前鏡頭：<strong data-current>—</strong>　切換冷卻：<span data-cooldown>—</span></p>
+      <button type="button" data-next disabled>下一台監視器</button>
+      <label data-slot-control hidden>選台目標
+        <select data-slot aria-label="選台目標">
+          <option value="0">主畫面</option>
+          <option value="1">第二畫面</option>
+        </select>
+      </label>
+      <p data-secondary-current hidden></p>
+      <div data-monitors></div>
+      <p>輕點對應影片可切台。每人最多兩台、兩格共用切換冷卻；同一台監視器共用過熱值。</p>
+    </section>
 
     <div class="box">
       <span>Codec preferences:</span>
