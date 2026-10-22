@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Fusion.Realtime.dll::Fusion.Photon.Realtime.PhotonAppSettings
   AppSettings:
     AppIdRealtime: 
-    AppIdFusion: 
+    AppIdFusion: fb2e30bf-cf8c-4992-9e01-c35c1c30862f
     AppIdQuantum: 
     AppIdChat: 
     AppIdVoice: 
     AppIdVideo: 
-    AppVersion: 
+    AppVersion: livestock-dev-01
     UseNameServer: 1
-    FixedRegion: 
+    FixedRegion: asia
     Server: 
     Port: 0
     ProxyServer: 
@@ -29,7 +29,7 @@ MonoBehaviour:
     EnableProtocolFallback: 1
     AuthMode: 2
     EnableLobbyStatistics: 0
-    NetworkLogging: 1
-    ClientLogging: 2
+    NetworkLogging: 0
+    ClientLogging: 0
     encryptionMode: 0
     emptyRoomTtl: 0
