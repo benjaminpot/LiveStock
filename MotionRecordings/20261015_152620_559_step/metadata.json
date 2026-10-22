@@ -1,0 +1,53 @@
+{
+    "formatVersion": 2,
+    "recordingId": "20261015_152620_559",
+    "sessionName": "step",
+    "createdUtc": "2026-10-15T15:26:20.5594916Z",
+    "completedUtc": "2026-10-15T15:26:28.7814493Z",
+    "unityVersion": "6000.3.25f1",
+    "sceneName": "test record",
+    "outputLocation": "projectRoot",
+    "frameFormat": "binaryFloat32",
+    "frameFileName": "frames.bin",
+    "binaryFormatVersion": 1,
+    "byteOrder": "littleEndian",
+    "binaryBytesPerFrame": 99,
+    "sampleRate": 60,
+    "usesUnscaledTime": true,
+    "completed": true,
+    "frameCount": 493,
+    "droppedSampleCount": 0,
+    "durationSeconds": 8.219804600001226,
+    "tracks": [
+        {
+            "id": "head",
+            "targetName": "CenterEyeAnchor",
+            "targetHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace/CenterEyeAnchor",
+            "coordinateSpace": "relativeToReference",
+            "referenceHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace",
+            "recordsPosition": true,
+            "recordsRotation": true,
+            "recordsLocalScale": false
+        },
+        {
+            "id": "L-hand",
+            "targetName": "LeftHandAnchor",
+            "targetHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace/LeftHandAnchor",
+            "coordinateSpace": "relativeToReference",
+            "referenceHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace",
+            "recordsPosition": true,
+            "recordsRotation": true,
+            "recordsLocalScale": false
+        },
+        {
+            "id": "R-hand",
+            "targetName": "RightHandAnchor",
+            "targetHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace/RightHandAnchor",
+            "coordinateSpace": "relativeToReference",
+            "referenceHierarchyPath": "[BuildingBlock] Camera Rig/TrackingSpace",
+            "recordsPosition": true,
+            "recordsRotation": true,
+            "recordsLocalScale": false
+        }
+    ]
+}
