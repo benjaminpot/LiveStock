@@ -1,0 +1,26 @@
+{
+    "name": "GDC.Metaverse",
+    "rootNamespace": "GDC.Metaverse",
+    "references": [
+        "Fusion.Unity",
+        "Photon.Realtime",
+        "PhotonVoice",
+        "PhotonVoice.API",
+        "PhotonVoice.Fusion"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.photonengine.voice-fusion",
+            "expression": "0.0.0",
+            "define": "GDC_HAS_PHOTON_VOICE"
+        }
+    ],
+    "noEngineReferences": false
+}
