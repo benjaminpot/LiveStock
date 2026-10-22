@@ -406,8 +406,8 @@ MonoBehaviour:
   m_Depth: 16
   m_AntiAliasing: 4
   m_Codec:
-    m_MimeType: video/H264
-    m_SdpFmtpLine: implementation_name=NvCodec;level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=420033
+    m_MimeType: 
+    m_SdpFmtpLine: 
   m_FrameRate: 30
   m_Bitrate:
     min: 0
