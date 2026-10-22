@@ -3,6 +3,8 @@ import { createDisplayStringArray } from "../../js/stats.js";
 import { VideoPlayer } from "../../js/videoplayer.js";
 import { RenderStreaming } from "../../module/renderstreaming.js";
 import { Signaling, WebSocketSignaling } from "../../module/signaling.js";
+import { CCTVPanel } from "./cctv-panel.js";
+import { CCTVVideo } from "./cctv-video.js";
 
 /** @type {Element} */
 let playButton;
@@ -20,6 +22,14 @@ messageDiv.style.display = 'none';
 const playerDiv = document.getElementById('player');
 const lockMouseCheck = document.getElementById('lockMouseCheck');
 const videoPlayer = new VideoPlayer();
+const cctvPanel = new CCTVPanel(document.getElementById('cctvPanel'), document.getElementById('cctvBlackout'));
+const cctvVideo = new CCTVVideo(videoPlayer, document.getElementById('secondaryVideo'));
+cctvPanel.onState = state => {
+  cctvVideo.setState(state);
+  videoPlayer.resizeVideo();
+};
+document.getElementById('secondaryVideo').addEventListener('click', () =>
+  cctvPanel.send({ type: 'cctv-next', slot: 1 }));
 
 setup();
 
@@ -66,6 +76,7 @@ function showPlayButton() {
 
 function onClickPlayButton() {
   playButton.style.display = 'none';
+  cctvPanel.setConnection('連線中');
 
   // add video player
   videoPlayer.createPlayer(playerDiv, lockMouseCheck);
@@ -80,7 +91,7 @@ async function setupRenderStreaming() {
   renderstreaming = new RenderStreaming(signaling, config);
   renderstreaming.onConnect = onConnect;
   renderstreaming.onDisconnect = onDisconnect;
-  renderstreaming.onTrackEvent = (data) => videoPlayer.addTrack(data.track);
+  renderstreaming.onTrackEvent = (data) => cctvVideo.addTrack(data);
   renderstreaming.onGotOffer = setCodecPreferences;
 
   await renderstreaming.start();
@@ -90,10 +101,19 @@ async function setupRenderStreaming() {
 function onConnect() {
   const channel = renderstreaming.createDataChannel("input");
   videoPlayer.setupInput(channel);
+  const connection = renderstreaming;
+  // Unity routes input and game commands by this connection's identity.
+  // Keep input ready before starting the status/command channel.
+  channel.addEventListener('open', () => {
+    if (renderstreaming === connection)
+      cctvPanel.attach(connection.createDataChannel('cctv'));
+  }, { once: true });
   showStatsMessage();
 }
 
 async function onDisconnect(connectionId) {
+  cctvPanel.reset();
+  cctvVideo.reset();
   clearStatsMessage();
   messageDiv.style.display = 'block';
   messageDiv.innerText = `Disconnect peer on ${connectionId}.`;
