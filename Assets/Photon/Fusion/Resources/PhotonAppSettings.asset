@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1878438611, guid: 7de3b8b9e1263ad479e2d0c4261b7646, type: 3}
+  m_Name: PhotonAppSettings
+  m_EditorClassIdentifier: Fusion.Realtime.dll::Fusion.Photon.Realtime.PhotonAppSettings
+  AppSettings:
+    AppIdRealtime: 
+    AppIdFusion: fb2e30bf-cf8c-4992-9e01-c35c1c30862f
+    AppIdQuantum: 
+    AppIdChat: 
+    AppIdVoice: 
+    AppIdVideo: 
+    AppVersion: livestock-dev-01
+    UseNameServer: 1
+    FixedRegion: asia
+    Server: 
+    Port: 0
+    ProxyServer: 
+    Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 2
+    EnableLobbyStatistics: 0
+    NetworkLogging: 0
+    ClientLogging: 0
+    encryptionMode: 0
+    emptyRoomTtl: 0

@@ -1,0 +1,30 @@
+{
+    "name": "GDC.Metaverse.Editor",
+    "rootNamespace": "GDC.Metaverse.Editor",
+    "references": [
+        "GDC.Metaverse",
+        "Fusion.Unity",
+        "Fusion.Unity.Editor",
+        "Photon.Realtime",
+        "PhotonVoice",
+        "PhotonVoice.API",
+        "PhotonVoice.Fusion"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.photonengine.voice-fusion",
+            "expression": "0.0.0",
+            "define": "GDC_HAS_PHOTON_VOICE"
+        }
+    ],
+    "noEngineReferences": false
+}
