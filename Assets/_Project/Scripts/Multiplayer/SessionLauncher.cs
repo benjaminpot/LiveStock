@@ -53,6 +53,8 @@ namespace LiveStock.Multiplayer
         public bool CanSelectVR => UseVR || !HasLocalVRClient;
         public OVRCameraRig MenuVRRig => menuVRRole != null ? menuVRRole.GetComponentInChildren<OVRCameraRig>(true) : null;
 
+        public static void RefreshRunnerVisibility() => instance?.ApplyActiveRunner();
+
         void Awake()
         {
             if (instance != null && instance != this) { Destroy(gameObject); return; }
@@ -170,6 +172,7 @@ namespace LiveStock.Multiplayer
             events.OnSceneLoadDone.AddListener(r =>
             {
                 sceneReady.Add(r);
+                ConfigureServerOnly(r);
                 DisableScenePreviewCameras(r);
                 SpawnPlayers(r);
                 GDC.Metaverse.NetworkSpawner.SpawnFor(r);
@@ -220,6 +223,16 @@ namespace LiveStock.Multiplayer
             Destroy(go);
             Status = "Connection failed: " + result.ShutdownReason;
             return null;
+        }
+
+        static void ConfigureServerOnly(NetworkRunner runner)
+        {
+            if (runner.SceneManager is not NetworkSceneManagerDefault manager)
+                return;
+
+            foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
+                foreach (var serverOnly in root.GetComponentsInChildren<ServerOnly>(true))
+                    serverOnly.ActivateFor(runner);
         }
 
         string ResolveNetworkScenePath()
@@ -334,8 +347,12 @@ namespace LiveStock.Multiplayer
             if (ServerRunning)
             {
                 ServerRunner.ProvideInput = false;
-                if (IsMultiPeer) ServerRunner.SetVisible(false);
+                // Keep the authoritative scene ticking so ServerOnly.Start can
+                // resolve its runner and start Render Streaming. Hiding this
+                // scene until registration creates a visibility/startup cycle.
+                if (IsMultiPeer) ServerRunner.SetVisible(true);
             }
+            bool serverOwnsRendering = ServerRunning;
             for (int i = 0; i < clients.Count; i++)
             {
                 var runner = clients[i];
@@ -343,7 +360,9 @@ namespace LiveStock.Multiplayer
                 bool isVR = runnerUsesVR.TryGetValue(runner, out var usesVR) && usesVR;
                 bool keepAlive = active || isVR;
                 runner.ProvideInput = keepAlive;
-                if (runner.IsRunning && IsMultiPeer) runner.SetVisible(keepAlive);
+                // A process that is rendering CCTV must expose exactly the
+                // authoritative server scene, never a client replica.
+                if (runner.IsRunning && IsMultiPeer) runner.SetVisible(!serverOwnsRendering && keepAlive);
                 if (localRoles.TryGetValue(runner, out var state) && state.Role != null)
                 {
                     state.Role.SetActive(keepAlive);

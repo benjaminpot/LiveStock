@@ -20,6 +20,8 @@ namespace LiveStock.Multiplayer
         public Vector2 AreaSize = new(10, 10);
         [Min(0)] public float MinimumSpacing = 1.5f;
         [Min(1)] public int AttemptsPerNPC = 30;
+        [Tooltip("Alpha 安全上限：避免大量 NPC 同時消耗 Fusion、NavMesh 與 Rigging 資源。")]
+        [Min(1)] public int MaxNetworkedNPCs = 12;
         [Tooltip("0 每次不同，其他值可重現相同隨機排列。")]
         public int Seed;
         public bool SnapToGround = true;
@@ -68,12 +70,13 @@ namespace LiveStock.Multiplayer
             if (owner != null) return; // 同一個場景載入通知不會重複生成。
             owner = runner;
             var random = Seed == 0 ? new System.Random() : new System.Random(Seed);
+            int remaining = Mathf.Clamp(MaxNetworkedNPCs, 1, 200);
             foreach (var group in Groups)
             {
-                if (group == null || group.Prefab == null) continue;
+                if (group == null || group.Prefab == null || remaining <= 0) continue;
                 int min = Mathf.Clamp(group.MinCount, 0, 200);
                 int max = Mathf.Clamp(group.MaxCount, min, 200);
-                int count = random.Next(min, max + 1);
+                int count = Mathf.Min(random.Next(min, max + 1), remaining);
                 int made = 0;
                 for (int i = 0; i < count; i++)
                 {
@@ -84,6 +87,7 @@ namespace LiveStock.Multiplayer
                     spawned.Add(npc);
                     positions.Add(position);
                     made++;
+                    remaining--;
                 }
                 if (made < count) Debug.LogWarning($"{name}: {group.Prefab.name} 生成 {made}/{count}；請加大範圍或檢查地面 Layer。", this);
             }

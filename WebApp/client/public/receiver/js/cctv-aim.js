@@ -12,6 +12,15 @@ export function videoPoint(video, clientX, clientY) {
   return { x: (clientX - left) / width, y: 1 - (clientY - top) / height };
 }
 
+export function formatFireResult(message) {
+  return message.status === 'kill'
+    ? `擊殺：${message.objectName}（累計 ${message.kills ?? 1}）`
+    : message.status === 'hit' ? `命中：${message.objectName}`
+    : message.status === 'launched' ? '球已發射'
+    : message.status === 'miss' ? '未命中（測試球已清除）'
+    : '畫面已切換或無法使用，請重新瞄準';
+}
+
 export class CCTVAim {
   constructor(screens, fire, result, send) {
     this.screens = screens;
@@ -54,9 +63,7 @@ export class CCTVAim {
 
   showResult(message) {
     if (!this.aim || message.slot !== this.aim.slot || message.index !== this.aim.index) return;
-    this.result.textContent = message.status === 'hit' ? `命中：${message.objectName}`
-      : message.status === 'launched' ? '球已發射'
-      : message.status === 'miss' ? '未命中（測試球已清除）' : '畫面已切換或無法使用，請重新瞄準';
+    this.result.textContent = formatFireResult(message);
   }
 
   reset() {

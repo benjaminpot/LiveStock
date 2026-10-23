@@ -52,6 +52,10 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     private readonly HashSet<Camera> blackedOutCameras = new HashSet<Camera>();
     private float nextStatusTime;
 
+    public SignalingManager ManagedSignalingManager => signalingManager != null
+        ? signalingManager
+        : videoSender != null ? videoSender.GetComponent<SignalingManager>() : null;
+
     private sealed class Session
     {
         public GameObject output;
@@ -61,6 +65,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public RTCDataChannel channel;
         public DelegateOnMessage onMessage;
         public DelegateOnClose onClose;
+        public int kills;
     }
 
     private sealed class ViewOutput
@@ -117,6 +122,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public int index;
         public string status;
         public string objectName;
+        public int kills;
     }
 
     private void Awake()
@@ -440,14 +446,15 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
             ApplySessionView(output, command.index);
             Ray ray = output.camera.ViewportPointToRay(new Vector3(command.x, command.y, 0));
             var projectile = Instantiate(projectilePrefab, ray.GetPoint(0.12f), Quaternion.LookRotation(ray.direction));
-            projectile.Launch(ray.direction, objectName =>
+            projectile.Launch(ray.direction, (status, objectName) =>
             {
                 if (this == null || !isActiveAndEnabled ||
                     !sessions.TryGetValue(connectionId, out var current) || current != session ||
                     session.channel == null || session.channel.ReadyState != RTCDataChannelState.Open) return;
+                if (status == "kill") session.kills++;
                 var impact = new FireResult {
                     slot = command.slot, index = command.index,
-                    status = objectName == null ? "miss" : "hit", objectName = objectName ?? ""
+                    status = status, objectName = objectName ?? "", kills = session.kills
                 };
                 session.channel.Send(JsonUtility.ToJson(impact));
             });

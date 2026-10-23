@@ -34,6 +34,12 @@ public class AnimalMotionController : MonoBehaviour
     private readonly HashSet<string> warnedMissingMotions = new HashSet<string>(); // 避免找不到動作時每一幀都刷警告。
     private bool warnedMissingPlayer; // 記錄是否已提醒缺少播放元件。
 
+    /// <summary>
+    /// 目前 Motion List 的索引。網路 NPC 只同步這個小型狀態，
+    /// 不再逐 Tick 傳送整套骨架姿態。
+    /// </summary>
+    public int CurrentMotionIndex { get; private set; } = -1;
+
     private void Awake()
     {
         // 若 Inspector 沒有手動指定，就從本物件取得必要元件。
@@ -149,6 +155,7 @@ public class AnimalMotionController : MonoBehaviour
             if (string.Equals(motionPlayer.CurrentMotionName, entry.actionName, StringComparison.OrdinalIgnoreCase) &&
                 motionPlayer.IsPlaying)
             {
+                CurrentMotionIndex = i;
                 return true;
             }
 
@@ -157,7 +164,10 @@ public class AnimalMotionController : MonoBehaviour
 
             // 播放器成功載入時會更新 CurrentMotionName；如果載入失敗，它會清空此值並在 Console 報錯。
             if (string.Equals(motionPlayer.CurrentMotionName, entry.actionName, StringComparison.OrdinalIgnoreCase))
+            {
+                CurrentMotionIndex = i;
                 return true;
+            }
 
             return false;
         }
