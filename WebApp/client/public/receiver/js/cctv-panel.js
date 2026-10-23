@@ -33,6 +33,10 @@ export class CCTVPanel {
       if (this.channel !== channel) return;
       let state;
       try { state = JSON.parse(event.data); } catch { return; }
+      if (state.type === 'cctv-fire-result') {
+        this.onFireResult?.(state);
+        return;
+      }
       if (state.type !== 'cctv-state' || !Array.isArray(state.monitors)) return;
       this.state = state;
       this.render();
@@ -67,6 +71,7 @@ export class CCTVPanel {
     this.secondaryCurrent.hidden = true;
     this.slotControl.hidden = true;
     this.slot.value = '0';
+    this.onReset?.();
   }
 
   render() {

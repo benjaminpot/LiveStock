@@ -5,6 +5,7 @@ import { RenderStreaming } from "../../module/renderstreaming.js";
 import { Signaling, WebSocketSignaling } from "../../module/signaling.js";
 import { CCTVPanel } from "./cctv-panel.js";
 import { CCTVVideo } from "./cctv-video.js";
+import { CCTVAim } from "./cctv-aim.js";
 
 /** @type {Element} */
 let playButton;
@@ -24,12 +25,17 @@ const lockMouseCheck = document.getElementById('lockMouseCheck');
 const videoPlayer = new VideoPlayer();
 const cctvPanel = new CCTVPanel(document.getElementById('cctvPanel'), document.getElementById('cctvBlackout'));
 const cctvVideo = new CCTVVideo(videoPlayer, document.getElementById('secondaryVideo'));
+const cctvAim = new CCTVAim(
+  [...document.querySelectorAll('.cctv-screen')],
+  document.getElementById('fireButton'), document.getElementById('fireResult'),
+  command => cctvPanel.send(command));
+cctvPanel.onFireResult = result => cctvAim.showResult(result);
+cctvPanel.onReset = () => cctvAim.reset();
 cctvPanel.onState = state => {
   cctvVideo.setState(state);
   videoPlayer.resizeVideo();
+  cctvAim.setState(state);
 };
-document.getElementById('secondaryVideo').addEventListener('click', () =>
-  cctvPanel.send({ type: 'cctv-next', slot: 1 }));
 
 setup();
 

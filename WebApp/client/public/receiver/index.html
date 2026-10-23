@@ -21,10 +21,12 @@
     <div class="cctv-screen">
       <div id="player"></div>
       <div id="cctvBlackout" role="status" hidden></div>
+      <span data-crosshair aria-label="準星" hidden>＋</span>
     </div>
     <div id="secondaryScreen" class="cctv-screen" hidden>
       <video id="secondaryVideo" playsinline muted></video>
       <div id="secondaryBlackout" class="cctv-blackout" role="status" hidden></div>
+      <span data-crosshair aria-label="準星" hidden>＋</span>
     </div>
     </div>
 
@@ -40,7 +42,9 @@
       </label>
       <p data-secondary-current hidden></p>
       <div data-monitors></div>
-      <p>輕點對應影片可切台。每人最多兩台、兩格共用切換冷卻；同一台監視器共用過熱值。</p>
+      <button type="button" id="fireButton" disabled>發射</button>
+      <p id="fireResult" role="status">請點選影片放置準星</p>
+      <p>點影片放準星，再按發射。切換鏡頭請使用監視器按鈕；本次只回饋命中，不造成傷害。</p>
     </section>
 
     <div class="box">

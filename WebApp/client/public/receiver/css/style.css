@@ -34,6 +34,17 @@ body {
   height: 100%;
 }
 
+#Video, #secondaryVideo { object-fit: contain; object-position: center; }
+[data-crosshair] {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+  font: bold 32px/1 sans-serif;
+  pointer-events: none;
+}
+
 #fullscreenButton {
   position: absolute;
   top: 25px;

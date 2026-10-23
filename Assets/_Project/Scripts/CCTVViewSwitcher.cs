@@ -34,6 +34,9 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     [SerializeField, Min(0.1f)] private float recoveryDuration = 10;
     [SerializeField, Min(0)] private float switchCooldown = 3;
 
+    [Header("Test projectile")]
+    [SerializeField] private CCTVTestProjectile projectilePrefab;
+
     private int previewIndex;
     private CCTVMonitorState state;
     private SignalingManager signalingManager;
@@ -102,6 +105,18 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public string type;
         public int index;
         public int slot;
+        public float x;
+        public float y;
+    }
+
+    [Serializable]
+    private sealed class FireResult
+    {
+        public string type = "cctv-fire-result";
+        public int slot;
+        public int index;
+        public string status;
+        public string objectName;
     }
 
     private void Awake()
@@ -186,8 +201,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         ApplyPreview();
     }
 
-    // The Inspector event identifies the action to bind on EACH session receiver.
-    // Calls without a connection identity only affect the Unity local preview.
+    // Identify the template's old click-to-switch action so remote receivers
+    // can exclude it. Inspector calls here still control the local preview.
     public void OnSwitch(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -346,12 +361,6 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         var events = new List<PlayerInput.ActionEvent>();
         foreach (var actionEvent in inputTemplate.actionEvents)
             if (switchAction == null || actionEvent.actionId != switchAction.id.ToString()) events.Add(actionEvent);
-        if (switchAction != null)
-        {
-            var actionEvent = new PlayerInput.ActionEvent(switchAction);
-            actionEvent.AddListener(context => { if (context.performed) SwitchNextFor(data.connectionId); });
-            events.Add(actionEvent);
-        }
         session.input.actionEvents = new ReadOnlyArray<PlayerInput.ActionEvent>(events.ToArray());
         sessions.Add(data.connectionId, session);
         ApplySessionViews(data.connectionId, session);
@@ -413,7 +422,38 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         if (command == null) return;
         if (command.type == "cctv-select") SwitchFor(connectionId, command.index, command.slot);
         else if (command.type == "cctv-next") SwitchNextFor(connectionId, command.slot);
+        else if (command.type == "cctv-fire") Fire(connectionId, command);
         SendStatus();
+    }
+
+    private void Fire(string connectionId, Command command)
+    {
+        var session = sessions[connectionId];
+        if (session.channel == null || session.channel.ReadyState != RTCDataChannelState.Open) return;
+        var result = new FireResult { slot = command.slot, index = command.index, status = "unavailable" };
+        if (projectilePrefab != null && command.slot >= 0 && command.slot < session.views.Length &&
+            command.x >= 0 && command.x <= 1 && command.y >= 0 && command.y <= 1 &&
+            state.Viewers[connectionId].IndexAt(command.slot) == command.index &&
+            command.index >= 0 && !state.Monitors[command.index].Overheated)
+        {
+            var output = session.views[command.slot];
+            ApplySessionView(output, command.index);
+            Ray ray = output.camera.ViewportPointToRay(new Vector3(command.x, command.y, 0));
+            var projectile = Instantiate(projectilePrefab, ray.GetPoint(0.12f), Quaternion.LookRotation(ray.direction));
+            projectile.Launch(ray.direction, objectName =>
+            {
+                if (this == null || !isActiveAndEnabled ||
+                    !sessions.TryGetValue(connectionId, out var current) || current != session ||
+                    session.channel == null || session.channel.ReadyState != RTCDataChannelState.Open) return;
+                var impact = new FireResult {
+                    slot = command.slot, index = command.index,
+                    status = objectName == null ? "miss" : "hit", objectName = objectName ?? ""
+                };
+                session.channel.Send(JsonUtility.ToJson(impact));
+            });
+            result.status = "launched";
+        }
+        session.channel.Send(JsonUtility.ToJson(result));
     }
 
     private void SendStatus()
