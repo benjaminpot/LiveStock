@@ -167,6 +167,7 @@ namespace LiveStock.Multiplayer
                 DisableScenePreviewCameras(r);
                 SpawnPlayers(r);
                 GDC.Metaverse.NetworkSpawner.SpawnFor(r);
+                RandomNPCSpawner.SpawnFor(r);
                 ApplyActiveRunner();
             });
             events.OnSceneLoadStart.AddListener(r =>
@@ -174,6 +175,7 @@ namespace LiveStock.Multiplayer
                 sceneReady.Remove(r);
                 ClearLocalRole(r);
                 GDC.Metaverse.NetworkSpawner.DespawnFor(r);
+                RandomNPCSpawner.DespawnFor(r);
                 if (!r.IsServer) return;
                 foreach (var obj in players.Values) if (obj != null) r.Despawn(obj);
                 players.Clear();
@@ -182,19 +184,19 @@ namespace LiveStock.Multiplayer
             runner.AddCallbacks(events);
 
             var scene = new NetworkSceneInfo();
-            bool suppliesScene = dedicatedServer || mode == GameMode.Single;
-            if (suppliesScene) scene.AddSceneRef(SceneRef.FromPath("Assets/_Project/Scenes/Lobby.unity"), LoadSceneMode.Single);
+            // Fusion Multi-Peer 要求每個 Runner（包含 Client）都指定自己的場景。
+            scene.AddSceneRef(SceneRef.FromPath("Assets/_Project/Scenes/test Network.unity"), LoadSceneMode.Single);
             var args = new StartGameArgs
             {
                 GameMode = mode,
                 SessionName = RoomName.Trim(),
                 PlayerCount = 4,
                 SceneManager = go.AddComponent<NetworkSceneManagerDefault>(),
+                Scene = scene,
                 EnableClientSessionCreation = mode != GameMode.Client,
                 IsOpen = true,
                 IsVisible = true
             };
-            if (suppliesScene) args.Scene = scene;
             var result = await runner.StartGame(args);
             if (result.Ok)
             {
@@ -264,7 +266,8 @@ namespace LiveStock.Multiplayer
                 var camera = state.Role.AddComponent<Camera>(); camera.farClipPlane = 2000; camera.depth = 100;
                 camera.GetUniversalAdditionalCameraData().allowXRRendering = false;
                 state.Role.AddComponent<AudioListener>();
-                state.Role.AddComponent<ObserverCamera>();
+                var observer = state.Role.AddComponent<ObserverCamera>();
+                observer.Initialize(runner);
             }
             localRoles[runner] = state;
             ApplyActiveRunner();
