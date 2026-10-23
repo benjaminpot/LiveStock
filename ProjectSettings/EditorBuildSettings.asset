@@ -6,15 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/_Project/Scenes/Menu.unity
+    path: Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity
     guid: 978e7046e1dd1ee439071a7056fe34a0
   - enabled: 1
-    path: Assets/_Project/Scenes/Lobby.unity
+    path: Assets/_Project/Scenes/_ALPHA_DEMO/Lobby.unity
     guid: f6b915e10d74b354eb1bf7a935c987f2
   - enabled: 1
+    path: Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity
+    guid: d2c488a17d5b04540bda9e02be806ce5
+  - enabled: 0
     path: Assets/_Project/Scenes/Farm_Multiplayer.unity
     guid: bf5870385e977bc46842f1fc42549f66
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/test Network.unity
     guid: 13643f045a2664d4bb6f2280104af6eb
   - enabled: 0

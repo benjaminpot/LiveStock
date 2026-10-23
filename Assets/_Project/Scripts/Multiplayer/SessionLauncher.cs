@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fusion;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
@@ -20,6 +21,8 @@ namespace LiveStock.Multiplayer
         public NetworkObject PlayerPrefab;
         public bool UseVR;
         public string RoomName = "LIVESTOCK-DEV";
+        [Tooltip("留空時使用按下 Server/Join 當下的場景。也可填入完整 Assets/.../*.unity 路徑。")]
+        public string NetworkScenePath;
         public string Status = "Menu - start a server or join an existing dedicated server";
 
         readonly Dictionary<NetworkRunner, LocalRoleState> localRoles = new();
@@ -67,6 +70,9 @@ namespace LiveStock.Multiplayer
 
         void Update()
         {
+#if UNITY_EDITOR
+            HandleEditorShortcuts();
+#endif
             if (ServerRunning) SpawnPlayers(ServerRunner);
             foreach (var client in clients)
                 if (client != null && client.IsRunning && client.IsServer) SpawnPlayers(client);
@@ -87,13 +93,13 @@ namespace LiveStock.Multiplayer
         }
 
 #if UNITY_EDITOR
-        void OnGUI()
+        void HandleEditorShortcuts()
         {
             if (!IsMultiPeer) return;
-            var current = Event.current;
-            if (current.type != EventType.KeyDown) return;
-            if (current.keyCode == KeyCode.F1) { AddEditorPeer(); current.Use(); }
-            else if (current.keyCode == KeyCode.F2) { SwitchActiveRunner(); current.Use(); }
+            var keyboard = Keyboard.current;
+            if (keyboard == null) return;
+            if (keyboard.f1Key.wasPressedThisFrame) AddEditorPeer();
+            else if (keyboard.f2Key.wasPressedThisFrame) SwitchActiveRunner();
         }
 #endif
 
@@ -183,9 +189,10 @@ namespace LiveStock.Multiplayer
             events.OnShutdown.AddListener((r, reason) => OnRunnerShutdown(r, reason));
             runner.AddCallbacks(events);
 
+            var networkScenePath = ResolveNetworkScenePath();
             var scene = new NetworkSceneInfo();
             // Fusion Multi-Peer 要求每個 Runner（包含 Client）都指定自己的場景。
-            scene.AddSceneRef(SceneRef.FromPath("Assets/_Project/Scenes/test Network.unity"), LoadSceneMode.Single);
+            scene.AddSceneRef(SceneRef.FromPath(networkScenePath), LoadSceneMode.Single);
             var args = new StartGameArgs
             {
                 GameMode = mode,
@@ -215,10 +222,41 @@ namespace LiveStock.Multiplayer
             return null;
         }
 
+        string ResolveNetworkScenePath()
+        {
+            if (!string.IsNullOrWhiteSpace(NetworkScenePath)) return NetworkScenePath.Trim();
+
+            var activeScenePath = SceneManager.GetActiveScene().path;
+            if (!string.IsNullOrWhiteSpace(activeScenePath)) return activeScenePath;
+
+            const string fallback = "Assets/_Project/Scenes/test Network.unity";
+            Debug.LogWarning($"{nameof(SessionLauncher)}: active scene has no asset path; falling back to {fallback}.", this);
+            return fallback;
+        }
+
 #if UNITY_EDITOR
         public void AddEditorPeer()
         {
-            if (!CanAddEditorPeer) return;
+            if (!IsMultiPeer)
+            {
+                Status = "F1 requires Fusion Peer Mode = Multiple.";
+                return;
+            }
+            if (Busy)
+            {
+                Status = "Wait for the current connection operation to finish before adding another player.";
+                return;
+            }
+            if (peerAtMenu)
+            {
+                Status = "This menu is already the next player. Join first, then press F1 to open another player menu.";
+                return;
+            }
+            if (clients.Count >= 4)
+            {
+                Status = "Player limit reached (4/4).";
+                return;
+            }
             peerAtMenu = true;
             activePeerIndex = clients.Count;
             UseVR = false;
