@@ -50,7 +50,12 @@ namespace LiveStock.Multiplayer
                     yield return null;
             }
 
-            ActivateFor(runner);
+            // A large scene may take longer than 300 rendered frames to finish
+            // Fusion's scene mapping. OnSceneLoadDone will call ActivateFor with
+            // the authoritative Runner; do not disable this root just because
+            // the early lookup timed out.
+            if (runner != null)
+                ActivateFor(runner);
         }
 
         public void ActivateFor(NetworkRunner target)
@@ -65,6 +70,12 @@ namespace LiveStock.Multiplayer
                 gameObject.SetActive(false);
                 return;
             }
+
+            // The early runner lookup may have hidden this root before Fusion
+            // completed scene mapping. A valid authoritative callback owns the
+            // final state and must reactivate the hierarchy.
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
 
             registered = true;
             ActiveRoots.Add(this);

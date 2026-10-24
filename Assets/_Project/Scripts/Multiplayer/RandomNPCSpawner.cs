@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
@@ -32,6 +33,7 @@ namespace LiveStock.Multiplayer
         readonly List<NetworkObject> spawned = new();
         readonly List<Vector3> positions = new();
         NetworkRunner owner;
+        Coroutine pendingSpawn;
 
         // 只計算仍存在的網路 NPC，方便 Inspector 與測試工具查詢。
         public int AliveCount => spawned.FindAll(npc => npc != null && npc.IsValid).Count;
@@ -61,13 +63,34 @@ namespace LiveStock.Multiplayer
         {
             if (!runner.IsServer || runner.SceneManager is not NetworkSceneManagerDefault manager) return;
             foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
-                foreach (var spawner in root.GetComponentsInChildren<RandomNPCSpawner>())
-                    if (spawner.enabled) spawner.Spawn(runner);
+                foreach (var spawner in root.GetComponentsInChildren<RandomNPCSpawner>(true))
+                    if (spawner.isActiveAndEnabled) spawner.RequestSpawn(runner);
         }
 
-        void Spawn(NetworkRunner runner)
+        void RequestSpawn(NetworkRunner runner)
         {
-            if (owner != null) return; // 同一個場景載入通知不會重複生成。
+            if (owner != null || pendingSpawn != null)
+                return;
+            pendingSpawn = StartCoroutine(SpawnAfterPhysicsReady(runner));
+        }
+
+        IEnumerator SpawnAfterPhysicsReady(NetworkRunner runner)
+        {
+            // 新載入的 Multi-Peer 物理場景要先完成 FixedUpdate，地面 Collider 才能可靠 Raycast。
+            for (int attempt = 0; attempt < 5; attempt++)
+            {
+                yield return new WaitForFixedUpdate();
+                if (runner == null || !runner.IsRunning || !runner.IsServer)
+                    break;
+                if (Spawn(runner) > 0)
+                    break;
+            }
+            pendingSpawn = null;
+        }
+
+        int Spawn(NetworkRunner runner)
+        {
+            if (owner != null) return AliveCount; // 同一個場景載入通知不會重複生成。
             owner = runner;
             var random = Seed == 0 ? new System.Random() : new System.Random(Seed);
             int remaining = Mathf.Clamp(MaxNetworkedNPCs, 1, 200);
@@ -91,6 +114,13 @@ namespace LiveStock.Multiplayer
                 }
                 if (made < count) Debug.LogWarning($"{name}: {group.Prefab.name} 生成 {made}/{count}；請加大範圍或檢查地面 Layer。", this);
             }
+
+            int aliveCount = AliveCount;
+            if (aliveCount > 0)
+                Debug.Log($"[RandomNPCSpawner] '{runner.name}' generated {aliveCount} network NPCs.", this);
+            else
+                owner = null; // 物理場景尚未就緒時允許下一個 FixedUpdate 重試。
+            return aliveCount;
         }
 
         bool TryPosition(System.Random random, out Vector3 position)
@@ -127,6 +157,11 @@ namespace LiveStock.Multiplayer
                 {
                     spawner.ClearGenerated();
                     spawner.owner = null;
+                    if (spawner.pendingSpawn != null)
+                    {
+                        spawner.StopCoroutine(spawner.pendingSpawn);
+                        spawner.pendingSpawn = null;
+                    }
                 }
         }
 

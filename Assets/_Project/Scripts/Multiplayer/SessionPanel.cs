@@ -65,14 +65,7 @@ namespace LiveStock.Multiplayer
             addPeer = Button(panel.transform, "Open New Player Menu (F1)", () => FindFirstObjectByType<SessionLauncher>().AddEditorPeer());
             switchPeer = Button(panel.transform, "Switch Peer (F2)", () => FindFirstObjectByType<SessionLauncher>().SwitchActiveRunner());
 #endif
-            var eventSystem = FindFirstObjectByType<EventSystem>();
-            if (eventSystem == null) eventSystem = new GameObject("EventSystem", typeof(EventSystem)).GetComponent<EventSystem>();
-            desktopInput = eventSystem.GetComponent<InputSystemUIInputModule>();
-            if (desktopInput == null) desktopInput = eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
-            vrInput = eventSystem.GetComponent<OVRInputModule>();
-            if (vrInput == null) vrInput = eventSystem.gameObject.AddComponent<OVRInputModule>();
-            vrInput.joyPadClickButton = OVRInput.Button.PrimaryIndexTrigger;
-            vrInput.enabled = false;
+            EnsureInputModules();
         }
         static TMP_Text Label(Transform parent, string value)
         {
@@ -90,6 +83,7 @@ namespace LiveStock.Multiplayer
         void Update()
         {
             var launcher = FindFirstObjectByType<SessionLauncher>(); if (launcher == null || status == null) return;
+            EnsureInputModules();
             ConfigurePresentation(launcher);
             var anyNetwork = launcher.ServerRunning || launcher.ConnectedPeerCount > 0;
             server.gameObject.SetActive(!launcher.ServerRunning && launcher.ConnectedPeerCount == 0);
@@ -129,7 +123,7 @@ namespace LiveStock.Multiplayer
                 canvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1280, 720);
                 canvas.renderMode = RenderMode.WorldSpace;
                 canvas.worldCamera = rig.centerEyeAnchor.GetComponent<Camera>();
-                vrInput.rayTransform = rig.rightControllerAnchor;
+                if (vrInput != null) vrInput.rayTransform = rig.rightControllerAnchor;
                 panelRect.anchorMin = panelRect.anchorMax = panelRect.pivot = new Vector2(.5f, .5f);
                 panelRect.anchoredPosition = Vector2.zero;
             }
@@ -145,9 +139,31 @@ namespace LiveStock.Multiplayer
                 panelRect.anchoredPosition = new Vector2(20, -20);
             }
             desktopRaycaster.enabled = !useVR;
-            desktopInput.enabled = !useVR;
+            if (desktopInput != null) desktopInput.enabled = !useVR;
             vrRaycaster.enabled = useVR;
-            vrInput.enabled = useVR;
+            if (vrInput != null) vrInput.enabled = useVR;
+        }
+
+        void EnsureInputModules()
+        {
+            // SessionPanel 會跨場景保留，但原場景的 EventSystem 會被銷毀，因此要重新綁定。
+            if (desktopInput != null && vrInput != null)
+                return;
+
+            var eventSystem = FindFirstObjectByType<EventSystem>();
+            if (eventSystem == null)
+                eventSystem = new GameObject("EventSystem", typeof(EventSystem)).GetComponent<EventSystem>();
+
+            desktopInput = eventSystem.GetComponent<InputSystemUIInputModule>();
+            if (desktopInput == null)
+                desktopInput = eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
+
+            vrInput = eventSystem.GetComponent<OVRInputModule>();
+            if (vrInput == null)
+                vrInput = eventSystem.gameObject.AddComponent<OVRInputModule>();
+
+            vrInput.joyPadClickButton = OVRInput.Button.PrimaryIndexTrigger;
+            vrInput.enabled = false;
         }
     }
 }

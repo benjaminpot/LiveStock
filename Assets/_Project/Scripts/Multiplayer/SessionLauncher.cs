@@ -11,6 +11,8 @@ namespace LiveStock.Multiplayer
 {
     public class SessionLauncher : MonoBehaviour
     {
+        const string DefaultNetworkScenePath = "Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity";
+
         sealed class LocalRoleState
         {
             public GameObject Role;
@@ -21,8 +23,8 @@ namespace LiveStock.Multiplayer
         public NetworkObject PlayerPrefab;
         public bool UseVR;
         public string RoomName = "LIVESTOCK-DEV";
-        [Tooltip("留空時使用按下 Server/Join 當下的場景。也可填入完整 Assets/.../*.unity 路徑。")]
-        public string NetworkScenePath;
+        [Tooltip("多人遊戲場景的完整 Assets/.../*.unity 路徑；必須啟用於 Build Settings。")]
+        public string NetworkScenePath = DefaultNetworkScenePath;
         public string Status = "Menu - start a server or join an existing dedicated server";
 
         readonly Dictionary<NetworkRunner, LocalRoleState> localRoles = new();
@@ -36,6 +38,7 @@ namespace LiveStock.Multiplayer
         int activePeerIndex;
         bool peerAtMenu = true;
         GameObject menuVRRole;
+        string resolvedNetworkScenePath;
         static SessionLauncher instance;
 
         public NetworkRunner ServerRunner { get; private set; }
@@ -193,9 +196,24 @@ namespace LiveStock.Multiplayer
             runner.AddCallbacks(events);
 
             var networkScenePath = ResolveNetworkScenePath();
+            int networkSceneIndex = SceneUtility.GetBuildIndexByScenePath(networkScenePath);
+            if (networkSceneIndex < 0)
+            {
+                if (dedicatedServer) ServerRunner = null;
+                else clients.Remove(runner);
+                runnerUsesVR.Remove(runner);
+                Debug.LogError(
+                    $"{nameof(SessionLauncher)}: network scene is not enabled in Build Settings: {networkScenePath}",
+                    this);
+                Status = $"Network scene is not enabled in Build Settings: {networkScenePath}";
+                Destroy(go);
+                return null;
+            }
+
             var scene = new NetworkSceneInfo();
             // Fusion Multi-Peer 要求每個 Runner（包含 Client）都指定自己的場景。
-            scene.AddSceneRef(SceneRef.FromPath(networkScenePath), LoadSceneMode.Single);
+            // 直接使用 Build Settings index，避免錯誤/停用的 path 找不到時落入 Addressables 分支。
+            scene.AddSceneRef(SceneRef.FromIndex(networkSceneIndex), LoadSceneMode.Single);
             var args = new StartGameArgs
             {
                 GameMode = mode,
@@ -210,7 +228,9 @@ namespace LiveStock.Multiplayer
             var result = await runner.StartGame(args);
             if (result.Ok)
             {
-                if (dedicatedServer && IsMultiPeer) runner.SetVisible(false);
+                // Dedicated Server owns CCTV rendering and NPC simulation in this process.
+                // Do not hide it here after OnSceneLoadDone has activated ServerOnly;
+                // the following visibility pass keeps the authoritative Runner visible.
                 ApplyActiveRunner();
                 return runner;
             }
@@ -237,14 +257,23 @@ namespace LiveStock.Multiplayer
 
         string ResolveNetworkScenePath()
         {
-            if (!string.IsNullOrWhiteSpace(NetworkScenePath)) return NetworkScenePath.Trim();
+            // Multi-Peer 載入後 Active Scene 會變成沒有 asset path 的 Runner 場景。
+            // 第一個 Runner 決定路徑後必須快取，後續 Client 才會載入同一個場景。
+            if (!string.IsNullOrWhiteSpace(resolvedNetworkScenePath))
+                return resolvedNetworkScenePath;
+
+            if (!string.IsNullOrWhiteSpace(NetworkScenePath))
+                return resolvedNetworkScenePath = NetworkScenePath.Trim();
 
             var activeScenePath = SceneManager.GetActiveScene().path;
-            if (!string.IsNullOrWhiteSpace(activeScenePath)) return activeScenePath;
+            var activeSceneName = SceneManager.GetActiveScene().name;
+            if (!string.IsNullOrWhiteSpace(activeScenePath) && activeSceneName != "Menu" && activeSceneName != "Lobby")
+                return resolvedNetworkScenePath = activeScenePath;
 
-            const string fallback = "Assets/_Project/Scenes/test Network.unity";
-            Debug.LogWarning($"{nameof(SessionLauncher)}: active scene has no asset path; falling back to {fallback}.", this);
-            return fallback;
+            Debug.LogWarning(
+                $"{nameof(SessionLauncher)}: no gameplay scene was configured; using {DefaultNetworkScenePath}.",
+                this);
+            return resolvedNetworkScenePath = DefaultNetworkScenePath;
         }
 
 #if UNITY_EDITOR
@@ -446,8 +475,19 @@ namespace LiveStock.Multiplayer
         public void StartFarm()
         {
             var authority = ServerRunning ? ServerRunner : clients.FirstOrDefault(r => r != null && r.IsRunning && r.IsServer);
-            if (authority != null && !authority.IsSceneManagerBusy)
-                authority.LoadScene(SceneRef.FromPath("Assets/_Project/Scenes/Farm_Multiplayer.unity"));
+            if (authority == null || authority.IsSceneManagerBusy)
+                return;
+
+            const string farmScenePath = "Assets/_Project/Scenes/MainGame.unity";
+            int farmSceneIndex = SceneUtility.GetBuildIndexByScenePath(farmScenePath);
+            if (farmSceneIndex < 0)
+            {
+                Status = $"Farm scene is not enabled in Build Settings: {farmScenePath}";
+                Debug.LogError(Status, this);
+                return;
+            }
+
+            authority.LoadScene(SceneRef.FromIndex(farmSceneIndex));
         }
 
         public async void Leave()
@@ -500,10 +540,20 @@ namespace LiveStock.Multiplayer
         static void DisableScenePreviewCameras(NetworkRunner runner)
         {
             if (runner.SceneManager is not NetworkSceneManagerDefault manager) return;
+
+            var serverPreviewCameras = new HashSet<Camera>();
+            if (runner.IsServer)
+                foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
+                    foreach (var switcher in root.GetComponentsInChildren<CCTVViewSwitcher>(true))
+                        switcher.CollectPreviewCameras(serverPreviewCameras);
+
             foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
             {
-                foreach (var camera in root.GetComponentsInChildren<Camera>(true)) camera.enabled = false;
-                foreach (var listener in root.GetComponentsInChildren<AudioListener>(true)) listener.enabled = false;
+                foreach (var camera in root.GetComponentsInChildren<Camera>(true))
+                    if (!serverPreviewCameras.Contains(camera))
+                        camera.enabled = false;
+                foreach (var listener in root.GetComponentsInChildren<AudioListener>(true))
+                    listener.enabled = false;
             }
         }
     }

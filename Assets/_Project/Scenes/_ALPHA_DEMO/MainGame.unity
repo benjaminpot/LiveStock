@@ -210855,6 +210855,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NPC_sheep
       objectReference: {fileID: 0}
+    - target: {fileID: 8113692632351386186, guid: f2c6d83234b37884fa694b2eddfc36ee, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

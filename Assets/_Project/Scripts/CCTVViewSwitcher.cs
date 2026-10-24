@@ -56,6 +56,17 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         ? signalingManager
         : videoSender != null ? videoSender.GetComponent<SignalingManager>() : null;
 
+    /// <summary>讓多人場景只保留 CCTV 的本機預覽 Camera，不要把串流來源誤當一般場景 Camera 關閉。</summary>
+    public void CollectPreviewCameras(ICollection<Camera> target)
+    {
+        if (target == null || views == null)
+            return;
+
+        foreach (var view in views)
+            if (view != null && view.previewCamera != null)
+                target.Add(view.previewCamera);
+    }
+
     private sealed class Session
     {
         public GameObject output;
