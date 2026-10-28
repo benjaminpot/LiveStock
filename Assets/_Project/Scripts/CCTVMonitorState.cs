@@ -52,14 +52,9 @@ public sealed class CCTVMonitorState
         var viewer = new Viewer();
         for (int i = 0; i < Monitors.Length; i++)
             if (!Monitors[i].Overheated) { viewer.SelectedIndex = i; break; }
-        // Fill up to two distinct slots on connection, without a separate UI
-        // switch. If only a hot second camera exists, show its recovery screen.
-        for (int i = 0; i < Monitors.Length; i++)
-            if (i != viewer.SelectedIndex)
-            {
-                viewer.SecondaryIndex = i;
-                if (!Monitors[i].Overheated) break;
-            }
+        // DEMO TEMPORARY: 第二顯示鏡頭目前不會出現在網頁上，因此維持 -1，避免隱藏的鏡頭
+        // 仍被算成有人觀看並持續累積 Heat。正式恢復雙畫面時，再於此處指派 SecondaryIndex。
+        viewer.SecondaryIndex = -1;
         viewers.Add(connectionId, viewer);
         return viewer;
     }
@@ -69,13 +64,12 @@ public sealed class CCTVMonitorState
     public bool TrySwitch(string connectionId, int index, int slot = 0)
     {
         if (!viewers.TryGetValue(connectionId, out var viewer) || index < 0 || index >= Monitors.Length ||
-            slot < 0 || slot > 1 || viewer.IndexAt(slot) < 0 ||
+            // DEMO TEMPORARY: 只接受主畫面 slot 0；恢復雙畫面時再允許 slot 1。
+            slot != 0 || viewer.IndexAt(slot) < 0 ||
             index == viewer.IndexAt(slot) || viewer.CooldownRemaining > 0 || Monitors[index].Overheated)
             return false;
         if (slot == 0)
             viewer.SelectedIndex = index;
-        else
-            viewer.SecondaryIndex = index;
         viewer.CooldownRemaining = switchCooldown;
         return true;
     }
@@ -91,8 +85,7 @@ public sealed class CCTVMonitorState
             if (viewers.TryGetValue(connectionId, out var viewer))
             {
                 counts[viewer.SelectedIndex]++;
-                if (viewer.SecondaryIndex >= 0 && viewer.SecondaryIndex != viewer.SelectedIndex)
-                    counts[viewer.SecondaryIndex]++;
+                // DEMO TEMPORARY: 第二顯示鏡頭停用，不把隱藏鏡頭加入觀看/過熱統計。
             }
         for (int i = 0; i < Monitors.Length; i++)
         {

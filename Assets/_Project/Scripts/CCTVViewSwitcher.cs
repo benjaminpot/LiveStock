@@ -70,7 +70,9 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     private sealed class Session
     {
         public GameObject output;
-        public ViewOutput[] views = new ViewOutput[2];
+        // DEMO TEMPORARY: 網頁目前只展示一個主 CCTV。只建立一個 sender，避免隱藏的
+        // 第二串流繼續渲染及累積過熱；正式恢復雙畫面時將長度改回 2。
+        public ViewOutput[] views = new ViewOutput[1];
         public InputReceiver input;
         public InputActionAsset actions;
         public RTCDataChannel channel;
@@ -101,6 +103,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public int[] selectedIndices;
         public string[] videoMids;
         public float cooldownRemaining;
+        public float cooldownDuration;
         public float heatLimit;
         public MonitorMessage[] monitors;
     }
@@ -478,7 +481,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     {
         if (state == null) return;
         var message = new StatusMessage {
-            heatLimit = state.HeatLimit, monitors = new MonitorMessage[views.Length]
+            heatLimit = state.HeatLimit, cooldownDuration = switchCooldown,
+            monitors = new MonitorMessage[views.Length]
         };
         for (int i = 0; i < views.Length; i++)
         {
@@ -494,7 +498,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
             if (entry.Value.channel == null || entry.Value.channel.ReadyState != RTCDataChannelState.Open) continue;
             var viewer = state.Viewers[entry.Key];
             message.selectedIndex = viewer.SelectedIndex;
-            message.selectedIndices = new[] { viewer.SelectedIndex, viewer.SecondaryIndex };
+            // DEMO TEMPORARY: 保留陣列格式相容前端，但第二槽固定為 -1。
+            message.selectedIndices = new[] { viewer.SelectedIndex, -1 };
             message.videoMids = new string[entry.Value.views.Length];
             for (int slot = 0; slot < message.videoMids.Length; slot++)
                 if (entry.Value.views[slot].sender.Transceivers.TryGetValue(entry.Key, out var transceiver))

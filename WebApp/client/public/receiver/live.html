@@ -17,16 +17,32 @@
         <span><strong>LiveStock</strong><small>FARM WATCH</small></span>
       </a>
       <div class="topbar-center">
-        <span class="live-pill"><i></i> LIVE</span>
-        <span class="broadcast-title">The Pasture Never Sleeps</span>
+        <a href="#watch">Home</a>
+        <a class="active" href="#watch">Live</a>
+        <a href="#cameras">Cameras</a>
+        <a href="#store">Store</a>
       </div>
       <div class="topbar-status"><span class="status-dot"></span><span data-connection role="status">OFFLINE</span></div>
     </header>
 
     <main class="studio-layout">
+      <nav class="side-nav" aria-label="Primary navigation">
+        <span class="side-label">WATCH</span>
+        <a class="active" href="#watch"><b>⌂</b> Live Hunt</a>
+        <a href="#cameras"><b>◉</b> Camera Grid</a>
+        <a href="#interaction"><b>⌖</b> Interactive Hunt</a>
+        <span class="side-label">EXPLORE</span>
+        <a href="#store"><b>◆</b> Hunting Gear</a>
+        <a href="#community"><b>♟</b> Community</a>
+        <div class="season-card">
+          <span>LIVE SEASON</span>
+          <strong>WILD FRONTIER</strong>
+          <small>New challenges every hunt</small>
+        </div>
+      </nav>
       <div class="broadcast-column">
         <div id="warning" hidden></div>
-        <section class="video-card" aria-label="Live CCTV feed">
+        <section id="watch" class="video-card" aria-label="Live CCTV feed">
           <div class="video-meta">
             <div><span class="eyebrow">PRIMARY FEED</span><h1 data-current>Waiting for signal</h1></div>
             <div class="viewer-count"><span aria-hidden="true">●</span> <b>1</b> WATCHING</div>
@@ -53,8 +69,12 @@
 
         <section id="cctvPanel" class="control-deck" aria-label="CCTV controls">
           <div class="section-heading">
-            <div><span class="eyebrow">CAMERA NETWORK</span><h2>Select a feed</h2></div>
-            <div class="cooldown-chip">SWITCH <span data-cooldown>—</span></div>
+            <div><span class="eyebrow">CAMERA NETWORK</span><h2 id="cameras">Select a feed</h2></div>
+            <div class="cooldown-card" data-cooldown-card>
+              <div><small>CAMERA SWITCH</small><strong data-cooldown>READY</strong></div>
+              <progress data-cooldown-progress max="3" value="0"></progress>
+              <span data-cooldown-hint>Switch available</span>
+            </div>
           </div>
           <button type="button" data-next class="sr-only" disabled>Next camera</button>
           <label data-slot-control class="sr-only" hidden>Target screen
@@ -62,7 +82,7 @@
           </label>
           <p data-secondary-current class="sr-only" hidden></p>
           <div data-monitors class="camera-grid" aria-live="polite"></div>
-          <div class="interaction-bar">
+          <div id="interaction" class="interaction-bar">
             <div class="interaction-copy">
               <span class="eyebrow">LIVE INTERACTION</span>
               <strong id="fireResult" role="status">Click inside the video to lock a target</strong>
@@ -82,21 +102,32 @@
         </details>
       </div>
 
-      <aside class="chat-panel" aria-label="Live chat">
-        <div class="chat-header">
-          <div><span class="eyebrow">COMMUNITY</span><h2>Live Chat</h2></div>
-          <span class="chat-online">● ONLINE</span>
-        </div>
-        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
-        <div class="chat-notice">Local demo chat · messages stay on this device</div>
-        <form id="chatForm" class="chat-form">
-          <label class="sr-only" for="chatInput">Send a chat message</label>
-          <input id="chatInput" type="text" maxlength="160" autocomplete="off" placeholder="Send a message…">
-          <button type="submit" aria-label="Send message">➤</button>
-        </form>
+      <aside class="right-rail">
+        <section id="community" class="chat-panel" aria-label="Live chat">
+          <div class="chat-header">
+            <div><span class="eyebrow">COMMUNITY</span><h2>Live Chat</h2></div>
+            <span class="chat-online">● ONLINE</span>
+          </div>
+          <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+          <form id="chatForm" class="chat-form">
+            <label class="sr-only" for="chatInput">Send a chat message</label>
+            <input id="chatInput" type="text" maxlength="160" autocomplete="off" placeholder="Send a message…">
+            <button type="submit" aria-label="Send message">➤</button>
+          </form>
+        </section>
+
+        <section id="store" class="store-panel" aria-label="Hunting gear store">
+          <div class="store-header"><div><span class="eyebrow">ARSENAL</span><h2>Hunting Gear</h2></div><span>4 ITEMS</span></div>
+          <div class="store-grid">
+            <article class="store-item"><span class="item-icon">◉</span><div><h3>寶貝球 <small>CAPTURE BALL</small></h3><p>Arc throw</p></div><strong>100</strong><button type="button" disabled>COMING SOON</button></article>
+            <article class="store-item"><span class="item-icon">➶</span><div><h3>弓箭 <small>BOW</small></h3><p>Slow projectile</p></div><strong>100</strong><button type="button" disabled>COMING SOON</button></article>
+            <article class="store-item rare"><span class="item-icon">⌖</span><div><h3>狙擊槍 <small>SNIPER</small></h3><p>Point-and-hit</p></div><strong>599</strong><button type="button" disabled>COMING SOON</button></article>
+            <article class="store-item rare"><span class="item-icon">✹</span><div><h3>炸彈 <small>BOMB</small></h3><p>Arc · area damage</p></div><strong>599</strong><button type="button" disabled>COMING SOON</button></article>
+          </div>
+        </section>
       </aside>
     </main>
-    <footer><span>LiveStock Farm Watch</span><span>DEMO BUILD · LOCAL NETWORK</span></footer>
+    <footer><span>LiveStock Farm Watch</span><span>LIVE · HUNT · SURVIVE</span></footer>
   </div>
   <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
   <script src="https://unpkg.com/event-target@latest/min.js"></script>

@@ -9,6 +9,9 @@ export class CCTVPanel {
     this.connection = document.querySelector('[data-connection]');
     this.current = document.querySelector('[data-current]');
     this.cooldown = root.querySelector('[data-cooldown]');
+    this.cooldownCard = root.querySelector('[data-cooldown-card]');
+    this.cooldownProgress = root.querySelector('[data-cooldown-progress]');
+    this.cooldownHint = root.querySelector('[data-cooldown-hint]');
     this.monitors = root.querySelector('[data-monitors]');
     this.next = root.querySelector('[data-next]');
     this.slot = root.querySelector('[data-slot]');
@@ -70,6 +73,9 @@ export class CCTVPanel {
     this.setConnection('OFFLINE');
     this.current.textContent = 'Waiting for signal';
     this.cooldown.textContent = '—';
+    this.cooldownCard?.classList.remove('is-cooling');
+    if (this.cooldownProgress) this.cooldownProgress.value = 0;
+    if (this.cooldownHint) this.cooldownHint.textContent = 'Switch available';
     if (this.rows.length !== 8) this.createRows(8);
     this.renderRows([]);
     this.blackout.hidden = true;
@@ -91,9 +97,19 @@ export class CCTVPanel {
     const selected = state.monitors[indices[0]];
     const secondary = state.monitors[indices[1]];
     const cooldown = Math.max(0, state.cooldownRemaining);
+    const cooldownDuration = Math.max(0.1, state.cooldownDuration ?? 3);
     this.connection.textContent = 'CONNECTED';
     this.current.textContent = selected?.name ?? 'No signal';
     this.cooldown.textContent = cooldown > 0 ? `${cooldown.toFixed(1)}s` : 'READY';
+    this.cooldownCard?.classList.toggle('is-cooling', cooldown > 0);
+    if (this.cooldownProgress) {
+      this.cooldownProgress.max = cooldownDuration;
+      this.cooldownProgress.value = cooldown;
+      this.cooldownProgress.setAttribute('aria-label', cooldown > 0
+        ? `Camera switch available in ${cooldown.toFixed(1)} seconds` : 'Camera switch available');
+    }
+    if (this.cooldownHint) this.cooldownHint.textContent = cooldown > 0
+      ? `Next switch in ${cooldown.toFixed(1)} seconds` : 'Switch available';
     this.slotControl.hidden = true;
     this.secondaryScreen.hidden = true;
     this.secondaryCurrent.hidden = true;
