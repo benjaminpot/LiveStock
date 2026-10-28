@@ -111,7 +111,8 @@ namespace LiveStock.Multiplayer
 
         void ConfigurePresentation(SessionLauncher launcher)
         {
-            var rig = launcher.MenuFocused && launcher.UseVR ? launcher.MenuVRRig : null;
+            // Keep the world-space UI attached after the menu rig becomes the local VR avatar.
+            var rig = launcher.InteractionVRRig;
             bool useVR = rig != null;
             if (useVR && configuredRig != rig)
             {

@@ -55,6 +55,24 @@ namespace LiveStock.Multiplayer
         public bool HasLocalVRClient => runnerUsesVR.Any(pair => pair.Key != null && pair.Key.IsRunning && pair.Value);
         public bool CanSelectVR => UseVR || !HasLocalVRClient;
         public OVRCameraRig MenuVRRig => menuVRRole != null ? menuVRRole.GetComponentInChildren<OVRCameraRig>(true) : null;
+        public OVRCameraRig InteractionVRRig
+        {
+            get
+            {
+                if (MenuFocused && UseVR)
+                    return MenuVRRig;
+
+                var runner = Runner;
+                if (runner == null || !runnerUsesVR.TryGetValue(runner, out bool usesVR) || !usesVR)
+                    return null;
+
+                if (localRoles.TryGetValue(runner, out var state) && state.Role != null)
+                    return state.Role.GetComponentInChildren<OVRCameraRig>(true);
+
+                // Keep the menu rig interactive while the network avatar is taking ownership of it.
+                return MenuVRRig;
+            }
+        }
 
         public static void RefreshRunnerVisibility() => instance?.ApplyActiveRunner();
 
@@ -95,6 +113,27 @@ namespace LiveStock.Multiplayer
             UseVR = !UseVR;
             RefreshMenuVRRole();
             ApplyActiveRunner();
+        }
+
+        public void ConnectAsVRClient()
+        {
+            if (!Application.isPlaying)
+            {
+                Status = "Enter Play Mode before connecting a VR client.";
+                return;
+            }
+            if (Busy || !MenuFocused)
+                return;
+            if (!UseVR && HasLocalVRClient)
+            {
+                Status = "This process already has a VR player. Only one headset is supported per process.";
+                return;
+            }
+
+            UseVR = true;
+            RefreshMenuVRRole();
+            ApplyActiveRunner();
+            StartSession();
         }
 
 #if UNITY_EDITOR
@@ -405,6 +444,8 @@ namespace LiveStock.Multiplayer
         void RefreshMenuVRRole()
         {
             bool shouldExist = MenuFocused && UseVR && !HasLocalVRClient && PlayerPrefab != null;
+            bool waitingForVRRole = runnerUsesVR.Any(pair =>
+                pair.Key != null && pair.Key.IsRunning && pair.Value && !localRoles.ContainsKey(pair.Key));
             if (shouldExist && menuVRRole == null)
             {
                 var localVRPrefab = PlayerPrefab.GetComponent<NetworkPlayer>()?.LocalVRPrefab;
@@ -416,7 +457,7 @@ namespace LiveStock.Multiplayer
                 foreach (var playback in menuVRRole.GetComponentsInChildren<LiveStock.MotionRecording.VRRecordingTargetPlayer>(true))
                 { playback.playOnStart = false; playback.enabled = false; }
             }
-            else if (!shouldExist && menuVRRole != null)
+            else if (!shouldExist && !waitingForVRRole && menuVRRole != null)
             {
                 Destroy(menuVRRole);
                 menuVRRole = null;

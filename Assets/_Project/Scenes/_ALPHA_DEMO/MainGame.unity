@@ -30842,6 +30842,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: MultiplayerDemo
       objectReference: {fileID: 0}
+    - target: {fileID: 8738504698229205380, guid: 5405e8223ac64ad429cb3087c5e55ef8, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
