@@ -6,6 +6,7 @@ import { Signaling, WebSocketSignaling } from "../../module/signaling.js";
 import { CCTVPanel } from "./cctv-panel.js";
 import { CCTVVideo } from "./cctv-video.js";
 import { CCTVAim } from "./cctv-aim.js";
+import { sfx } from "./sfx.js";
 
 /** @type {Element} */
 let playButton;
@@ -27,7 +28,7 @@ const cctvPanel = new CCTVPanel(document.getElementById('cctvPanel'), document.g
 const cctvVideo = new CCTVVideo(videoPlayer, document.getElementById('secondaryVideo'));
 const cctvAim = new CCTVAim(
   [...document.querySelectorAll('.cctv-screen')],
-  document.getElementById('fireButton'), document.getElementById('fireResult'),
+  document.getElementById('fireResult'),
   command => cctvPanel.send(command));
 cctvPanel.onFireResult = result => cctvAim.showResult(result);
 cctvPanel.onReset = () => cctvAim.reset();
@@ -81,6 +82,7 @@ function showPlayButton() {
 }
 
 function onClickPlayButton() {
+  sfx.unlock();
   playButton.style.display = 'none';
   cctvPanel.setConnection('CONNECTING');
 

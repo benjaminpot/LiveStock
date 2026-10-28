@@ -1,3 +1,5 @@
+import { sfx } from './sfx.js';
+
 // Video coordinates use Unity's viewport convention: bottom-left (0, 0).
 export function videoPoint(video, clientX, clientY) {
   if (!video.videoWidth || !video.videoHeight) return null;
@@ -22,30 +24,36 @@ export function formatFireResult(message) {
 }
 
 export class CCTVAim {
-  constructor(screens, fire, result, send) {
+  constructor(screens, result, send) {
     this.screens = screens;
-    this.fire = fire;
     this.result = result;
     this.send = send;
     this.state = null;
     this.aim = null;
+    this.lastFireAt = Number.NEGATIVE_INFINITY;
     for (let slot = 0; slot < screens.length; slot++) {
       screens[slot].addEventListener('click', event => {
         if (event.target.tagName !== 'VIDEO') return;
         const index = this.state?.selectedIndices?.[slot];
-        if (!(index >= 0) || this.state.monitors[index].status === 'overheated') return;
+        if (!(index >= 0) || this.state.monitors[index].status === 'overheated') {
+          sfx.play('unavailable');
+          return;
+        }
         const point = videoPoint(event.target, event.clientX, event.clientY);
-        if (!point) return;
+        if (!point) {
+          sfx.play('unavailable');
+          return;
+        }
+        const now = performance.now();
+        if (now - this.lastFireAt < 200) return;
+        this.lastFireAt = now;
         this.aim = { slot, index, ...point };
-        this.result.textContent = 'Target locked · press FIRE to confirm';
+        this.result.textContent = 'Target locked · firing…';
         this.render();
+        sfx.play('shoot');
+        this.send({ type: 'cctv-fire', ...this.aim });
       });
     }
-    fire.addEventListener('click', () => {
-      if (this.fire.disabled || !this.aim) return;
-      this.result.textContent = 'Firing…';
-      this.send({ type: 'cctv-fire', ...this.aim });
-    });
     this.reset();
     this.resize = new ResizeObserver(() => this.render());
     screens.forEach(screen => this.resize.observe(screen));
@@ -63,18 +71,18 @@ export class CCTVAim {
 
   showResult(message) {
     if (!this.aim || message.slot !== this.aim.slot || message.index !== this.aim.index) return;
+    if (!['kill', 'hit', 'launched', 'miss'].includes(message.status)) sfx.play('unavailable');
     this.result.textContent = formatFireResult(message);
   }
 
   reset() {
     this.state = null;
     this.aim = null;
-    this.result.textContent = 'Click inside the video to lock a target';
+    this.result.textContent = 'Click inside the video to fire';
     this.render();
   }
 
   render() {
-    this.fire.disabled = !this.aim;
     this.screens.forEach((screen, slot) => {
       const marker = screen.querySelector('[data-crosshair]');
       marker.hidden = !this.aim || this.aim.slot !== slot;

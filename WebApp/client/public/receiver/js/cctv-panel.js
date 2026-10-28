@@ -1,3 +1,5 @@
+import { sfx } from './sfx.js';
+
 // Layout is kept separate from VideoPlayer so the page can be redesigned later.
 export class CCTVPanel {
   constructor(root, blackout) {
@@ -24,6 +26,7 @@ export class CCTVPanel {
     this.pendingIndex = -1;
     this.pendingSlot = 0;
     this.switchTimeout = null;
+    this.lastMonitorStatuses = null;
     this.slot.value = '0';
     this.slot.addEventListener('change', () => this.render());
     this.next.addEventListener('click', () => this.send({ type: 'cctv-next', slot: Number(this.slot.value) }));
@@ -85,6 +88,7 @@ export class CCTVPanel {
     this.slotControl.hidden = true;
     this.slot.value = '0';
     this.finishSwitch();
+    this.lastMonitorStatuses = null;
     this.onReset?.();
   }
 
@@ -98,6 +102,15 @@ export class CCTVPanel {
     const secondary = state.monitors[indices[1]];
     const cooldown = Math.max(0, state.cooldownRemaining);
     const cooldownDuration = Math.max(0.1, state.cooldownDuration ?? 3);
+    if (this.lastMonitorStatuses) {
+      const becameHot = state.monitors.some((monitor, index) =>
+        monitor.status === 'overheated' && this.lastMonitorStatuses[index] !== 'overheated');
+      const recovered = state.monitors.some((monitor, index) =>
+        monitor.status !== 'overheated' && this.lastMonitorStatuses[index] === 'overheated');
+      if (becameHot) sfx.play('overheated');
+      else if (recovered) sfx.play('recovered');
+    }
+    this.lastMonitorStatuses = state.monitors.map(monitor => monitor.status);
     this.connection.textContent = 'CONNECTED';
     this.current.textContent = selected?.name ?? 'No signal';
     this.cooldown.textContent = cooldown > 0 ? `${cooldown.toFixed(1)}s` : 'READY';
@@ -134,7 +147,11 @@ export class CCTVPanel {
       title.textContent = monitor?.name ?? `CAM ${String(index + 1).padStart(2, '0')} · NULL`;
       button.textContent = monitor?.name ?? `Camera ${index + 1} unavailable`;
       button.setAttribute('aria-pressed', String(Boolean(monitor) && index === selectedIndex));
-      button.disabled = !monitor || index === selectedIndex || cooldown > 0 || monitor.status === 'overheated';
+      const blocked = Boolean(monitor) && (index === selectedIndex || cooldown > 0 || monitor.status === 'overheated');
+      // Keep unavailable cards clickable so the UI can explain the refusal
+      // with sound instead of feeling unresponsive.
+      button.disabled = false;
+      button.setAttribute('aria-disabled', String(!monitor || blocked));
       heat.hidden = !monitor;
       if (!monitor) {
         status.textContent = 'NO DATA';
@@ -152,14 +169,31 @@ export class CCTVPanel {
 
   requestSwitch(index) {
     const monitor = this.state?.monitors[index];
-    if (!monitor) return;
+    if (!monitor) {
+      sfx.play('unavailable');
+      this.showDeniedSwitch();
+      return;
+    }
+    const selectedIndex = this.state.selectedIndices?.[0] ?? this.state.selectedIndex;
+    if (index === selectedIndex || this.state.cooldownRemaining > 0 || monitor.status === 'overheated') {
+      sfx.play('unavailable');
+      this.showDeniedSwitch();
+      return;
+    }
     this.pendingIndex = index;
     this.pendingSlot = Number(this.slot.value);
     if (this.switching) this.switching.hidden = false;
     if (this.switchingCamera) this.switchingCamera.textContent = `Routing ${monitor.name} to primary feed…`;
     clearTimeout(this.switchTimeout);
     this.switchTimeout = setTimeout(() => this.finishSwitch(), 10000);
+    sfx.play('switch');
     this.send({ type: 'cctv-select', index, slot: this.pendingSlot });
+  }
+
+  showDeniedSwitch() {
+    this.cooldownCard?.classList.remove('denied');
+    void this.cooldownCard?.offsetWidth;
+    this.cooldownCard?.classList.add('denied');
   }
 
   finishSwitch() {
