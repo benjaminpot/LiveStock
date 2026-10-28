@@ -82,7 +82,7 @@ function showPlayButton() {
 
 function onClickPlayButton() {
   playButton.style.display = 'none';
-  cctvPanel.setConnection('連線中');
+  cctvPanel.setConnection('CONNECTING');
 
   // add video player
   videoPlayer.createPlayer(playerDiv, lockMouseCheck);

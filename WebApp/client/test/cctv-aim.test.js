@@ -14,7 +14,7 @@ describe('CCTV aiming', () => {
 
   test('formats authoritative kill feedback with the per-viewer score', () => {
     expect(formatFireResult({ status: 'kill', objectName: 'NPC_sheep', kills: 3 }))
-      .toBe('擊殺：NPC_sheep（累計 3）');
-    expect(formatFireResult({ status: 'miss' })).toBe('未命中（測試球已清除）');
+      .toBe('Target down: NPC_sheep · Score 3');
+    expect(formatFireResult({ status: 'miss' })).toBe('Missed · projectile cleared');
   });
 });

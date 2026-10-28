@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <link rel="icon" href="../images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="css/demo.css">
+  <title>LiveStock — Farm Watch</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="./live.html" aria-label="LiveStock Farm Watch home">
+        <span class="brand-mark" aria-hidden="true">LS</span>
+        <span><strong>LiveStock</strong><small>FARM WATCH</small></span>
+      </a>
+      <div class="topbar-center">
+        <span class="live-pill"><i></i> LIVE</span>
+        <span class="broadcast-title">The Pasture Never Sleeps</span>
+      </div>
+      <div class="topbar-status"><span class="status-dot"></span><span data-connection role="status">OFFLINE</span></div>
+    </header>
+
+    <main class="studio-layout">
+      <div class="broadcast-column">
+        <div id="warning" hidden></div>
+        <section class="video-card" aria-label="Live CCTV feed">
+          <div class="video-meta">
+            <div><span class="eyebrow">PRIMARY FEED</span><h1 data-current>Waiting for signal</h1></div>
+            <div class="viewer-count"><span aria-hidden="true">●</span> <b>1</b> WATCHING</div>
+          </div>
+          <div class="cctv-screens">
+            <div class="cctv-screen main-screen">
+              <div id="player"></div>
+              <div id="cctvBlackout" class="feed-overlay blackout" role="status" hidden></div>
+              <div id="switchingOverlay" class="feed-overlay switching" role="status" hidden>
+                <div class="scanner" aria-hidden="true"></div>
+                <div class="switching-copy"><span class="spinner"></span><strong>ACQUIRING SIGNAL</strong><small data-switching-camera>Switching camera…</small></div>
+              </div>
+              <span data-crosshair aria-label="Crosshair" hidden>＋</span>
+              <div class="feed-corners" aria-hidden="true"></div>
+              <div class="feed-hud" aria-hidden="true"><span>REC <i></i></span><span>LIVE / 1080P</span></div>
+            </div>
+            <div id="secondaryScreen" class="cctv-screen" hidden>
+              <video id="secondaryVideo" playsinline muted></video>
+              <div id="secondaryBlackout" class="cctv-blackout" role="status" hidden></div>
+              <span data-crosshair aria-label="Crosshair" hidden>＋</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="cctvPanel" class="control-deck" aria-label="CCTV controls">
+          <div class="section-heading">
+            <div><span class="eyebrow">CAMERA NETWORK</span><h2>Select a feed</h2></div>
+            <div class="cooldown-chip">SWITCH <span data-cooldown>—</span></div>
+          </div>
+          <button type="button" data-next class="sr-only" disabled>Next camera</button>
+          <label data-slot-control class="sr-only" hidden>Target screen
+            <select data-slot aria-label="Target screen"><option value="0">Primary</option><option value="1">Secondary</option></select>
+          </label>
+          <p data-secondary-current class="sr-only" hidden></p>
+          <div data-monitors class="camera-grid" aria-live="polite"></div>
+          <div class="interaction-bar">
+            <div class="interaction-copy">
+              <span class="eyebrow">LIVE INTERACTION</span>
+              <strong id="fireResult" role="status">Click inside the video to lock a target</strong>
+              <small>Place the crosshair on a sheep, then confirm the shot.</small>
+            </div>
+            <button type="button" id="fireButton" class="fire-button" disabled title="Select a target inside the video first"><span aria-hidden="true">◎</span> FIRE</button>
+          </div>
+        </section>
+
+        <details class="technical-panel">
+          <summary>Stream diagnostics</summary>
+          <div class="technical-grid">
+            <label>Codec <select id="codecPreferences" autocomplete="off" disabled><option selected value="">Default</option></select></label>
+            <label><input type="checkbox" id="lockMouseCheck" autocomplete="off"> Lock cursor to player</label>
+          </div>
+          <div id="message"></div>
+        </details>
+      </div>
+
+      <aside class="chat-panel" aria-label="Live chat">
+        <div class="chat-header">
+          <div><span class="eyebrow">COMMUNITY</span><h2>Live Chat</h2></div>
+          <span class="chat-online">● ONLINE</span>
+        </div>
+        <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+        <div class="chat-notice">Local demo chat · messages stay on this device</div>
+        <form id="chatForm" class="chat-form">
+          <label class="sr-only" for="chatInput">Send a chat message</label>
+          <input id="chatInput" type="text" maxlength="160" autocomplete="off" placeholder="Send a message…">
+          <button type="submit" aria-label="Send message">➤</button>
+        </form>
+      </aside>
+    </main>
+    <footer><span>LiveStock Farm Watch</span><span>DEMO BUILD · LOCAL NETWORK</span></footer>
+  </div>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="https://unpkg.com/event-target@latest/min.js"></script>
+  <script src="https://unpkg.com/resize-observer-polyfill@1.5.0/dist/ResizeObserver.global.js"></script>
+  <script type="module" src="js/demo-ui.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

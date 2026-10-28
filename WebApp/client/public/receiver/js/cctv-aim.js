@@ -14,11 +14,11 @@ export function videoPoint(video, clientX, clientY) {
 
 export function formatFireResult(message) {
   return message.status === 'kill'
-    ? `擊殺：${message.objectName}（累計 ${message.kills ?? 1}）`
-    : message.status === 'hit' ? `命中：${message.objectName}`
-    : message.status === 'launched' ? '球已發射'
-    : message.status === 'miss' ? '未命中（測試球已清除）'
-    : '畫面已切換或無法使用，請重新瞄準';
+    ? `Target down: ${message.objectName} · Score ${message.kills ?? 1}`
+    : message.status === 'hit' ? `Hit confirmed: ${message.objectName}`
+    : message.status === 'launched' ? 'Projectile launched'
+    : message.status === 'miss' ? 'Missed · projectile cleared'
+    : 'Feed changed or unavailable · reacquire target';
 }
 
 export class CCTVAim {
@@ -37,13 +37,13 @@ export class CCTVAim {
         const point = videoPoint(event.target, event.clientX, event.clientY);
         if (!point) return;
         this.aim = { slot, index, ...point };
-        this.result.textContent = '已瞄準，按發射確認';
+        this.result.textContent = 'Target locked · press FIRE to confirm';
         this.render();
       });
     }
     fire.addEventListener('click', () => {
       if (this.fire.disabled || !this.aim) return;
-      this.result.textContent = '發射中…';
+      this.result.textContent = 'Firing…';
       this.send({ type: 'cctv-fire', ...this.aim });
     });
     this.reset();
@@ -56,7 +56,7 @@ export class CCTVAim {
     if (this.aim && (state.selectedIndices?.[this.aim.slot] !== this.aim.index ||
         state.monitors[this.aim.index]?.status === 'overheated')) {
       this.aim = null;
-      this.result.textContent = '請重新點選影片瞄準';
+      this.result.textContent = 'Feed changed · reacquire target';
     }
     this.render();
   }
@@ -69,7 +69,7 @@ export class CCTVAim {
   reset() {
     this.state = null;
     this.aim = null;
-    this.result.textContent = '請點選影片放置準星';
+    this.result.textContent = 'Click inside the video to lock a target';
     this.render();
   }
 
