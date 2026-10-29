@@ -6,6 +6,7 @@ namespace LiveStock.Multiplayer
     public struct MoveInput : INetworkInput
     {
         public NetworkBool IsVR;
+        public int TeleportVersion;
         public Vector3 Root, Head, Left, Right;
         public Quaternion RootRotation, HeadRotation, LeftRotation, RightRotation;
     }
@@ -20,18 +21,30 @@ namespace LiveStock.Multiplayer
         [Networked] Quaternion HeadRotation { get; set; }
         [Networked] Quaternion LeftRotation { get; set; }
         [Networked] Quaternion RightRotation { get; set; }
+        [Networked] int TeleportVersion { get; set; }
+        [Networked] Vector3 TeleportPosition { get; set; }
+        [Networked] Quaternion TeleportRotation { get; set; }
         GameObject visual;
         LiveStock.MotionRecording.VRRecordingTargetPlayer targets;
         bool visualRole;
         bool visualInitialized;
+        int appliedTeleportVersion;
         Material observerMaterial;
         public override void Spawned()
         {
-            if (Object.HasInputAuthority) FindFirstObjectByType<SessionLauncher>().CreateLocalRole(Runner, transform.position);
+            if (!Object.HasInputAuthority) return;
+            var launcher = FindFirstObjectByType<SessionLauncher>();
+            launcher.CreateLocalRole(Runner, transform.position);
+            ApplyPendingTeleport(launcher);
         }
         public override void FixedUpdateNetwork()
         {
-            if (!GetInput(out MoveInput data)) return;
+            // Only State Authority consumes player input and writes network state.
+            // Input Authority reports tracking poses, but cannot directly own or
+            // overwrite the authoritative NetworkTransform.
+            if (!Object.HasStateAuthority || !GetInput(out MoveInput data) ||
+                data.TeleportVersion != TeleportVersion)
+                return;
             IsVR = data.IsVR;
             transform.SetPositionAndRotation(data.Root, data.RootRotation);
             Head = data.Head; Left = data.Left; Right = data.Right;
@@ -39,7 +52,11 @@ namespace LiveStock.Multiplayer
         }
         public override void Render()
         {
-            if (Object.HasInputAuthority) return;
+            if (Object.HasInputAuthority)
+            {
+                ApplyPendingTeleport(FindFirstObjectByType<SessionLauncher>());
+                return;
+            }
             if (!visualInitialized || visualRole != (bool)IsVR)
             {
                 visualInitialized = true;
@@ -58,6 +75,27 @@ namespace LiveStock.Multiplayer
             targets.headTarget.SetPositionAndRotation(Head, HeadRotation);
             targets.leftHandTarget.SetPositionAndRotation(Left, LeftRotation);
             targets.rightHandTarget.SetPositionAndRotation(Right, RightRotation);
+        }
+
+        /// <summary>State Authority entry point for spawn and later server teleports.</summary>
+        public void ServerTeleport(Vector3 position, Quaternion rotation)
+        {
+            if (Object == null || !Object.IsValid || !Object.HasStateAuthority)
+                return;
+
+            TeleportPosition = position;
+            TeleportRotation = rotation;
+            TeleportVersion++;
+            transform.SetPositionAndRotation(position, rotation);
+        }
+
+        void ApplyPendingTeleport(SessionLauncher launcher)
+        {
+            if (launcher == null || TeleportVersion <= appliedTeleportVersion)
+                return;
+
+            launcher.ApplyServerTeleport(Runner, TeleportPosition, TeleportRotation, TeleportVersion);
+            appliedTeleportVersion = TeleportVersion;
         }
         void CreateObserverVisual()
         {

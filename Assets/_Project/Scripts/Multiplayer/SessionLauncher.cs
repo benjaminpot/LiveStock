@@ -39,6 +39,7 @@ namespace LiveStock.Multiplayer
             public GameObject Role;
             public LiveStock.MotionRecording.VRRecordingTargetPlayer Targets;
             public bool IsVR;
+            public int TeleportVersion;
         }
 
         public NetworkObject PlayerPrefab;
@@ -410,11 +411,27 @@ namespace LiveStock.Multiplayer
             ApplyActiveRunner();
         }
 
+        /// <summary>
+        /// Applies a State Authority teleport to the input owner's local tracking rig.
+        /// The version is echoed in MoveInput so the server never accepts a stale
+        /// pre-teleport world pose on the following network tick.
+        /// </summary>
+        public void ApplyServerTeleport(NetworkRunner runner, Vector3 position, Quaternion rotation, int version)
+        {
+            if (!localRoles.TryGetValue(runner, out var state) || state.Role == null ||
+                version <= state.TeleportVersion)
+                return;
+
+            state.Role.transform.SetPositionAndRotation(position, rotation);
+            state.TeleportVersion = version;
+        }
+
         MoveInput ReadPose(NetworkRunner runner)
         {
             bool isVR = runnerUsesVR.TryGetValue(runner, out var value) && value;
             var data = new MoveInput { IsVR = isVR, RootRotation = Quaternion.identity, HeadRotation = Quaternion.identity, LeftRotation = Quaternion.identity, RightRotation = Quaternion.identity };
             if (!localRoles.TryGetValue(runner, out var state) || state.Role == null) return data;
+            data.TeleportVersion = state.TeleportVersion;
             data.Root = state.Role.transform.position; data.RootRotation = state.Role.transform.rotation;
             if (state.Targets != null)
             {
@@ -525,19 +542,48 @@ namespace LiveStock.Multiplayer
         void SpawnPlayers(NetworkRunner runner)
         {
             if (!runner.IsServer || !IsGameplayScene(runner) || runner.IsSceneManagerBusy || GameSessionState.For(runner)?.Phase != GamePhase.Running) return;
-            foreach (var player in runner.ActivePlayers)
+            var spawnPoints = FindPlayerSpawnPoints(runner);
+            int playerIndex = 0;
+            foreach (var player in runner.ActivePlayers.OrderBy(player => player.PlayerId))
             {
-                if (players.ContainsKey(player)) continue;
-                var obj = runner.Spawn(PlayerPrefab, new Vector3((player.PlayerId % 4) * 3 - 4.5f, 0, 0), Quaternion.identity, player);
+                if (players.ContainsKey(player)) { playerIndex++; continue; }
+                Vector3 position = spawnPoints.Count > 0
+                    ? spawnPoints[playerIndex % spawnPoints.Count].position
+                    : new Vector3((player.PlayerId % 4) * 3 - 4.5f, 0, 0);
+                Quaternion rotation = spawnPoints.Count > 0
+                    ? spawnPoints[playerIndex % spawnPoints.Count].rotation
+                    : Quaternion.identity;
+                var obj = runner.Spawn(PlayerPrefab, position, rotation, player);
                 players[player] = obj;
                 runner.SetPlayerObject(player, obj);
+                obj.GetComponent<NetworkPlayer>()?.ServerTeleport(position, rotation);
+                playerIndex++;
             }
+        }
+
+        static List<Transform> FindPlayerSpawnPoints(NetworkRunner runner)
+        {
+            var result = new List<Transform>();
+            if (runner.SceneManager is not NetworkSceneManagerDefault manager)
+                return result;
+
+            foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
+                foreach (var candidate in root.GetComponentsInChildren<Transform>(true))
+                    if (candidate.name.StartsWith("Anchor_PlayerSpawn_", StringComparison.Ordinal))
+                        result.Add(candidate);
+
+            result.Sort((a, b) => string.CompareOrdinal(a.name, b.name));
+            return result;
         }
 
         public void StartGame()
         {
             if (!CanStartGame) return;
-            if (SessionState.BeginGame()) Status = "Game running.";
+            if (!SessionState.BeginGame()) return;
+            // The dedicated server chooses the scene-authored spawn anchors and
+            // creates every player object with State Authority before gameplay.
+            SpawnPlayers(ServerRunner);
+            Status = "Game running.";
         }
 
         public void EnterMainGame()

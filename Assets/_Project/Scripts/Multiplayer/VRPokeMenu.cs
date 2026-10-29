@@ -66,7 +66,10 @@ namespace LiveStock.Multiplayer
             return button.Action switch
             {
                 VRPokeMenuAction.Connect => !connected && launcher.MenuFocused && !launcher.Busy && !launcher.IsServerEntry,
-                VRPokeMenuAction.Leave => connected && !launcher.Busy,
+                // This is a lobby control. Once the network map starts loading,
+                // the gameplay scene must not keep a floating Leave button.
+                VRPokeMenuAction.Leave => connected && !launcher.Busy && !launcher.MapLoaded &&
+                    (launcher.SessionState == null || launcher.SessionState.Phase == GamePhase.Lobby),
                 _ => false
             };
         }
