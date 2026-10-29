@@ -80,6 +80,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 3088931548356943962, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
+      propertyPath: instanceId
+      value: 340a9133-5824-4f70-96b6-1ef526c41af4
+      objectReference: {fileID: 0}
     - target: {fileID: 3348742841343926409, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_Name
       value: SheepWhite1(jaw)
@@ -139,6 +143,10 @@ PrefabInstance:
     - target: {fileID: 7652123212858782800, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.z
       value: 1.175
+      objectReference: {fileID: 0}
+    - target: {fileID: 7956095762978550330, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
+      propertyPath: instanceId
+      value: 79bb819e-efab-45eb-81af-c40366720f59
       objectReference: {fileID: 0}
     - target: {fileID: 8768740332956782606, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.x

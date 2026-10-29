@@ -117,7 +117,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f6ad50c8cba3584d9c08e4d17efffa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LiveStock.Multiplayer.NetworkPlayer
-  LocalVRPrefab: {fileID: 6623210070720935037, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
-  RemoteVRPrefab: {fileID: 360597451622466979, guid: 952e7b97930dec9478ac452c028bf366, type: 3}
+  LocalVRPrefab: {fileID: 5435867961655764188, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  RemoteVRPrefab: {fileID: 5435867961655764188, guid: bffe7bd380618b24192a769bfce4e198, type: 3}
   _IsVR:
     RawValue: 0
