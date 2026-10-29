@@ -11,7 +11,28 @@ namespace LiveStock.Multiplayer
 {
     public class SessionLauncher : MonoBehaviour
     {
-        const string DefaultNetworkScenePath = "Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity";
+        public enum EntryRole { Development, Server, VRClient }
+        public EntryRole Role;
+        public string AppIdFusion;
+        public string Region = "asia";
+        public string AppVersion = "livestock-alpha";
+        [Range(1, 16)] public int MaxPlayers = 4;
+        public NetworkObject SessionStatePrefab;
+        string entryScenePath;
+        readonly HashSet<NetworkRunner> gameplayActivated = new();
+        public bool IsServerEntry => Role == EntryRole.Server;
+        public bool IsVRClientEntry => Role == EntryRole.VRClient;
+        public GameSessionState SessionState => GameSessionState.For(ServerRunning ? ServerRunner : Runner);
+        public bool GameStarted => SessionState != null && SessionState.Phase == GamePhase.Running;
+        public bool MapLoaded => IsGameplayScene(ServerRunning ? ServerRunner : Runner);
+        public bool CanEnterMainGame => ServerRunning && !Busy && !ServerRunner.IsSceneManagerBusy && SessionState != null && SessionState.Phase == GamePhase.Lobby;
+        public int LobbyPlayerCount => ServerRunning ? ServerRunner.ActivePlayers.Count() : Runner != null && Runner.IsRunning ? Runner.ActivePlayers.Count() : 0;
+        public bool CanStartGame => ServerRunning && !Busy && MapLoaded && SessionState != null && SessionState.Phase == GamePhase.AwaitingStart && SessionState.AllReady;
+
+        bool IsGameplayScene(NetworkRunner runner)
+        {
+            return runner != null && runner.IsRunning && runner.SceneManager is RoleNetworkSceneManager manager && manager.MapLoaded && sceneReady.Contains(runner);
+        }
 
         sealed class LocalRoleState
         {
@@ -23,8 +44,6 @@ namespace LiveStock.Multiplayer
         public NetworkObject PlayerPrefab;
         public bool UseVR;
         public string RoomName = "LIVESTOCK-DEV";
-        [Tooltip("多人遊戲場景的完整 Assets/.../*.unity 路徑；必須啟用於 Build Settings。")]
-        public string NetworkScenePath = DefaultNetworkScenePath;
         public string Status = "Menu - start a server or join an existing dedicated server";
 
         readonly Dictionary<NetworkRunner, LocalRoleState> localRoles = new();
@@ -38,7 +57,6 @@ namespace LiveStock.Multiplayer
         int activePeerIndex;
         bool peerAtMenu = true;
         GameObject menuVRRole;
-        string resolvedNetworkScenePath;
         static SessionLauncher instance;
 
         public NetworkRunner ServerRunner { get; private set; }
@@ -80,15 +98,12 @@ namespace LiveStock.Multiplayer
         {
             if (instance != null && instance != this) { Destroy(gameObject); return; }
             instance = this;
+            entryScenePath = SceneManager.GetActiveScene().path;
+            if (string.IsNullOrWhiteSpace(AppIdFusion)) AppIdFusion = Fusion.Photon.Realtime.PhotonAppSettings.Global.AppSettings.AppIdFusion;
+            if (IsVRClientEntry) UseVR = true;
+            Status = IsServerEntry ? "Server offline - configure Fusion, then Start Server." : "Offline VR menu - connect to the server lobby when ready.";
             DontDestroyOnLoad(gameObject);
             Application.runInBackground = true;
-        }
-
-        void Start()
-        {
-#if UNITY_SERVER
-            StartDedicatedServer();
-#endif
         }
 
         void Update()
@@ -96,15 +111,33 @@ namespace LiveStock.Multiplayer
 #if UNITY_EDITOR
             HandleEditorShortcuts();
 #endif
-            if (ServerRunning) SpawnPlayers(ServerRunner);
-            foreach (var client in clients)
-                if (client != null && client.IsRunning && client.IsServer) SpawnPlayers(client);
+            if (ServerRunning) UpdateSession(ServerRunner);
+            foreach (var client in clients.ToArray())
+                if (client != null && client.IsRunning) UpdateSession(client);
             RefreshMenuVRRole();
+        }
+
+        void UpdateSession(NetworkRunner runner)
+        {
+            if (runner.IsSceneManagerBusy || !sceneReady.Contains(runner)) return;
+            if (runner.IsServer && GameSessionState.For(runner) == null && SessionStatePrefab != null)
+                runner.Spawn(SessionStatePrefab);
+            var state = GameSessionState.For(runner);
+            if (state == null || !IsGameplayScene(runner)) return;
+            state.ReportMapLoaded();
+            if (state.Phase != GamePhase.Running || !runner.IsServer) return;
+            // 遊戲啟動集中在此，只執行一次；地圖載入與 Start/Awake 都不生成 NPC。
+            if (gameplayActivated.Add(runner))
+            {
+                GDC.Metaverse.NetworkSpawner.SpawnFor(runner);
+                RandomNPCSpawner.SpawnFor(runner);
+            }
+            SpawnPlayers(runner);
         }
 
         public void ToggleRole()
         {
-            if (!MenuFocused || Busy) return;
+            if (Role != EntryRole.Development || !MenuFocused || Busy) return;
             if (!UseVR && HasLocalVRClient)
             {
                 Status = "This process already has a VR player. Use PC for this peer (one headset per process).";
@@ -117,6 +150,7 @@ namespace LiveStock.Multiplayer
 
         public void ConnectAsVRClient()
         {
+            if (IsServerEntry) { Status = "Use the VRclient / Menu scene to connect a VR client."; return; }
             if (!Application.isPlaying)
             {
                 Status = "Enter Play Mode before connecting a VR client.";
@@ -149,13 +183,13 @@ namespace LiveStock.Multiplayer
 
         public async void StartDedicatedServer()
         {
-            if (Busy || ServerRunning || !HasFusionAppId()) return;
+            if (IsVRClientEntry || Busy || ServerRunning || !HasFusionAppId()) return;
             Busy = true;
             Status = $"Starting dedicated server: {RoomName}...";
             try
             {
                 ServerRunner = await StartRunner(GameMode.Server, true, false);
-                if (ServerRunning) Status = $"Dedicated server ready: {RoomName}. This player is still at Menu.";
+                if (ServerRunning) Status = $"Lobby online: {RoomName}. Check players, then Enter MainGame.";
                 ApplyActiveRunner();
             }
             catch (Exception ex) { Status = ex.Message; Debug.LogException(ex); }
@@ -164,7 +198,7 @@ namespace LiveStock.Multiplayer
 
         public async void StartSession(bool offline = false)
         {
-            if (Busy || !MenuFocused || (!offline && !HasFusionAppId())) return;
+            if (IsServerEntry || Busy || !MenuFocused || (!offline && !HasFusionAppId())) return;
             Busy = true;
             int newIndex = clients.Count;
             Status = offline ? "Starting offline player..." : $"Player {newIndex + 1} joining {RoomName} as {(UseVR ? "VR" : "PC")}...";
@@ -176,8 +210,7 @@ namespace LiveStock.Multiplayer
                     peerAtMenu = false;
                     activePeerIndex = clients.IndexOf(runner);
                     ApplyActiveRunner();
-                    Status = offline ? "Offline player ready." :
-                        $"Player {activePeerIndex + 1} connected as {(UseVR ? "VR Sheep" : "PC Observer")}. F1 opens a fresh player Menu; F2 switches.";
+                    Status = offline ? "Offline player ready." : "Connected to lobby - waiting for server to start the game.";
                 }
             }
             catch (Exception ex) { Status = ex.Message; Debug.LogException(ex); }
@@ -186,9 +219,10 @@ namespace LiveStock.Multiplayer
 
         bool HasFusionAppId()
         {
-            if (!string.IsNullOrWhiteSpace(Fusion.Photon.Realtime.PhotonAppSettings.Global.AppSettings.AppIdFusion)) return true;
-            Status = "Set App Id Fusion in Fusion > Realtime Settings first.";
-            return false;
+            if (!Guid.TryParse(AppIdFusion?.Trim(), out _)) { Status = "Enter a valid Fusion App ID."; return false; }
+            if (string.IsNullOrWhiteSpace(RoomName)) { Status = "Enter a room name."; return false; }
+            if (string.IsNullOrWhiteSpace(Region)) { Status = "Enter the same fixed region on server and client (for example asia)."; return false; }
+            return true;
         }
 
         async System.Threading.Tasks.Task<NetworkRunner> StartRunner(GameMode mode, bool dedicatedServer, bool useVR)
@@ -216,14 +250,16 @@ namespace LiveStock.Multiplayer
                 sceneReady.Add(r);
                 ConfigureServerOnly(r);
                 DisableScenePreviewCameras(r);
-                SpawnPlayers(r);
-                GDC.Metaverse.NetworkSpawner.SpawnFor(r);
-                RandomNPCSpawner.SpawnFor(r);
+                if (IsGameplayScene(r))
+                {
+                    Status = "Map loaded. Waiting for all players and server Start Game.";
+                }
                 ApplyActiveRunner();
             });
             events.OnSceneLoadStart.AddListener(r =>
             {
                 sceneReady.Remove(r);
+                gameplayActivated.Remove(r);
                 ClearLocalRole(r);
                 GDC.Metaverse.NetworkSpawner.DespawnFor(r);
                 RandomNPCSpawner.DespawnFor(r);
@@ -234,36 +270,39 @@ namespace LiveStock.Multiplayer
             events.OnShutdown.AddListener((r, reason) => OnRunnerShutdown(r, reason));
             runner.AddCallbacks(events);
 
-            var networkScenePath = ResolveNetworkScenePath();
-            int networkSceneIndex = SceneUtility.GetBuildIndexByScenePath(networkScenePath);
-            if (networkSceneIndex < 0)
+            string lobbyPath = RoleNetworkSceneManager.SceneFolder + (dedicatedServer ? "Lobby_server.unity" : "Lobby_VRClient.unity");
+            if (SceneUtility.GetBuildIndexByScenePath(lobbyPath) < 0 || SessionStatePrefab == null)
             {
                 if (dedicatedServer) ServerRunner = null;
                 else clients.Remove(runner);
                 runnerUsesVR.Remove(runner);
                 Debug.LogError(
-                    $"{nameof(SessionLauncher)}: network scene is not enabled in Build Settings: {networkScenePath}",
+                    $"{nameof(SessionLauncher)}: missing role lobby or SessionStatePrefab: {lobbyPath}",
                     this);
-                Status = $"Network scene is not enabled in Build Settings: {networkScenePath}";
+                Status = $"Missing role lobby or GameSessionState prefab: {lobbyPath}";
                 Destroy(go);
                 return null;
             }
 
             var scene = new NetworkSceneInfo();
-            // Fusion Multi-Peer 要求每個 Runner（包含 Client）都指定自己的場景。
-            // 直接使用 Build Settings index，避免錯誤/停用的 path 找不到時落入 Addressables 分支。
-            scene.AddSceneRef(SceneRef.FromIndex(networkSceneIndex), LoadSceneMode.Single);
+            // 兩份 Build 使用同一個邏輯 SceneRef，實際場景由角色管理器解析。
+            scene.AddSceneRef(RoleNetworkSceneManager.LobbyRef, LoadSceneMode.Single);
             var args = new StartGameArgs
             {
                 GameMode = mode,
                 SessionName = RoomName.Trim(),
-                PlayerCount = 4,
-                SceneManager = go.AddComponent<NetworkSceneManagerDefault>(),
+                PlayerCount = Mathf.Clamp(MaxPlayers, 1, 16),
+                SceneManager = go.AddComponent<RoleNetworkSceneManager>(),
                 Scene = scene,
                 EnableClientSessionCreation = mode != GameMode.Client,
                 IsOpen = true,
                 IsVisible = true
             };
+            var settings = Fusion.Photon.Realtime.PhotonAppSettings.Global.AppSettings.GetCopy();
+            settings.AppIdFusion = AppIdFusion.Trim();
+            settings.FixedRegion = Region.Trim().ToLowerInvariant();
+            settings.AppVersion = AppVersion.Trim();
+            args.CustomPhotonAppSettings = settings;
             var result = await runner.StartGame(args);
             if (result.Ok)
             {
@@ -292,27 +331,6 @@ namespace LiveStock.Multiplayer
             foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
                 foreach (var serverOnly in root.GetComponentsInChildren<ServerOnly>(true))
                     serverOnly.ActivateFor(runner);
-        }
-
-        string ResolveNetworkScenePath()
-        {
-            // Multi-Peer 載入後 Active Scene 會變成沒有 asset path 的 Runner 場景。
-            // 第一個 Runner 決定路徑後必須快取，後續 Client 才會載入同一個場景。
-            if (!string.IsNullOrWhiteSpace(resolvedNetworkScenePath))
-                return resolvedNetworkScenePath;
-
-            if (!string.IsNullOrWhiteSpace(NetworkScenePath))
-                return resolvedNetworkScenePath = NetworkScenePath.Trim();
-
-            var activeScenePath = SceneManager.GetActiveScene().path;
-            var activeSceneName = SceneManager.GetActiveScene().name;
-            if (!string.IsNullOrWhiteSpace(activeScenePath) && activeSceneName != "Menu" && activeSceneName != "Lobby")
-                return resolvedNetworkScenePath = activeScenePath;
-
-            Debug.LogWarning(
-                $"{nameof(SessionLauncher)}: no gameplay scene was configured; using {DefaultNetworkScenePath}.",
-                this);
-            return resolvedNetworkScenePath = DefaultNetworkScenePath;
         }
 
 #if UNITY_EDITOR
@@ -443,9 +461,9 @@ namespace LiveStock.Multiplayer
 
         void RefreshMenuVRRole()
         {
-            bool shouldExist = MenuFocused && UseVR && !HasLocalVRClient && PlayerPrefab != null;
             bool waitingForVRRole = runnerUsesVR.Any(pair =>
                 pair.Key != null && pair.Key.IsRunning && pair.Value && !localRoles.ContainsKey(pair.Key));
+            bool shouldExist = ((MenuFocused && UseVR && !HasLocalVRClient) || waitingForVRRole) && PlayerPrefab != null;
             if (shouldExist && menuVRRole == null)
             {
                 var localVRPrefab = PlayerPrefab.GetComponent<NetworkPlayer>()?.LocalVRPrefab;
@@ -485,6 +503,7 @@ namespace LiveStock.Multiplayer
             clients.Remove(runner);
             runnerUsesVR.Remove(runner);
             sceneReady.Remove(runner);
+            gameplayActivated.Remove(runner);
             Destroy(runner.gameObject);
             if (wasServer)
             {
@@ -497,13 +516,15 @@ namespace LiveStock.Multiplayer
                 peerAtMenu = true;
                 activePeerIndex = clients.Count;
                 Status = "Player returned to Menu: " + reason;
+                if (IsVRClientEntry && !Busy && !IsMultiPeer && Application.isPlaying)
+                    SceneManager.LoadScene(RoleNetworkSceneManager.SceneFolder + "Menu_VRClient.unity");
             }
             ApplyActiveRunner();
         }
 
         void SpawnPlayers(NetworkRunner runner)
         {
-            if (!runner.IsServer || runner.IsSceneManagerBusy || !sceneReady.Contains(runner)) return;
+            if (!runner.IsServer || !IsGameplayScene(runner) || runner.IsSceneManagerBusy || GameSessionState.For(runner)?.Phase != GamePhase.Running) return;
             foreach (var player in runner.ActivePlayers)
             {
                 if (players.ContainsKey(player)) continue;
@@ -513,46 +534,50 @@ namespace LiveStock.Multiplayer
             }
         }
 
-        public void StartFarm()
+        public void StartGame()
         {
-            var authority = ServerRunning ? ServerRunner : clients.FirstOrDefault(r => r != null && r.IsRunning && r.IsServer);
-            if (authority == null || authority.IsSceneManagerBusy)
-                return;
+            if (!CanStartGame) return;
+            if (SessionState.BeginGame()) Status = "Game running.";
+        }
 
-            const string farmScenePath = "Assets/_Project/Scenes/MainGame.unity";
-            int farmSceneIndex = SceneUtility.GetBuildIndexByScenePath(farmScenePath);
-            if (farmSceneIndex < 0)
-            {
-                Status = $"Farm scene is not enabled in Build Settings: {farmScenePath}";
-                Debug.LogError(Status, this);
-                return;
-            }
-
-            authority.LoadScene(SceneRef.FromIndex(farmSceneIndex));
+        public void EnterMainGame()
+        {
+            if (!CanEnterMainGame) return;
+            var manager = (RoleNetworkSceneManager)ServerRunner.SceneManager;
+            if (SceneUtility.GetBuildIndexByScenePath(manager.LocalPath(RoleNetworkSceneManager.MainGameRef)) < 0)
+            { Status = "MainGame_server is missing from this build."; return; }
+            if (!SessionState.BeginMapLoad()) return;
+            Status = "Loading maps. Game mechanisms are paused.";
+            ServerRunner.LoadScene(RoleNetworkSceneManager.MainGameRef, LoadSceneMode.Single);
         }
 
         public async void Leave()
         {
             if (Busy) return;
             Busy = true;
-            foreach (var client in clients.ToArray()) if (client != null && client.IsRunning) await client.Shutdown();
-            if (ServerRunning) await ServerRunner.Shutdown();
-            ClearLocalRoles();
-            peerAtMenu = true;
-            activePeerIndex = 0;
-            Busy = false;
-            Status = "Menu - start a server or join an existing dedicated server";
-            if (!IsMultiPeer && SceneManager.GetActiveScene().name != "Menu") SceneManager.LoadScene("Menu");
+            try
+            {
+                foreach (var client in clients.ToArray()) if (client != null && client.IsRunning) await client.Shutdown();
+                if (ServerRunning) await ServerRunner.Shutdown();
+                ClearLocalRoles();
+                peerAtMenu = true;
+                activePeerIndex = 0;
+                Status = IsServerEntry ? "Server stopped. Ready to create a lobby." : "Offline VR menu - disconnected.";
+                if (!IsMultiPeer && !string.IsNullOrEmpty(entryScenePath)) SceneManager.LoadScene(entryScenePath);
+            }
+            finally { Busy = false; }
         }
 
         void ClearLocalRole(NetworkRunner runner)
         {
             if (!localRoles.Remove(runner, out var state)) return;
+            if (state.IsVR) SessionPanel.DetachFromRig();
             if (state.Role != null) Destroy(state.Role);
         }
 
         void ClearLocalRoles()
         {
+            SessionPanel.DetachFromRig();
             foreach (var state in localRoles.Values) if (state.Role != null) Destroy(state.Role);
             localRoles.Clear();
             foreach (var item in previewCameras) if (item.Key != null) item.Key.enabled = item.Value;
@@ -581,6 +606,14 @@ namespace LiveStock.Multiplayer
         static void DisableScenePreviewCameras(NetworkRunner runner)
         {
             if (runner.SceneManager is not NetworkSceneManagerDefault manager) return;
+            // server 的 Lobby 仍需要桌面相機，讓房間面板與等待空間正常顯示。
+            if (runner.IsServer && manager is RoleNetworkSceneManager roleManager && !roleManager.MapLoaded)
+            {
+                foreach (var root in manager.MainRunnerScene.GetRootGameObjects())
+                    foreach (var camera in root.GetComponentsInChildren<Camera>(true))
+                        camera.GetUniversalAdditionalCameraData().allowXRRendering = false;
+                return;
+            }
 
             var serverPreviewCameras = new HashSet<Camera>();
             if (runner.IsServer)

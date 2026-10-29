@@ -23,6 +23,9 @@ public static class ServerOnlySceneOrganizer
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
             return;
+        // 分流後伺服器服務由 Launcher 載入 Prefab，不再向共用場景加入 ServerOnly。
+        if (AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Prefabs/Multiplayer/MainGame_ServerSystems.prefab") != null)
+            return;
 
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {

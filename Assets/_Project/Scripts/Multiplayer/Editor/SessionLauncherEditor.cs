@@ -34,7 +34,7 @@ namespace LiveStock.Multiplayer.Editor
                     return;
 
                 var launcher = (SessionLauncher)target;
-                connectButton.SetEnabled(Application.isPlaying && launcher.MenuFocused && !launcher.Busy && launcher.CanSelectVR);
+                connectButton.SetEnabled(Application.isPlaying && !launcher.IsServerEntry && launcher.MenuFocused && !launcher.Busy && launcher.CanSelectVR);
             }
 
             RefreshState();
