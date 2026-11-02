@@ -6,6 +6,7 @@ namespace LiveStock.Multiplayer
     public struct MoveInput : INetworkInput
     {
         public NetworkBool IsVR;
+        public NetworkBool HasPose;
         public Vector3 Root, Head, Left, Right;
         public Quaternion RootRotation, HeadRotation, LeftRotation, RightRotation;
     }
@@ -13,6 +14,11 @@ namespace LiveStock.Multiplayer
     public class NetworkPlayer : NetworkBehaviour
     {
         public GameObject LocalVRPrefab, RemoteVRPrefab;
+        [Header("VR Stationary Pose")]
+        [Tooltip("Keep the VR network root at its server-assigned position. Local headset tracking remains natural.")]
+        public bool LockVRRoot = true;
+        [Min(0f)] public float MaxHeadHorizontalOffset = .2f;
+        [Min(0f)] public float MaxHeadVerticalOffset = .15f;
         [Networked] public NetworkBool IsVR { get; set; }
         [Networked] Vector3 Head { get; set; }
         [Networked] Vector3 Left { get; set; }
@@ -21,21 +27,47 @@ namespace LiveStock.Multiplayer
         [Networked] Quaternion LeftRotation { get; set; }
         [Networked] Quaternion RightRotation { get; set; }
         GameObject visual;
-        LiveStock.MotionRecording.VRRecordingTargetPlayer targets;
+        RemoteVRPoseTargets targets;
         bool visualRole;
         bool visualInitialized;
         Material observerMaterial;
+        bool hasHeadReference;
+        Vector3 headReference;
         public override void Spawned()
         {
             if (Object.HasInputAuthority) FindFirstObjectByType<SessionLauncher>().CreateLocalRole(Runner, transform.position);
         }
         public override void FixedUpdateNetwork()
         {
-            if (!GetInput(out MoveInput data)) return;
+            if (!Object.HasStateAuthority || !GetInput(out MoveInput data) || !data.HasPose) return;
             IsVR = data.IsVR;
-            transform.SetPositionAndRotation(data.Root, data.RootRotation);
+            if (!IsVR || !LockVRRoot)
+                transform.SetPositionAndRotation(data.Root, data.RootRotation);
+            if (IsVR && LockVRRoot)
+            {
+                if (!hasHeadReference)
+                {
+                    headReference = data.Head;
+                    hasHeadReference = true;
+                }
+                var limitedHead = LimitHeadOffset(data.Head, headReference,
+                    MaxHeadHorizontalOffset, MaxHeadVerticalOffset);
+                // Shift the hands by the same excess translation so leaning/walking
+                // beyond the limit does not leave the remote arms behind the head.
+                var correction = limitedHead - data.Head;
+                data.Head = limitedHead;
+                data.Left += correction;
+                data.Right += correction;
+            }
+            else hasHeadReference = false;
             Head = data.Head; Left = data.Left; Right = data.Right;
             HeadRotation = data.HeadRotation; LeftRotation = data.LeftRotation; RightRotation = data.RightRotation;
+        }
+        public static Vector3 LimitHeadOffset(Vector3 head, Vector3 reference, float horizontalLimit, float verticalLimit)
+        {
+            var offset = head - reference;
+            var horizontal = Vector2.ClampMagnitude(new Vector2(offset.x, offset.z), Mathf.Max(0f, horizontalLimit));
+            return reference + new Vector3(horizontal.x, Mathf.Clamp(offset.y, -Mathf.Max(0f, verticalLimit), Mathf.Max(0f, verticalLimit)), horizontal.y);
         }
         public override void Render()
         {
@@ -50,14 +82,16 @@ namespace LiveStock.Multiplayer
                 if (IsVR && RemoteVRPrefab != null)
                 {
                     visual = Instantiate(RemoteVRPrefab, transform.position, transform.rotation, transform);
-                    targets = System.Array.Find(visual.GetComponentsInChildren<LiveStock.MotionRecording.VRRecordingTargetPlayer>(true), t => t.headTarget != null && t.leftHandTarget != null && t.rightHandTarget != null);
+                    targets = visual.GetComponentInChildren<RemoteVRPoseTargets>(true);
+                    Runner.AddVisibilityNodes(visual);
+                    if (targets == null || !targets.IsConfigured)
+                        Debug.LogError("[NetworkPlayer] RemoteVRPrefab requires configured RemoteVRPoseTargets (head/left/right).", this);
                 }
+                else if (IsVR) Debug.LogError("[NetworkPlayer] RemoteVRPrefab is missing.", this);
                 else if (!IsVR) CreateObserverVisual();
             }
             if (targets == null) return;
-            targets.headTarget.SetPositionAndRotation(Head, HeadRotation);
-            targets.leftHandTarget.SetPositionAndRotation(Left, LeftRotation);
-            targets.rightHandTarget.SetPositionAndRotation(Right, RightRotation);
+            targets.ApplyPose(transform, Head, HeadRotation, Left, LeftRotation, Right, RightRotation);
         }
         void CreateObserverVisual()
         {

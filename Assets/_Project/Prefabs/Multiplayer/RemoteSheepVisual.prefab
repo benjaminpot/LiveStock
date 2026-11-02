@@ -138,6 +138,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7337317203287075958}
   - component: {fileID: 754677847168841262}
+  - component: {fileID: 2099930519417519610}
   m_Layer: 6
   m_Name: RemoteSheepVisual
   m_TagString: Untagged
@@ -175,6 +176,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   transformOffset: {x: 0, y: 1.28, z: 0}
+--- !u!114 &2099930519417519610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 360597451622466979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ef82719817d2fd43bf655104ea06b0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LiveStock.Multiplayer.RemoteVRPoseTargets
+  headTarget: {fileID: 3589169215973349343}
+  leftHandTarget: {fileID: 4553161003145515041}
+  rightHandTarget: {fileID: 6194958044898020787}
 --- !u!1 &617997543629298952
 GameObject:
   m_ObjectHideFlags: 0

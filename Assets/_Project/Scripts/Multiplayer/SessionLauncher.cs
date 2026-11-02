@@ -16,7 +16,7 @@ namespace LiveStock.Multiplayer
         sealed class LocalRoleState
         {
             public GameObject Role;
-            public LiveStock.MotionRecording.VRRecordingTargetPlayer Targets;
+            public Transform Head, Left, Right;
             public bool IsVR;
         }
 
@@ -372,11 +372,27 @@ namespace LiveStock.Multiplayer
                     state.Role.transform.SetPositionAndRotation(position, Quaternion.identity);
                 }
                 else state.Role = Instantiate(PlayerPrefab.GetComponent<NetworkPlayer>().LocalVRPrefab, position, Quaternion.identity);
-                state.Targets = Array.Find(state.Role.GetComponentsInChildren<LiveStock.MotionRecording.VRRecordingTargetPlayer>(true),
+                var recordedTargets = Array.Find(state.Role.GetComponentsInChildren<LiveStock.MotionRecording.VRRecordingTargetPlayer>(true),
                     t => t.headTarget != null && t.leftHandTarget != null && t.rightHandTarget != null);
                 foreach (var playback in state.Role.GetComponentsInChildren<LiveStock.MotionRecording.VRRecordingTargetPlayer>(true))
                 { playback.playOnStart = false; playback.enabled = false; }
-                if (state.Targets != null) state.Role.AddComponent<VRLiveTargets>().Initialize(state.Targets);
+                if (recordedTargets != null)
+                {
+                    state.Head = recordedTargets.headTarget;
+                    state.Left = recordedTargets.leftHandTarget;
+                    state.Right = recordedTargets.rightHandTarget;
+                    var live = state.Role.GetComponent<VRLiveTargets>() ?? state.Role.AddComponent<VRLiveTargets>();
+                    live.Initialize(recordedTargets);
+                }
+                else
+                {
+                    var nodes = state.Role.GetComponentsInChildren<Transform>(true);
+                    state.Head = Array.Find(nodes, t => t.name == "Target" && t.parent != null && t.parent.name == "CenterEyeAnchor");
+                    state.Left = Array.Find(nodes, t => t.name == "Target L" && t.parent != null && t.parent.name == "LeftHandAnchor");
+                    state.Right = Array.Find(nodes, t => t.name == "TargetR" && t.parent != null && t.parent.name == "RightHandAnchor");
+                    if (state.Head == null || state.Left == null || state.Right == null)
+                        Debug.LogError("[SessionLauncher] Local VR rig requires CenterEyeAnchor/Target, LeftHandAnchor/Target L and RightHandAnchor/TargetR.", state.Role);
+                }
             }
             else
             {
@@ -397,12 +413,16 @@ namespace LiveStock.Multiplayer
             bool isVR = runnerUsesVR.TryGetValue(runner, out var value) && value;
             var data = new MoveInput { IsVR = isVR, RootRotation = Quaternion.identity, HeadRotation = Quaternion.identity, LeftRotation = Quaternion.identity, RightRotation = Quaternion.identity };
             if (!localRoles.TryGetValue(runner, out var state) || state.Role == null) return data;
+            if (isVR && (state.Head == null || state.Left == null || state.Right == null)) return data;
+            data.HasPose = true;
             data.Root = state.Role.transform.position; data.RootRotation = state.Role.transform.rotation;
-            if (state.Targets != null)
+            if (isVR)
             {
-                data.Head = state.Targets.headTarget.position; data.HeadRotation = state.Targets.headTarget.rotation;
-                data.Left = state.Targets.leftHandTarget.position; data.LeftRotation = state.Targets.leftHandTarget.rotation;
-                data.Right = state.Targets.rightHandTarget.position; data.RightRotation = state.Targets.rightHandTarget.rotation;
+                var root = state.Role.transform;
+                var inverseRotation = Quaternion.Inverse(root.rotation);
+                data.Head = root.InverseTransformPoint(state.Head.position); data.HeadRotation = inverseRotation * state.Head.rotation;
+                data.Left = root.InverseTransformPoint(state.Left.position); data.LeftRotation = inverseRotation * state.Left.rotation;
+                data.Right = root.InverseTransformPoint(state.Right.position); data.RightRotation = inverseRotation * state.Right.rotation;
             }
             return data;
         }
