@@ -50,17 +50,24 @@ UnityEditor.EditorUtility.RequestScriptReload(); return "Reload queued before na
         if ([DateTime]::UtcNow -gt $flowReloadDeadline) { throw 'Script domain reload did not complete before the build.' }
         Start-Sleep -Seconds 1
     }
-    $flowReady = unity status --until-ready --format json | ConvertFrom-Json
-    if (!$flowReady.success) { throw 'Editor not ready after domain reload.' }
+    do {
+        $flowReady = unity command editor_status --caller plugin --skill unity-cli --format json | ConvertFrom-Json
+        if ($flowReady.success -and $flowReady.data.result.status -eq 'ready') { break }
+        if ([DateTime]::UtcNow -gt $flowReloadDeadline) { throw 'Editor not ready after domain reload.' }
+        Start-Sleep -Seconds 1
+    } while ($true)
     $flowBindings = Join-Path $flowRoot 'Builds/ConnectionTest/RuntimeActionBindings.json'
     if (Test-Path -LiteralPath $flowBindings) { Remove-Item -LiteralPath $flowBindings }
-    $flowBuild = unity command build --caller plugin --skill unity-cli --format json --target StandaloneWindows64 --outputPath Builds/ConnectionTest/LiveStockFlow.exe --options '[\"Development\"]' --confirm true | ConvertFrom-Json
+    $flowBuildOptions = '["Development"]'
+    if ($PSVersionTable.PSVersion.Major -lt 7) { $flowBuildOptions = $flowBuildOptions.Replace('"', '\"') }
+    $flowBuild = unity command build --caller plugin --skill unity-cli --format json --target StandaloneWindows64 --outputPath Builds/ConnectionTest/LiveStockFlow.exe --options $flowBuildOptions --confirm true | ConvertFrom-Json
     if (!$flowBuild.success -or $flowBuild.data.result.status -ne 'queued') { throw ($flowBuild | ConvertTo-Json -Depth 6) }
     $flowDeadline = [DateTime]::UtcNow.AddMinutes(25)
     do {
         Start-Sleep -Seconds 3
         $flowStatus = unity command build_status --caller plugin --skill unity-cli --format json | ConvertFrom-Json
-        if ($flowStatus.success -and $flowStatus.data.result.status -eq 'completed') { break }
+        if ($flowStatus.success -and $flowStatus.data.result.status -eq 'completed' -and
+            $flowStatus.data.result.buildId -eq $flowBuild.data.result.buildId) { break }
         if ([DateTime]::UtcNow -gt $flowDeadline) { throw 'Native Windows build timed out.' }
     } while ($true)
     $flowStatus.data.result | ConvertTo-Json -Depth 50 | Set-Content -Encoding UTF8 Docs/VR_Lobby_Build_Report.json

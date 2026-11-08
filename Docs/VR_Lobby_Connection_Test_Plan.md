@@ -1,6 +1,6 @@
 # VR Menu → Lobby → MainGame 測試計畫
 
-日期：2026-11-08。狀態：本次範圍的實作與桌面驗收已完成。Multi-Peer 線上驗收 15 項、載入期間離線等 4 項邊界檢查、滑鼠操作、Windows 建置及獨立 Server＋Editor Client 跨程序驗證皆通過。實體頭盔未驗證。完整結果見 [測試結果](VR_Lobby_Test_Results.md)。
+日期：2026-11-08。狀態：本次範圍的實作與桌面驗收已完成。Multi-Peer 線上驗收 15 項、載入期間離線等 4 項邊界檢查、PC 操作 12 項及獨立 Server＋兩個 PC Client 的 10 項跨程序驗收皆通過。Windows 建置與 Editor PC 畫面檢查完成。實體頭盔仍待裝置驗收。完整結果見 [測試結果](VR_Lobby_Test_Results.md)。
 
 ## 目標與分工
 
@@ -172,6 +172,20 @@ Codex 工作：
 使用者測試 T11：Server Build＋Editor VR Client，重做加入與手動開始，確認不依賴 Editor-only 測試工具。
 
 使用者測試 T12：在 MainGame 後嘗試加入同房；第一版應拒絕加入並提供可理解的失敗提示。
+
+## PC 操作替代測試
+
+使用者於 2026-11-08 授權在離開期間完成自動測試，並先以 PC 操作玩家驗證多人流程。
+
+- 已新增 DesktopTestPlayer，由桌面模式的 ConnectionManager 自動建立並保留。
+- WASD 移動、滑鼠右鍵轉向、Q／E 升降、Shift 加速，採用自由飛行視角。
+- PC 控制 12 項驗收通過。選單／斷線時停止操作，Lobby 與 MainGame 可操作。
+- 同一 Windows 建置的三份程序完成 Server＋兩位 PC Client 驗收，共 10 項通過。已確認不同程序與 PlayerRef、Server 權威、2/2 載入、同步換場、各自輸入、退出與關服清理。
+- 共用 MainGame 的兩個預覽動物 NavMeshAgent 已停用。最終獨立測試記錄中的導航錯誤為零。
+- PC／Server 限制為 60 FPS，便於同機多程序測試。
+- Editor PC 畫面檢查通過，操作提示沒有文字溢出，Return to Menu 按鈕可見。背景隱藏程序的 ScreenCapture 產生黑畫面，視覺證據採用 Editor PC 模式擷圖。
+
+操作與雙 PC 視窗啟動方式請見 [測試操作說明](VR_Lobby_Test_Guide.md)。
 
 ## 本次預計交付檔案與物件
 

@@ -1,0 +1,602 @@
+[
+  {
+    "test": "Dedicated Server opens with zero players",
+    "pass": true,
+    "evidence": {
+      "frame": 2176,
+      "status": "Lobby - waiting for Start Game.",
+      "connected": true,
+      "isClient": false,
+      "isServer": true,
+      "localPlayer": "[Player:None]",
+      "room": "LIVESTOCK-DEV",
+      "phase": "Lobby",
+      "players": 0,
+      "loaded": 0,
+      "stateId": "[Id:1024]",
+      "authority": true,
+      "canStart": false,
+      "canControl": null,
+      "stage": 1,
+      "position": null,
+      "rotation": null,
+      "activeRigs": 0,
+      "listeners": 0,
+      "pid": 53484
+    }
+  },
+  {
+    "test": "Three separate processes and two distinct online players",
+    "pass": true,
+    "evidence": {
+      "A": {
+        "frame": 1688,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51960
+      },
+      "B": {
+        "frame": 555,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "Server": {
+        "frame": 2797,
+        "status": "Lobby - waiting for Start Game.",
+        "connected": true,
+        "isClient": false,
+        "isServer": true,
+        "localPlayer": "[Player:None]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": true,
+        "canStart": true,
+        "canControl": null,
+        "stage": 1,
+        "position": null,
+        "rotation": null,
+        "activeRigs": 0,
+        "listeners": 0,
+        "pid": 53484
+      }
+    }
+  },
+  {
+    "test": "All peers share one Lobby state and authority belongs to Server",
+    "pass": true,
+    "evidence": {
+      "A": {
+        "frame": 1688,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51960
+      },
+      "B": {
+        "frame": 555,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "Server": {
+        "frame": 2797,
+        "status": "Lobby - waiting for Start Game.",
+        "connected": true,
+        "isClient": false,
+        "isServer": true,
+        "localPlayer": "[Player:None]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": true,
+        "canStart": true,
+        "canControl": null,
+        "stage": 1,
+        "position": null,
+        "rotation": null,
+        "activeRigs": 0,
+        "listeners": 0,
+        "pid": 53484
+      }
+    }
+  },
+  {
+    "test": "PC A keyboard moves only its local view",
+    "pass": true,
+    "evidence": {
+      "A": {
+        "frame": 1865,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          3.251186
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51960
+      },
+      "distance": 3.251186,
+      "B": {
+        "frame": 804,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          0,
+          1.75,
+          0
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      }
+    }
+  },
+  {
+    "test": "Both PC clients follow Server Start Game in the same room",
+    "pass": true,
+    "evidence": {
+      "A": {
+        "frame": 2074,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          12,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51960
+      },
+      "B": {
+        "frame": 1014,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          12,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "Server": {
+        "frame": 3106,
+        "status": "All connected players reached MainGame.",
+        "connected": true,
+        "isClient": false,
+        "isServer": true,
+        "localPlayer": "[Player:None]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": true,
+        "canStart": false,
+        "canControl": null,
+        "stage": 2,
+        "position": null,
+        "rotation": null,
+        "activeRigs": 0,
+        "listeners": 0,
+        "pid": 53484
+      }
+    }
+  },
+  {
+    "test": "PC B remains controllable after scene transition",
+    "pass": true,
+    "evidence": {
+      "before": {
+        "frame": 1014,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          12,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "after": {
+        "frame": 1152,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          15.25149,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      }
+    }
+  },
+  {
+    "test": "Each PC owns one listener and has no active XR rig",
+    "pass": true,
+    "evidence": {
+      "B": {
+        "frame": 1152,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          15.25149,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "A": {
+        "frame": 2074,
+        "status": "InMainGame | Players: 2 | Loaded: 2/2",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 2,
+        "position": [
+          12,
+          3.67,
+          -12
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51960
+      }
+    }
+  },
+  {
+    "test": "Leaving PC returns to Menu and Server keeps the other player",
+    "pass": true,
+    "evidence": {
+      "B": {
+        "frame": 1259,
+        "status": "Ready to connect.",
+        "connected": null,
+        "isClient": null,
+        "isServer": null,
+        "localPlayer": null,
+        "room": null,
+        "phase": null,
+        "players": null,
+        "loaded": null,
+        "stateId": null,
+        "authority": null,
+        "canStart": null,
+        "canControl": false,
+        "stage": 0,
+        "position": [
+          -12.03,
+          1.06,
+          12.1
+        ],
+        "rotation": [
+          0,
+          179.6
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 51224
+      },
+      "Server": {
+        "frame": 3469,
+        "status": "All connected players reached MainGame.",
+        "connected": true,
+        "isClient": false,
+        "isServer": true,
+        "localPlayer": "[Player:None]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "InMainGame",
+        "players": 1,
+        "loaded": 1,
+        "stateId": "[Id:1024]",
+        "authority": true,
+        "canStart": false,
+        "canControl": null,
+        "stage": 2,
+        "position": null,
+        "rotation": null,
+        "activeRigs": 0,
+        "listeners": 0,
+        "pid": 53484
+      }
+    }
+  },
+  {
+    "test": "MainGame rejects late PC joins",
+    "pass": true,
+    "evidence": {
+      "frame": 1427,
+      "status": "Connection failed: GameClosed",
+      "connected": null,
+      "isClient": null,
+      "isServer": null,
+      "localPlayer": null,
+      "room": null,
+      "phase": null,
+      "players": null,
+      "loaded": null,
+      "stateId": null,
+      "authority": null,
+      "canStart": null,
+      "canControl": false,
+      "stage": 0,
+      "position": [
+        -12.03,
+        1.06,
+        12.1
+      ],
+      "rotation": [
+        0,
+        179.6
+      ],
+      "activeRigs": 0,
+      "listeners": 1,
+      "pid": 51224
+    }
+  },
+  {
+    "test": "Server shutdown disconnects remaining PC and disables movement",
+    "pass": true,
+    "evidence": {
+      "frame": 2604,
+      "status": "Disconnected: DisconnectedByPluginLogic",
+      "connected": null,
+      "isClient": null,
+      "isServer": null,
+      "localPlayer": null,
+      "room": null,
+      "phase": null,
+      "players": null,
+      "loaded": null,
+      "stateId": null,
+      "authority": null,
+      "canStart": null,
+      "canControl": false,
+      "stage": 2,
+      "position": [
+        12,
+        3.67,
+        -12
+      ],
+      "rotation": [
+        0,
+        0
+      ],
+      "activeRigs": 0,
+      "listeners": 1,
+      "pid": 51960
+    }
+  }
+]

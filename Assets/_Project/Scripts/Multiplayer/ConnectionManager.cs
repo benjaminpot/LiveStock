@@ -79,6 +79,8 @@ public class ConnectionManager : MonoBehaviour
                 desktopCamera.clearFlags = CameraClearFlags.SolidColor;
                 desktopCamera.backgroundColor = new Color(.04f, .06f, .09f);
                 desktopCamera.cullingMask = 0;
+                var player = desktopCamera.GetComponent<DesktopTestPlayer>() ?? desktopCamera.gameObject.AddComponent<DesktopTestPlayer>();
+                player.Initialize(this);
             }
         }
         if (FlowLaunchOptions.DesktopClient && menuCanvas != null)
@@ -256,7 +258,8 @@ public class ConnectionManager : MonoBehaviour
             Status = $"{state.Phase} | Players: {state.PlayerCount} | Loaded: {state.LoadedPlayers}/{state.PlayerCount}"
                 + (state.Phase == LobbySessionState.SessionPhase.Lobby ? "\nWaiting for the server to start." : "");
         if (statusText != null) statusText.text = Status;
-        if (sessionStatusText != null) sessionStatusText.text = Status;
+        if (sessionStatusText != null) sessionStatusText.text = Status
+            + (FlowLaunchOptions.DesktopClient && IsConnected ? "\nPC: WASD move | RMB look | Q/E down/up | Shift fast" : "");
         bool canEdit = !IsBusy && !IsConnected;
         if (connectButton != null) connectButton.interactable = canEdit;
         if (roomNameInput != null) roomNameInput.interactable = canEdit;

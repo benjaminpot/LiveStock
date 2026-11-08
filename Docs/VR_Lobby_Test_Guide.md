@@ -21,6 +21,42 @@ Server 先開房並進入 Lobby；玩家從現有 LogInMenu 連線，Server 顯�
 
 若 Unity 場景尚未保存，入口會提示先保存，不會自行彈出阻塞自動化的儲存視窗。
 
+## PC 測試玩家操作
+
+使用 **Start Server + Desktop Menu (no headset)** 或獨立程式的 `-flow-desktop` 模式，連入 Lobby 後即可操作 PC 測試視角。
+
+| 輸入 | 動作 |
+|---|---|
+| W／A／S／D | 依目前朝向前後左右移動 |
+| 按住滑鼠右鍵並移動 | 轉動視角 |
+| Q／E | 下降／上升 |
+| Shift | 加速 |
+| 放開滑鼠右鍵 | 使用游標點擊 UI |
+
+PC 測試視角採用自由飛行，可穿越場景幾何，方便檢查出生點與換場結果。輸入只在已連線且場景載入完成後生效。返回選單或斷線後停止移動。控制元件由 ConnectionManager 自動建立，換場後繼續使用。
+
+這一階段的多人驗收涵蓋真實 Client 身分、玩家人數、載入回報及共同換場。遠端角色模型與移動同步依計畫另行實作。
+
+## 一台電腦開兩個可操作的 PC Client
+
+使用已建置的程式，可開一個 Server 與兩個獨立 PC 視窗。從專案根目錄分別啟動以下程序。
+
+```powershell
+$flowExe = (Resolve-Path './Builds/ConnectionTest/LiveStockFlow.exe').Path
+Start-Process -FilePath $flowExe -ArgumentList '-flow-server', '-screen-fullscreen', '0'
+Start-Process -FilePath $flowExe -ArgumentList '-flow-desktop', '-screen-fullscreen', '0'
+Start-Process -FilePath $flowExe -ArgumentList '-flow-desktop', '-screen-fullscreen', '0'
+```
+
+1. 等 Server 顯示 Lobby 已開啟。
+2. 在兩個 PC 視窗分別按 CONNECT，房名與地區使用相同設定。
+3. 確認 Server 顯示 Players 2、Loaded 2/2。
+4. 在 Server 視窗按 Start Game，兩個 Client 都應進入 MainGame。
+5. 切換至各個 PC 視窗，使用鍵盤滑鼠操作，並觀察每個 Client 的狀態。
+6. 測試結束關閉三個視窗。若要重新開一局，重新啟動 Server。
+
+程式的 Server／桌面模式限制為 60 FPS，讓同一台電腦執行多個程序時有較穩定的資源用量。自動驗收使用同一建置的獨立複本，為各程序保留各自的診斷入口。
+
 ## 有 VR 頭盔的操作
 
 1. 先確保 Quest Link／實際 XR 裝置已能在目前專案中運作。
@@ -70,6 +106,7 @@ Server 要保留手動按鈕，所以使用有畫面的 Windows 程式，不加 
 | FlowSceneMarker | 標記 Lobby 或 MainGame，指定本機 VRSpawnPoint |
 | LobbySessionState Prefab | Server 權威的階段、人數與載入回報，跨場景保留 |
 | FlowLaunchOptions | 獨立程序的 Server／桌面啟動選擇與 XR 分流 |
+| DesktopTestPlayer | PC 測試相機的鍵盤滑鼠自由移動 |
 | Editor/LocalConnectionTestTools | GDC 模式切換、一次啟動兩端、增減測試玩家與測試結束還原 |
 
 沒有修改 SessionLauncher.cs、SessionPanel.cs 或 GDC_METAVERSE 插件原始碼。新的等待狀態顯示整合在 ConnectionManager 的 SessionCanvas，沒有另建不必要的 UI 框架。
@@ -77,6 +114,7 @@ Server 要保留手動按鈕，所以使用有畫面的 Windows 程式，不加 
 ## 結果與限制
 
 - [完整測試結果與報告連結](VR_Lobby_Test_Results.md)：線上驗收 15/15、載入邊界 4/4、滑鼠點擊及獨立 Server＋Editor Client 跨程序測試通過。
+- 新增 PC 操作 12/12 與獨立 Server＋兩個 PC Client 的 10/10 驗收通過，兩位 PC 均可在換場後繼續操作。
 - Windows 建置成功，0 errors、192 warnings；警告主要來自既有 Sentis shader 與 Meta 套件，未以此推論實體 VR 已驗收。
 - 頭盔追蹤、控制器射線及遠端角色同步，各自獨立驗收；本次沒有實作遠端角色同步。
 

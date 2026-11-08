@@ -6,6 +6,9 @@
 
 | 測試 | 結果與證據 |
 |---|---|
+| PC 鍵盤滑鼠操作 | [12/12 通過](VR_Lobby_PC_Controls_Report.json)，涵蓋 WASD、加速、升降、右鍵視角、換場後持續操作與斷線停用 |
+| 獨立 Windows Server＋兩個 PC Client | [10/10 通過](VR_Lobby_PC_Multiplayer_Report.json)，涵蓋三個不同 PID、不同 PlayerRef、同房狀態／Server 權威、2/2 載入、各自輸入、共同換場、返回選單、晚加入拒絕與關服斷線 |
+| Editor PC 畫面 | [通過](VR_Lobby_PC_Visual_Report.json)，相機有效、操作提示未溢出、共用 MainGame 啟用的 NavMeshAgent 為零。[實際畫面](ConnectionFlowEvidence/pc_main_game.png) |
 | 真實 Photon Server＋兩個 Client，Editor Multiple | [15/15 通過](VR_Lobby_Acceptance_Report.json)：無人禁止開始、輸入驗證、重複連線、兩人載入等待、離開人數、同步換場、相同網路狀態 ID、重複開始、晚加入拒絕、關服斷線與返回選單 |
 | 載入期間離開與權威檢查 | [4/4 通過](VR_Lobby_LoadingEdge_Report.json)：Lobby 載入阻擋、Client 不可開始、Lobby／MainGame 載入中的離線者移出等待名單 |
 | 桌面實際指標點擊 | [通過](VR_Lobby_Pointer_Report.json)：CONNECT、Server Start Game，兩端進入 MainGame |
@@ -17,12 +20,15 @@
 
 跨程序測試透過診斷介面呼叫 Server 的同一個 StartGame 方法；桌面按鈕本身另由指標點擊測試驗證。測試有確認 frameCount 前進，並非只進入 Play Mode 或觀看靜態預覽。
 
+新增的雙 PC 跨程序測試會觸發 CONNECT 與 Server Start Game 的既有按鈕事件，再透過 Input System 模擬鍵盤操作。兩個 Client 的位置各自獨立，測試階段採用本機自由飛行視角。三程序的背景隱藏視窗擷圖為黑畫面，已刪除該擷圖，保留的畫面證據來自 Editor PC 模式。最終程序均已結束。
+
 ## 交付內容
 
 - [操作說明](VR_Lobby_Test_Guide.md)與[實作計畫](VR_Lobby_Connection_Test_Plan.md)。
 - 四個流程場景：`Assets/_Project/Scenes/_flow test/` 下的 Menu_VRClient、ServerBootstrap、Lobby、MainGame。
 - 獨立測試程式：`Builds/ConnectionTest/LiveStockFlow.exe`。`-flow-server` 開 Server，`-flow-desktop` 開桌面 Client，無參數為 VR Client。
 - GDC 測試支援入口：`LiveStock > Connection Test`。不需要手動額外掛 GDC 測試元件。
+- PC 操作元件位於 `Assets/_Project/Scripts/Multiplayer/DesktopTestPlayer.cs`，由桌面模式自動掛到測試相機。
 - 驗收工具：`Tools/ConnectionFlow/`，位於 Assets 外，不會成為遊戲腳本。
 - [選單畫面](ConnectionFlowEvidence/delivery_menu.png)、[等待室](ConnectionFlowEvidence/lobby_verified.png)、[MainGame 出生點](ConnectionFlowEvidence/main_verified.png)。
 
@@ -37,3 +43,5 @@
 5. 再以無參數的 Windows VR Client 重複一次，驗證手動 XR loader 啟動與裝置相容性。
 
 本次沒有實體頭盔，因此沒有宣稱以上項目通過。Windows 建置警告主要來自既有 Sentis shader variant 與 Meta 相容性／棄用項目；無頭盔的 Server 記錄仍有 Meta 原生 OpenXR 裝置不可用訊息，雖然實際管理的 XR loader 為 null。現有測試 EXE 包含本機 Unity Pipeline 診斷功能，只供開發測試，正式發佈前需另做正式建置。
+
+最終獨立程序記錄仍有既有 Fusion Avatar 範例資源的 Missing Script 警告，以及背景視窗的 graphics ring buffer 警告。四個流程場景的 Missing Script 檢查均為零。測試發現的預覽動物 NavMeshAgent 錯誤已在共用 MainGame 停用元件後消除。各類訊息的次數分開保存。[日誌檢查摘要](VR_Lobby_PC_Log_Summary.json)

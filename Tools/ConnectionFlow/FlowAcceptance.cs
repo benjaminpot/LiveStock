@@ -39,7 +39,11 @@ public static class FlowAcceptance
         if (!Application.isPlaying) throw new Exception("Start a desktop local test first.");
         var server = UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>();
         var client = UnityEngine.Object.FindObjectsByType<ConnectionManager>(FindObjectsSortMode.None).Single(c => !c.name.StartsWith("Test Client"));
-        await Wait(() => server != null && server.State != null, "Server did not open Lobby");
+        await Wait(() =>
+        {
+            if (server == null) server = UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>();
+            return server != null && server.State != null;
+        }, "Server did not open Lobby");
         int frame = Time.frameCount; await Task.Delay(250);
         Check("Player loop advances", Time.frameCount > frame, new { before=frame, after=Time.frameCount });
         Check("T4 Server alone cannot start", server.State.PlayerCount == 0 && !server.State.CanStart, Snapshot(server,client));

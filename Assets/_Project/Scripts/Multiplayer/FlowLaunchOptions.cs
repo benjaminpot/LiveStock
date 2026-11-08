@@ -54,7 +54,7 @@ public static class FlowLaunchOptions
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void SelectEntry()
     {
-        if (ServerOnly) Application.targetFrameRate = 60;
+        if (ServerOnly || DesktopClient) Application.targetFrameRate = 60;
         if (ServerOnly && SceneManager.GetActiveScene().path != ServerConnectionManager.SceneFolder + "ServerBootstrap.unity")
         {
             foreach (var client in UnityEngine.Object.FindObjectsByType<ConnectionManager>(FindObjectsSortMode.None))

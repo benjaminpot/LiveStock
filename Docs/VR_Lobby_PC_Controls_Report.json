@@ -1,0 +1,73 @@
+[
+  {
+    "test": "PC view created with one listener and no active XR rig",
+    "pass": true,
+    "evidence": true
+  },
+  {
+    "test": "Menu ignores movement",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "W moves the loaded PC view",
+    "pass": true,
+    "evidence": 1.22055376
+  },
+  {
+    "test": "Shift increases movement speed",
+    "pass": true,
+    "evidence": {
+      "walk": 1.22055376,
+      "fast": 2.43675423
+    }
+  },
+  {
+    "test": "E raises the PC view",
+    "pass": true,
+    "evidence": 1.22632337
+  },
+  {
+    "test": "Q lowers the PC view",
+    "pass": true,
+    "evidence": -1.22012973
+  },
+  {
+    "test": "Right mouse rotates the PC view",
+    "pass": true,
+    "evidence": 9.894798
+  },
+  {
+    "test": "Two clients share one room and authoritative state",
+    "pass": true,
+    "evidence": {
+      "PlayerCount": 2,
+      "LoadedPlayers": 2,
+      "room": "LIVESTOCK-DEV"
+    }
+  },
+  {
+    "test": "Extra test client does not create a controllable camera",
+    "pass": true,
+    "evidence": "Test Client 1"
+  },
+  {
+    "test": "PC control survives the shared MainGame transition",
+    "pass": true,
+    "evidence": {
+      "distance": 1.21147156,
+      "stage": 2,
+      "PlayerCount": 2
+    }
+  },
+  {
+    "test": "Disconnected PC view ignores input",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "Return to Menu restores ready status",
+    "pass": true,
+    "evidence": "Ready to connect."
+  }
+]
