@@ -8,6 +8,11 @@ using UnityEngine.XR.Management;
 public static class FlowLaunchOptions
 {
     public static bool ServerOnly => Environment.GetCommandLineArgs().Contains("-flow-server");
+    public static bool VRPreview => Environment.GetCommandLineArgs().Contains("-flow-vr-preview")
+#if UNITY_EDITOR
+        || UnityEditor.SessionState.GetBool("LiveStock.FlowVRPreview", false)
+#endif
+        ;
     public static bool DesktopClient => Environment.GetCommandLineArgs().Contains("-flow-desktop")
 #if UNITY_EDITOR
         || UnityEditor.SessionState.GetBool("LiveStock.FlowDesktopTest", false)
@@ -19,7 +24,7 @@ public static class FlowLaunchOptions
     {
         // A separate server/desktop process must not try to claim the headset.
         // In the Editor, only the explicit desktop test option suppresses XR for all local peers.
-        if ((ServerOnly || DesktopClient) && XRGeneralSettings.Instance != null)
+        if ((ServerOnly || DesktopClient || VRPreview) && XRGeneralSettings.Instance != null)
         {
 #if UNITY_EDITOR
             XRGeneralSettings.Instance.InitManagerOnStart = false;
@@ -33,7 +38,7 @@ public static class FlowLaunchOptions
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void PrepareLocalRig()
     {
-        if (!ServerOnly && !DesktopClient)
+        if (!ServerOnly && !DesktopClient && !VRPreview)
         {
 #if !UNITY_EDITOR
             // Test builds defer automatic XR startup so a server process never opens the headset.
@@ -54,7 +59,7 @@ public static class FlowLaunchOptions
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void SelectEntry()
     {
-        if (ServerOnly || DesktopClient) Application.targetFrameRate = 60;
+        if (ServerOnly || DesktopClient || VRPreview) Application.targetFrameRate = 60;
         if (ServerOnly && SceneManager.GetActiveScene().path != ServerConnectionManager.SceneFolder + "ServerBootstrap.unity")
         {
             foreach (var client in UnityEngine.Object.FindObjectsByType<ConnectionManager>(FindObjectsSortMode.None))

@@ -68,3 +68,5 @@ MonoBehaviour:
   _Phase: 0
   _PlayerCount: 0
   _LoadedPlayers: 0
+  desktopAvatarPrefab: {fileID: 788149333441283388, guid: 1b88f62c5f28086449172bb0f64d1ada, type: 3}
+  vrAvatarPrefab: {fileID: 1675020324719839866, guid: 817dd7bf8e10714448d6f8a51bf13952, type: 3}

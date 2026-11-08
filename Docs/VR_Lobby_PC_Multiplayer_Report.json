@@ -3,7 +3,8 @@
     "test": "Dedicated Server opens with zero players",
     "pass": true,
     "evidence": {
-      "frame": 2176,
+      "networkPenguins": 0,
+      "frame": 3548,
       "status": "Lobby - waiting for Start Game.",
       "connected": true,
       "isClient": false,
@@ -22,7 +23,7 @@
       "rotation": null,
       "activeRigs": 0,
       "listeners": 0,
-      "pid": 53484
+      "pid": 12708
     }
   },
   {
@@ -30,7 +31,8 @@
     "pass": true,
     "evidence": {
       "A": {
-        "frame": 1688,
+        "networkPenguins": 2,
+        "frame": 2901,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -46,9 +48,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          0
+          1.5,
+          0.100000024,
+          3
         ],
         "rotation": [
           0,
@@ -56,10 +58,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51960
+        "pid": 49676
       },
       "B": {
-        "frame": 555,
+        "networkPenguins": 2,
+        "frame": 958,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -75,9 +78,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          0
+          3,
+          0.100000024,
+          3
         ],
         "rotation": [
           0,
@@ -85,10 +88,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "Server": {
-        "frame": 2797,
+        "networkPenguins": 2,
+        "frame": 4616,
         "status": "Lobby - waiting for Start Game.",
         "connected": true,
         "isClient": false,
@@ -107,7 +111,7 @@
         "rotation": null,
         "activeRigs": 0,
         "listeners": 0,
-        "pid": 53484
+        "pid": 12708
       }
     }
   },
@@ -116,7 +120,8 @@
     "pass": true,
     "evidence": {
       "A": {
-        "frame": 1688,
+        "networkPenguins": 2,
+        "frame": 2901,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -132,9 +137,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          0
+          1.5,
+          0.100000024,
+          3
         ],
         "rotation": [
           0,
@@ -142,10 +147,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51960
+        "pid": 49676
       },
       "B": {
-        "frame": 555,
+        "networkPenguins": 2,
+        "frame": 958,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -161,9 +167,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          0
+          3,
+          0.100000024,
+          3
         ],
         "rotation": [
           0,
@@ -171,10 +177,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "Server": {
-        "frame": 2797,
+        "networkPenguins": 2,
+        "frame": 4616,
         "status": "Lobby - waiting for Start Game.",
         "connected": true,
         "isClient": false,
@@ -193,7 +200,96 @@
         "rotation": null,
         "activeRigs": 0,
         "listeners": 0,
-        "pid": 53484
+        "pid": 12708
+      }
+    }
+  },
+  {
+    "test": "Both standalone clients receive both penguins",
+    "pass": true,
+    "evidence": {
+      "A": {
+        "networkPenguins": 2,
+        "frame": 2901,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:2]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          1.5,
+          0.100000024,
+          3
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 49676
+      },
+      "B": {
+        "networkPenguins": 2,
+        "frame": 958,
+        "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+        "connected": true,
+        "isClient": true,
+        "isServer": false,
+        "localPlayer": "[Player:3]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": false,
+        "canStart": false,
+        "canControl": true,
+        "stage": 1,
+        "position": [
+          3,
+          0.100000024,
+          3
+        ],
+        "rotation": [
+          0,
+          0
+        ],
+        "activeRigs": 0,
+        "listeners": 1,
+        "pid": 56672
+      },
+      "Server": {
+        "networkPenguins": 2,
+        "frame": 4616,
+        "status": "Lobby - waiting for Start Game.",
+        "connected": true,
+        "isClient": false,
+        "isServer": true,
+        "localPlayer": "[Player:None]",
+        "room": "LIVESTOCK-DEV",
+        "phase": "Lobby",
+        "players": 2,
+        "loaded": 2,
+        "stateId": "[Id:1024]",
+        "authority": true,
+        "canStart": true,
+        "canControl": null,
+        "stage": 1,
+        "position": null,
+        "rotation": null,
+        "activeRigs": 0,
+        "listeners": 0,
+        "pid": 12708
       }
     }
   },
@@ -202,7 +298,8 @@
     "pass": true,
     "evidence": {
       "A": {
-        "frame": 1865,
+        "networkPenguins": 2,
+        "frame": 3114,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -218,9 +315,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          3.251186
+          1.5,
+          0.100000024,
+          7.62703943
         ],
         "rotation": [
           0,
@@ -228,11 +325,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51960
+        "pid": 49676
       },
-      "distance": 3.251186,
       "B": {
-        "frame": 804,
+        "networkPenguins": 2,
+        "frame": 1250,
         "status": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
         "connected": true,
         "isClient": true,
@@ -248,9 +345,9 @@
         "canControl": true,
         "stage": 1,
         "position": [
-          0,
-          1.75,
-          0
+          3,
+          0.100000024,
+          3
         ],
         "rotation": [
           0,
@@ -258,8 +355,9 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
-      }
+        "pid": 56672
+      },
+      "distance": 4.62703943
     }
   },
   {
@@ -267,7 +365,8 @@
     "pass": true,
     "evidence": {
       "A": {
-        "frame": 2074,
+        "networkPenguins": 2,
+        "frame": 3357,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -283,9 +382,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          12,
-          3.67,
-          -12
+          13.5,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -293,10 +392,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51960
+        "pid": 49676
       },
       "B": {
-        "frame": 1014,
+        "networkPenguins": 2,
+        "frame": 1506,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -312,9 +412,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          12,
-          3.67,
-          -12
+          15,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -322,10 +422,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "Server": {
-        "frame": 3106,
+        "networkPenguins": 2,
+        "frame": 4973,
         "status": "All connected players reached MainGame.",
         "connected": true,
         "isClient": false,
@@ -344,7 +445,7 @@
         "rotation": null,
         "activeRigs": 0,
         "listeners": 0,
-        "pid": 53484
+        "pid": 12708
       }
     }
   },
@@ -353,7 +454,8 @@
     "pass": true,
     "evidence": {
       "before": {
-        "frame": 1014,
+        "networkPenguins": 2,
+        "frame": 1506,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -369,9 +471,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          12,
-          3.67,
-          -12
+          15,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -379,10 +481,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "after": {
-        "frame": 1152,
+        "networkPenguins": 2,
+        "frame": 1655,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -398,9 +501,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          15.25149,
-          3.67,
-          -12
+          18.5100021,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -408,7 +511,7 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       }
     }
   },
@@ -417,7 +520,8 @@
     "pass": true,
     "evidence": {
       "B": {
-        "frame": 1152,
+        "networkPenguins": 2,
+        "frame": 1655,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -433,9 +537,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          15.25149,
-          3.67,
-          -12
+          18.5100021,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -443,10 +547,11 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "A": {
-        "frame": 2074,
+        "networkPenguins": 2,
+        "frame": 3357,
         "status": "InMainGame | Players: 2 | Loaded: 2/2",
         "connected": true,
         "isClient": true,
@@ -462,9 +567,9 @@
         "canControl": true,
         "stage": 2,
         "position": [
-          12,
-          3.67,
-          -12
+          13.5,
+          2.02,
+          -9
         ],
         "rotation": [
           0,
@@ -472,7 +577,7 @@
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51960
+        "pid": 49676
       }
     }
   },
@@ -481,7 +586,8 @@
     "pass": true,
     "evidence": {
       "B": {
-        "frame": 1259,
+        "networkPenguins": 0,
+        "frame": 1772,
         "status": "Ready to connect.",
         "connected": null,
         "isClient": null,
@@ -497,20 +603,21 @@
         "canControl": false,
         "stage": 0,
         "position": [
-          -12.03,
-          1.06,
-          12.1
+          -12,
+          1.1,
+          0
         ],
         "rotation": [
           0,
-          179.6
+          0
         ],
         "activeRigs": 0,
         "listeners": 1,
-        "pid": 51224
+        "pid": 56672
       },
       "Server": {
-        "frame": 3469,
+        "networkPenguins": 1,
+        "frame": 5402,
         "status": "All connected players reached MainGame.",
         "connected": true,
         "isClient": false,
@@ -529,7 +636,7 @@
         "rotation": null,
         "activeRigs": 0,
         "listeners": 0,
-        "pid": 53484
+        "pid": 12708
       }
     }
   },
@@ -537,8 +644,9 @@
     "test": "MainGame rejects late PC joins",
     "pass": true,
     "evidence": {
-      "frame": 1427,
-      "status": "Connection failed: GameClosed",
+      "networkPenguins": 0,
+      "frame": 1904,
+      "status": "Disconnected: GameClosed",
       "connected": null,
       "isClient": null,
       "isServer": null,
@@ -553,24 +661,25 @@
       "canControl": false,
       "stage": 0,
       "position": [
-        -12.03,
-        1.06,
-        12.1
+        -12,
+        1.1,
+        0
       ],
       "rotation": [
         0,
-        179.6
+        0
       ],
       "activeRigs": 0,
       "listeners": 1,
-      "pid": 51224
+      "pid": 56672
     }
   },
   {
     "test": "Server shutdown disconnects remaining PC and disables movement",
     "pass": true,
     "evidence": {
-      "frame": 2604,
+      "networkPenguins": 0,
+      "frame": 3916,
       "status": "Disconnected: DisconnectedByPluginLogic",
       "connected": null,
       "isClient": null,
@@ -586,9 +695,9 @@
       "canControl": false,
       "stage": 2,
       "position": [
-        12,
-        3.67,
-        -12
+        13.5,
+        2.02,
+        -9
       ],
       "rotation": [
         0,
@@ -596,7 +705,7 @@
       ],
       "activeRigs": 0,
       "listeners": 1,
-      "pid": 51960
+      "pid": 49676
     }
   }
 ]

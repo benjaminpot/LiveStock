@@ -1,0 +1,52 @@
+[
+  {
+    "test": "Normal VR action keeps the SDK rig active without an automatic preview fallback",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Normal VR keeps the original offline world-space menu",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Adding the real VR rig preserves both existing PC connections",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Native VR and both PC clients are connected and ready",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Missing physical tracking does not prevent VR avatar creation",
+    "pass": true,
+    "evidence": {
+      "trackingAvailable": false,
+      "hasPose": 0
+    }
+  },
+  {
+    "test": "All clients survive repeated view switches with the native rig running",
+    "pass": true,
+    "evidence": {
+      "advancedFrames": 904
+    }
+  },
+  {
+    "test": "Existing PC still replicates to all four runners after VR joins",
+    "pass": true,
+    "evidence": 0.0005527138
+  },
+  {
+    "test": "Three clients follow the server into MainGame",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server stop disconnects all three clients cleanly",
+    "pass": true,
+    "evidence": null
+  }
+]

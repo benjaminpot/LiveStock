@@ -1,5 +1,11 @@
 # VR Lobby 第一階段測試結果
 
+本次依使用者回報回退 VR 桌面介面替換，改為直接載入原本 Menu_VRClient。最新原場景混合驗收共 40 項通過，包含完整本機 VR Rig 啟用後加入兩位已連線 Desktop 的測試。結果與裝置驗收限制見 [最新 VR 操作說明](VR_Mixed_Connection_Guide.md)。下列前次報告保留為歷史記錄。
+
+VR 混合同步改版已完成Desktop 先加入 14 項、VR 先加入 15 項驗收，以及純 Desktop 14 項回歸。頭手 Anchor 經真實 Fusion 連線驅動現有羊模型 IK。操作與裝置驗收範圍請見 [VR 混合連線說明](VR_Mixed_Connection_Guide.md)。
+
+2026-11-08 工具改版的 14 項驗收已通過，涵蓋獨立未連線 Menu、無 Server 連線失敗、F2 視角與輸入隔離、企鵝模型位置及同步、換場與退出。詳見 [本次驗收](Connection_Test_Independent_Report.json) 與 [操作說明](VR_Lobby_Test_Guide.md)。以下為先前版本的測試記錄。
+
 日期：2026-11-08。已完成 Server 先開房、VR 選單加入、玩家／載入人數、桌面手動開始及共用 MainGame 換場。本機 Rig 跨場景保留；網路角色與頭手同步留待下一階段。
 
 ## 已實際驗證

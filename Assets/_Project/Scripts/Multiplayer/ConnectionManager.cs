@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,15 +32,28 @@ public class ConnectionManager : MonoBehaviour
     [SerializeField] Camera desktopCamera;
     [SerializeField] GameObject[] menuWorldRoots = Array.Empty<GameObject>();
 
+    [SerializeField] bool desktopMode;
+    [SerializeField, Tooltip("Editor/device-free VR role. Uses serialized tracking anchors without starting XR.")]
+    bool vrPreviewMode;
+    [SerializeField] DesktopTestPlayer desktopPlayerPrefab;
+    DesktopTestPlayer desktopPlayer;
+    public bool IsDesktop => desktopMode || FlowLaunchOptions.DesktopClient;
+    public bool IsVRPreview => !IsDesktop && (vrPreviewMode || FlowLaunchOptions.VRPreview);
+    public bool ViewSelected { get; private set; } = true;
+    public static IReadOnlyList<ConnectionManager> Clients => instances;
+    public void ConfigureDesktop(bool desktop) => desktopMode = desktop;
     static readonly List<ConnectionManager> instances = new();
     Vector3 menuRigPosition;
     Quaternion menuRigRotation;
     int shownStage;
     bool returning;
     int desktopWorldMask;
+    readonly Dictionary<UnityEngine.Behaviour, bool> viewStates = new();
+    Vector3 menuCameraPosition;
+    Quaternion menuCameraRotation;
     public NetworkRunner Runner { get; private set; }
     public bool IsBusy { get; private set; }
-    public bool IsConnected => Runner != null && Runner.IsRunning && Runner.IsClient;
+    public bool IsConnected => Runner != null && Runner.IsRunning && Runner.IsClient && Runner.IsConnectedToServer;
     public string Status { get; private set; } = "Ready to connect.";
     // Editor tests may delay this acknowledgement to exercise the server's loaded-player gate.
     [NonSerialized] public float ReadyReportDelaySeconds;
@@ -55,7 +68,7 @@ public class ConnectionManager : MonoBehaviour
         if (localVRRig != null)
         {
             // RuntimeInitialize callbacks run at startup, not on every return to the menu.
-            if (FlowLaunchOptions.DesktopClient) localVRRig.SetActive(false);
+            if (IsDesktop || IsVRPreview) localVRRig.SetActive(false);
             menuRigPosition = localVRRig.transform.position;
             menuRigRotation = localVRRig.transform.rotation;
             localVRRig.transform.SetParent(transform, true);
@@ -63,27 +76,36 @@ public class ConnectionManager : MonoBehaviour
         if (vrEventSystem != null) vrEventSystem.transform.SetParent(transform, true);
         if (menuCanvas != null) menuCanvas.transform.SetParent(transform, true);
         if (sessionCanvas != null) { sessionCanvas.transform.SetParent(transform, true); sessionCanvas.gameObject.SetActive(false); }
+        // Keep this scene's offline environment available when returning from a network scene.
+        foreach (var root in menuWorldRoots) if (root != null) root.transform.SetParent(transform, true);
+        if (IsDesktop && desktopPlayerPrefab != null)
+        {
+            if (desktopCamera != null) desktopCamera.gameObject.SetActive(false);
+            desktopPlayer = Instantiate(desktopPlayerPrefab, transform);
+            desktopPlayer.Initialize(this);
+            desktopCamera = desktopPlayer.ViewCamera;
+        }
         if (desktopCamera != null)
         {
             desktopWorldMask = desktopCamera.cullingMask;
-            desktopCamera.transform.SetParent(transform, true);
+            if (desktopPlayer == null) desktopCamera.transform.SetParent(transform, true);
             desktopCamera.targetDisplay = 0;
             // The fallback camera is for desktop test runs without a headset.
-            desktopCamera.gameObject.SetActive(FlowLaunchOptions.DesktopClient);
+            desktopCamera.gameObject.SetActive(IsDesktop || IsVRPreview);
+            desktopCamera.enabled = IsDesktop || IsVRPreview;
             // The scene's preview listener may be disabled; desktop mode owns exactly one listener.
             var listener = desktopCamera.GetComponent<AudioListener>();
-            if (listener == null && FlowLaunchOptions.DesktopClient) listener = desktopCamera.gameObject.AddComponent<AudioListener>();
-            if (listener != null) listener.enabled = FlowLaunchOptions.DesktopClient;
-            if (FlowLaunchOptions.DesktopClient)
+            if (listener == null && (IsDesktop || IsVRPreview)) listener = desktopCamera.gameObject.AddComponent<AudioListener>();
+            if (listener != null) listener.enabled = IsDesktop || IsVRPreview;
+            if (IsDesktop)
             {
                 desktopCamera.clearFlags = CameraClearFlags.SolidColor;
                 desktopCamera.backgroundColor = new Color(.04f, .06f, .09f);
                 desktopCamera.cullingMask = 0;
-                var player = desktopCamera.GetComponent<DesktopTestPlayer>() ?? desktopCamera.gameObject.AddComponent<DesktopTestPlayer>();
-                player.Initialize(this);
+
             }
         }
-        if (FlowLaunchOptions.DesktopClient && menuCanvas != null)
+        if (IsDesktop && menuCanvas != null)
         {
             // A mouse-operated test uses its own scoped input module; the server has a separate UI root.
             if (vrEventSystem != null) vrEventSystem.SetActive(false);
@@ -108,11 +130,11 @@ public class ConnectionManager : MonoBehaviour
                 var scaler = sessionCanvas.GetComponent<CanvasScaler>() ?? sessionCanvas.gameObject.AddComponent<CanvasScaler>();
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution = new Vector2(1280, 720);
-                if (sessionStatusText != null) sessionStatusText.rectTransform.anchoredPosition = new Vector2(0, -180);
+                if (sessionStatusText != null) { sessionStatusText.rectTransform.anchoredPosition = new Vector2(-390, 270); sessionStatusText.rectTransform.sizeDelta = new Vector2(440, 110); sessionStatusText.fontSize = 20; sessionStatusText.alignment = TextAlignmentOptions.TopLeft; }
                 var background = sessionCanvas.transform.Find("Background") as RectTransform;
-                if (background != null) { background.anchoredPosition = new Vector2(0, -200); background.sizeDelta = new Vector2(650, 240); }
+                if (background != null) { background.anchoredPosition = new Vector2(-390, 235); background.sizeDelta = new Vector2(480, 210); }
                 foreach (var button in sessionCanvas.GetComponentsInChildren<Button>(true))
-                    button.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -270);
+                    { var rect = button.GetComponent<RectTransform>(); rect.anchoredPosition = new Vector2(-390, 160); rect.sizeDelta = new Vector2(240, 44); }
             }
             var input = new GameObject("Desktop Client Input", typeof(UnityEngine.InputSystem.UI.MultiplayerEventSystem),
                 typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
@@ -120,7 +142,47 @@ public class ConnectionManager : MonoBehaviour
             input.GetComponent<UnityEngine.InputSystem.UI.MultiplayerEventSystem>().playerRoot = gameObject;
             input.GetComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>().AssignDefaultActions();
         }
+        if (IsVRPreview && desktopCamera != null && menuCanvas != null)
+        {
+            // Device-free observation keeps the original world-space VR menu and its scene.
+            desktopCamera.transform.position = localVRRig.transform.position + Vector3.up * 1.65f;
+            desktopCamera.transform.LookAt(menuCanvas.transform.position);
+            desktopCamera.stereoTargetEye = StereoTargetEyeMask.None;
+            var data = desktopCamera.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+            if (data != null) data.allowXRRendering = false;
+        }
+        if (desktopCamera != null)
+        {
+            menuCameraPosition = desktopCamera.transform.position;
+            menuCameraRotation = desktopCamera.transform.rotation;
+        }
         DontDestroyOnLoad(gameObject);
+        if (!IsDesktop) GetComponent<VRClientPoseSource>()?.Initialize(this);
+        if (ConnectionTestViews.Instance != null) ConnectionTestViews.Instance.Select(this);
+    }
+    /// <summary>Routes rendering and input to the peer selected with F2.</summary>
+    public void SetViewSelected(bool selected)
+    {
+        if (ViewSelected == selected) return;
+        ViewSelected = selected;
+        foreach (var root in menuWorldRoots) if (root != null) root.SetActive(selected && shownStage == 0);
+        if (desktopPlayer != null)
+            foreach (var visual in desktopPlayer.GetComponentsInChildren<Renderer>(true)) visual.enabled = selected;
+        // Preserve each camera's SDK/authored state. Enabling every eye and fallback camera breaks VR rendering.
+        if (!selected)
+        {
+            viewStates.Clear();
+            foreach (var component in GetComponentsInChildren<UnityEngine.Behaviour>(true))
+                if (component is Canvas || component is Camera || component is AudioListener
+                    || component is UnityEngine.EventSystems.EventSystem)
+                {
+                    viewStates[component] = component.enabled;
+                    component.enabled = false;
+                }
+        }
+        else
+            foreach (var pair in viewStates) if (pair.Key != null) pair.Key.enabled = pair.Value;
+        if (Runner != null && Runner.IsRunning) Runner.SetVisible(selected);
     }
     void OnDestroy() => instances.Remove(this);
 
@@ -152,15 +214,25 @@ public class ConnectionManager : MonoBehaviour
             DontDestroyOnLoad(go);
             Runner = go.AddComponent<NetworkRunner>();
             go.AddComponent<RunnerEnableVisibility>();
-            Runner.ProvideInput = false; // Head/hand network input is intentionally a later feature.
+            Runner.ProvideInput = false; // Authenticated session RPCs carry desktop and VR poses.
             var manager = go.AddComponent<NetworkSceneManagerDefault>();
             manager.IsSceneTakeOverEnabled = false;
             var events = go.AddComponent<NetworkEvents>();
+            events.OnDisconnectedFromServer ??= new NetworkEvents.DisconnectFromServerEvent();
+            events.OnDisconnectedFromServer.AddListener((runner, reason) =>
+            {
+                if (Runner != runner) return;
+                SetStatus("Disconnected: " + reason);
+                _ = runner.Shutdown();
+            });
             events.OnShutdown ??= new NetworkEvents.ShutdownEvent();
             events.OnShutdown.AddListener((runner, reason) =>
             {
-                if (Runner == runner) Runner = null;
-                SetStatus("Disconnected: " + reason);
+                if (Runner == runner)
+                {
+                    Runner = null;
+                    SetStatus("Disconnected: " + reason);
+                }
                 Destroy(runner.gameObject);
             });
             Runner.AddCallbacks(events);
@@ -181,7 +253,7 @@ public class ConnectionManager : MonoBehaviour
                 return false;
             }
             // Only the visible VR/desktop operator client renders its copy of the world.
-            if (Runner.Config.PeerMode == NetworkProjectConfig.PeerModes.Multiple) Runner.SetVisible(localVRRig != null || desktopCamera != null);
+            if (Runner.Config.PeerMode == NetworkProjectConfig.PeerModes.Multiple) Runner.SetVisible(ViewSelected);
             SetStatus($"Connected: {Runner.SessionInfo.Name}. Loading Lobby...");
             return true;
         }
@@ -219,7 +291,12 @@ public class ConnectionManager : MonoBehaviour
             if (localVRRig != null) localVRRig.transform.SetPositionAndRotation(menuRigPosition, menuRigRotation);
             if (menuCanvas != null) menuCanvas.gameObject.SetActive(true);
             if (sessionCanvas != null) sessionCanvas.gameObject.SetActive(false);
-            if (desktopCamera != null && FlowLaunchOptions.DesktopClient) desktopCamera.cullingMask = 0;
+            if (desktopCamera != null && (IsDesktop || IsVRPreview))
+            {
+                desktopCamera.cullingMask = IsDesktop ? 0 : desktopWorldMask;
+                desktopCamera.transform.SetPositionAndRotation(menuCameraPosition, menuCameraRotation);
+            }
+            foreach (var root in menuWorldRoots) if (root != null) root.SetActive(ViewSelected);
             returning = false;
             SetStatus("Ready to connect.");
         }
@@ -233,7 +310,7 @@ public class ConnectionManager : MonoBehaviour
 
     void Update()
     {
-        var state = State;
+        var state = IsConnected ? State : null;
         var marker = IsConnected && !Runner.IsSceneManagerBusy ? FlowSceneMarker.For(Runner) : null;
         if (marker != null && marker.Stage != shownStage)
         {
@@ -247,7 +324,8 @@ public class ConnectionManager : MonoBehaviour
                 if (localVRRig != null) localVRRig.transform.SetPositionAndRotation(spawn.position, spawn.rotation);
                 if (desktopCamera != null && desktopCamera.gameObject.activeSelf)
                 {
-                    desktopCamera.transform.SetPositionAndRotation(spawn.position + Vector3.up * 1.65f, spawn.rotation);
+                    if (desktopPlayer != null) desktopPlayer.Warp(spawn);
+                    else desktopCamera.transform.SetPositionAndRotation(spawn.position + Vector3.up * 1.65f, spawn.rotation);
                     desktopCamera.cullingMask = desktopWorldMask;
                 }
                 if (sessionCanvas != null)
@@ -257,13 +335,27 @@ public class ConnectionManager : MonoBehaviour
         if (state != null)
             Status = $"{state.Phase} | Players: {state.PlayerCount} | Loaded: {state.LoadedPlayers}/{state.PlayerCount}"
                 + (state.Phase == LobbySessionState.SessionPhase.Lobby ? "\nWaiting for the server to start." : "");
-        if (statusText != null) statusText.text = Status;
-        if (sessionStatusText != null) sessionStatusText.text = Status
-            + (FlowLaunchOptions.DesktopClient && IsConnected ? "\nPC: WASD move | RMB look | Q/E down/up | Shift fast" : "");
+        if (state != null && !IsDesktop && !IsVRPreview)
+        {
+            var source = GetComponent<VRClientPoseSource>();
+            if (source != null && !source.TrackingAvailable) Status += "\nWaiting for VR tracking.";
+        }
+        string viewLabel = ConnectionTestViews.Instance != null ? name + " | F2 next view\n" : "";
+        if (statusText != null) statusText.text = viewLabel + Status;
+        if (sessionStatusText != null) sessionStatusText.text = viewLabel + Status
+            + (IsDesktop && IsConnected ? "\nPC: WASD move | RMB look | Q/E down/up | Shift fast" : "");
         bool canEdit = !IsBusy && !IsConnected;
         if (connectButton != null) connectButton.interactable = canEdit;
         if (roomNameInput != null) roomNameInput.interactable = canEdit;
         if (regionInput != null) regionInput.interactable = canEdit;
+    }
+    void LateUpdate()
+    {
+        // The preview camera follows the same anchor hierarchy sampled by the VR pose sender.
+        if (!IsVRPreview || !IsConnected || desktopCamera == null) return;
+        var source = GetComponent<VRClientPoseSource>();
+        if (source != null && source.HeadAnchor != null)
+            desktopCamera.transform.SetPositionAndRotation(source.HeadAnchor.position, source.HeadAnchor.rotation);
     }
     void SetStatus(string message) { Status = message; Debug.Log("[ConnectionManager] " + message, this); }
 }

@@ -1,48 +1,55 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>A local PC test view for exercising the same connection flow without a headset.</summary>
-/// <remarks>Uses free camera movement for inspecting local scenes during connection tests.</remarks>
+/// <summary>Prefab-configured PC inspection player with a third-person camera and penguin visual.</summary>
 public sealed class DesktopTestPlayer : MonoBehaviour
 {
-    [SerializeField, Min(0.1f), Tooltip("Local camera movement speed in metres per second.")]
-    float moveSpeed = 3f;
-    [SerializeField, Min(0.01f), Tooltip("Degrees of rotation per mouse pixel while holding the right button.")]
-    float lookSensitivity = 0.12f;
-
+    [SerializeField] Camera viewCamera;
+    [SerializeField, Min(0.1f), Tooltip("Movement speed in metres per second.")] float moveSpeed = 3f;
+    [SerializeField, Min(0.01f), Tooltip("Degrees per mouse pixel.")] float lookSensitivity = 0.12f;
+    [SerializeField, Tooltip("Offset from the scene spawn point for the third-person test rig.")] Vector3 spawnOffset = new Vector3(0, 0, 3);
+    [SerializeField, Min(0f), Tooltip("Horizontal spacing between connected test players.")] float spawnSpacing = 1.5f;
     ConnectionManager owner;
-
-    /// <summary>Input is accepted only in this client's loaded Lobby or MainGame.</summary>
-    public bool CanControl => owner != null && FlowLaunchOptions.DesktopClient && owner.IsConnected
+    float nextPose;
+    public Camera ViewCamera => viewCamera;
+    public bool CanControl => owner != null && owner.IsDesktop && owner.ViewSelected && owner.IsConnected
         && !owner.IsBusy && !owner.Runner.IsSceneManagerBusy && owner.State != null
-        && owner.State.Phase != LobbySessionState.SessionPhase.LoadingMainGame
-        && FlowSceneMarker.For(owner.Runner) != null;
-
-    /// <summary>Binds the view to its own client, so other local test Runners never receive its input.</summary>
+        && owner.State.Phase != LobbySessionState.SessionPhase.LoadingMainGame && FlowSceneMarker.For(owner.Runner) != null;
     public void Initialize(ConnectionManager client) => owner = client;
-
+    /// <summary>Moves the prefab root after Fusion finishes loading a stage.</summary>
+    public void Warp(Transform spawn)
+    {
+        // Separate test players so their penguins can be inspected side by side.
+        var offset = Vector3.right * Mathf.Max(0, owner.Runner.LocalPlayer.PlayerId - 1) * spawnSpacing;
+        transform.SetPositionAndRotation(spawn.position + spawn.rotation * (offset + spawnOffset), spawn.rotation);
+    }
     void Update()
     {
-        if (!CanControl) return;
-        var mouse = Mouse.current;
-        if (mouse != null && mouse.rightButton.isPressed)
+        if (CanControl)
         {
-            // Keep the pointer available for Server/UI buttons when the right button is released.
-            Vector2 delta = mouse.delta.ReadValue() * lookSensitivity;
-            Vector3 angles = transform.eulerAngles;
-            float pitch = Mathf.DeltaAngle(0f, angles.x);
-            transform.rotation = Quaternion.Euler(Mathf.Clamp(pitch - delta.y, -80f, 80f), angles.y + delta.x, 0f);
+            var mouse = Mouse.current;
+            if (mouse != null && mouse.rightButton.isPressed)
+            {
+                Vector2 delta = mouse.delta.ReadValue() * lookSensitivity;
+                transform.Rotate(0f, delta.x, 0f, Space.World);
+                float pitch = Mathf.DeltaAngle(0f, viewCamera.transform.localEulerAngles.x);
+                viewCamera.transform.localRotation = Quaternion.Euler(Mathf.Clamp(pitch - delta.y, -80f, 80f), 0f, 0f);
+            }
+            var keys = Keyboard.current;
+            if (keys != null)
+            {
+                Vector3 input = new Vector3((keys.dKey.isPressed?1:0)-(keys.aKey.isPressed?1:0),
+                    (keys.eKey.isPressed?1:0)-(keys.qKey.isPressed?1:0), (keys.wKey.isPressed?1:0)-(keys.sKey.isPressed?1:0));
+                float speed = keys.leftShiftKey.isPressed || keys.rightShiftKey.isPressed ? moveSpeed * 2f : moveSpeed;
+                transform.position += transform.rotation * Vector3.ClampMagnitude(input, 1f) * speed * Mathf.Min(Time.unscaledDeltaTime, .1f);
+            }
         }
-
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
-        Vector3 input = new Vector3(
-            (keyboard.dKey.isPressed ? 1 : 0) - (keyboard.aKey.isPressed ? 1 : 0),
-            (keyboard.eKey.isPressed ? 1 : 0) - (keyboard.qKey.isPressed ? 1 : 0),
-            (keyboard.wKey.isPressed ? 1 : 0) - (keyboard.sKey.isPressed ? 1 : 0));
-        // Horizontal movement follows yaw; Q/E deliberately bypass gravity and collision for inspection.
-        Vector3 direction = Quaternion.Euler(0f, transform.eulerAngles.y, 0f) * Vector3.ClampMagnitude(input, 1f);
-        float speed = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed ? moveSpeed * 2f : moveSpeed;
-        transform.position += direction * speed * Mathf.Min(Time.unscaledDeltaTime, 0.1f);
+        // Every connected desktop view reports poses, including views currently deselected by F2.
+        if (owner != null && owner.IsConnected && owner.State != null && !owner.Runner.IsSceneManagerBusy
+            && FlowSceneMarker.For(owner.Runner) != null && Time.unscaledTime >= nextPose)
+        {
+            nextPose = Time.unscaledTime + .05f;
+            owner.State.RPC_DesktopPose(transform.position, transform.rotation);
+        }
     }
 }

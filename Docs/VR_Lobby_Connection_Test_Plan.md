@@ -1,5 +1,9 @@
 # VR Menu → Lobby → MainGame 測試計畫
 
+2026-11-09 修正 VR 入口：回退前次將 VR 轉換為桌面 Menu 的行為，工具直接載入原本 Menu_VRClient 場景。原場景 VR／Desktop 兩種啟動順序及完整本機 Rig 混合驗收共 40 項通過；實體頭盔尚待裝置測試。最新操作與證據見 [VR 混合連線說明](VR_Mixed_Connection_Guide.md)。
+
+2026-11-08 工具改版已改為獨立開啟未連線 Client、獨立啟停 Server、F2 切換視角，並加入可同步的 Desktop 企鵝 Prefab。新操作以 [測試工具說明](VR_Lobby_Test_Guide.md) 為準。下列階段紀錄保留改版前的交付歷史。
+
 日期：2026-11-08。狀態：本次範圍的實作與桌面驗收已完成。Multi-Peer 線上驗收 15 項、載入期間離線等 4 項邊界檢查、PC 操作 12 項及獨立 Server＋兩個 PC Client 的 10 項跨程序驗收皆通過。Windows 建置與 Editor PC 畫面檢查完成。實體頭盔仍待裝置驗收。完整結果見 [測試結果](VR_Lobby_Test_Results.md)。
 
 ## 目標與分工

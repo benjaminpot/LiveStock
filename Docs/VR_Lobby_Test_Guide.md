@@ -1,121 +1,63 @@
-# Server／VR Lobby 測試操作說明
+# Connection Test 操作說明
 
-## 功能範圍
+目前工具使用單一動作選單，每個 Client 都從未連線的 Menu 開始。測試入口位於 Unity 上方的 **LiveStock > Connection Test**。
 
-Server 先開房並進入 Lobby；玩家從現有 LogInMenu 連線，Server 顯示已加入／已載入人數，操作者手動按 Start Game，一起進入共用 MainGame。房間、Runner 連線及 LobbySessionState 的網路身分保留，不在換場時重新連線。
+## 選單功能
 
-本次不生成網路玩家模型、不傳送頭手姿態、不啟動 NPC／CCTV／語音；本機 VR 視角仍使用現有 Rig。加入 Fusion 房間並不是帳號登入。
-
-## 一台電腦、沒有頭盔的測試
-
-1. 保存正在編輯的場景，離開 Play Mode。
-2. 選單選擇 **LiveStock > Connection Test > Start Server + Desktop Menu (no headset)**。
-3. 工具透過 GDC 的 PeerModeTools 暫時切成 Multiple，開啟 Menu_VRClient，再於 Play Mode 加入 ServerBootstrap。Server 自動開 Lobby，但玩家不會自動加入。
-4. Game View 使用 Display 1；左上是 Server 管理區，右側是登入選單。等待 Server 顯示 Lobby，確認 Players 為 0 且 Start Game 停用。
-5. 保留房名 `LIVESTOCK-DEV`、region `asia`，按 **CONNECT**。
-6. 預期進入等待室：Server 顯示 Players 1、Loaded 1/1；客戶端顯示等待 Server 開始。
-7. 選單選擇 **Add Test Client**，預期 Players 2、Loaded 2/2。這位測試玩家是真實線上 Client，不會建立第二個 VR Rig、相機或 AudioListener。
-8. 點左上 **Start Game**，兩位玩家一起進入 MainGame，Loaded 最後為 2/2。開始時房間會關閉，不接受新玩家。
-9. 可使用 **Leave Last Test Client** 測試玩家離開。
-10. 測試結束選 **End Test**，或停止 Play Mode；工具還原原本 Peer Mode、XR 自動啟動與 Game View Display 設定。
-
-若 Unity 場景尚未保存，入口會提示先保存，不會自行彈出阻塞自動化的儲存視窗。
-
-## PC 測試玩家操作
-
-使用 **Start Server + Desktop Menu (no headset)** 或獨立程式的 `-flow-desktop` 模式，連入 Lobby 後即可操作 PC 測試視角。
-
-| 輸入 | 動作 |
+| 選單 | 動作 |
 |---|---|
-| W／A／S／D | 依目前朝向前後左右移動 |
-| 按住滑鼠右鍵並移動 | 轉動視角 |
-| Q／E | 下降／上升 |
-| Shift | 加速 |
-| 放開滑鼠右鍵 | 使用游標點擊 UI |
+| Open VR Client Menu (no headset) | 載入原本 Menu_VRClient 場景，以相機觀看 3D Menu，透過 Context Menu Connect 連線 |
+| Open VR Client Menu | 載入原本 Menu_VRClient 場景、保留 VR UI 與 Rig，一個 Editor 支援一套本機頭盔 |
+| Open Desktop Client Menu | 開啟一個未連線的 Desktop Client，可重複建立多位 |
+| Start Server | 建立 Server 並開啟 Lobby |
+| Stop Server | 關閉目前房間，已連線玩家會收到斷線狀態 |
+| Next View (F2) | 輪流選取 Server 與各個 Client |
+| Disconnect Selected Client | 目前 Client 離開房間並返回自己的 Menu |
+| Close Selected Client | 中斷目前 Client 並移除它的物件 |
+| End Test | 結束 Play Mode，還原測試前的 Peer Mode、XR 與 Display 設定 |
+| Build Windows Connection Test | 建置 Single Peer Windows 測試程式 |
 
-PC 測試視角採用自由飛行，可穿越場景幾何，方便檢查出生點與換場結果。輸入只在已連線且場景載入完成後生效。返回選單或斷線後停止移動。控制元件由 ConnectionManager 自動建立，換場後繼續使用。
+停止 Play Mode 時選 VR 入口，工具會載入原本 Menu_VRClient 場景。Desktop／Server 入口使用 ConnectionTestBootstrap。Play Mode 中可以逐一新增其他端。F2 切換同一個 Editor 裡的端，Game View 需取得鍵盤焦點。畫面會顯示目前 Client 名稱與 F2 提示，桌面鍵盤滑鼠只控制目前選取的 Client。
 
-這一階段的多人驗收涵蓋真實 Client 身分、玩家人數、載入回報及共同換場。遠端角色模型與移動同步依計畫另行實作。
+## 建議測試順序
 
-## 一台電腦開兩個可操作的 PC Client
+1. 儲存場景，選 Open Desktop Client Menu。
+2. 保持房名 LIVESTOCK-DEV、地區 asia，按 CONNECT。沒有 Server 時應顯示 GameNotFound，可在同一個 Menu 重試。
+3. 選 Start Server，等 Server 的 Lobby 開啟。
+4. 按 F2 切回 Desktop Client，再按 CONNECT，等待人數 1/1。
+5. 再選 Open Desktop Client Menu，第二位先維持未連線，確認 Server 人數仍為一位。
+6. 第二位手動按 CONNECT，等待 Server 顯示 Players 2、Loaded 2/2。
+7. 用 F2 在 Server、Desktop Client 1、Desktop Client 2 間切換。
+8. 在 Server 畫面按 Start Game，兩位玩家一起進入 MainGame。
+9. 在各個 Desktop 畫面使用 WASD、右鍵觀看、Q／E 升降、Shift 加速。其他已連線端會看到對應企鵝移動。
+10. 測試 Disconnect Selected Client、Stop Server 與 Close Selected Client，完成後選 End Test。
 
-使用已建置的程式，可開一個 Server 與兩個獨立 PC 視窗。從專案根目錄分別啟動以下程序。
+VR 測試時改用 Open VR Client Menu，再自行選擇是否開 Server、何時按 CONNECT。實體頭盔與 VR／Desktop 混合追蹤仍須使用裝置驗收。
 
-```powershell
-$flowExe = (Resolve-Path './Builds/ConnectionTest/LiveStockFlow.exe').Path
-Start-Process -FilePath $flowExe -ArgumentList '-flow-server', '-screen-fullscreen', '0'
-Start-Process -FilePath $flowExe -ArgumentList '-flow-desktop', '-screen-fullscreen', '0'
-Start-Process -FilePath $flowExe -ArgumentList '-flow-desktop', '-screen-fullscreen', '0'
-```
+## Prefab 與修改位置
 
-1. 等 Server 顯示 Lobby 已開啟。
-2. 在兩個 PC 視窗分別按 CONNECT，房名與地區使用相同設定。
-3. 確認 Server 顯示 Players 2、Loaded 2/2。
-4. 在 Server 視窗按 Start Game，兩個 Client 都應進入 MainGame。
-5. 切換至各個 PC 視窗，使用鍵盤滑鼠操作，並觀察每個 Client 的狀態。
-6. 測試結束關閉三個視窗。若要重新開一局，重新啟動 Server。
+所有專用 Prefab 位於 `Assets/_Project/Prefabs/Multiplayer/`。
 
-程式的 Server／桌面模式限制為 60 FPS，讓同一台電腦執行多個程序時有較穩定的資源用量。自動驗收使用同一建置的獨立複本，為各程序保留各自的診斷入口。
-
-## 有 VR 頭盔的操作
-
-1. 先確保 Quest Link／實際 XR 裝置已能在目前專案中運作。
-2. 選 **Start Server + VR Menu**。此模式不全域關閉 XR，只有 Server 不建立 VR Rig。
-3. 在頭盔中使用原 LogInMenu 的 CONNECT。LogInMenu 和換場後的 SessionCanvas 都已配置 Meta PointableCanvas、RayInteractable 與裁切平面；PCM 的 Canvas Module 與同一個本機 Rig 會隨 ConnectionManager 保留。
-4. 由電腦操作者在桌面按 Server 的 Start Game。頭盔顯示共用 MainGame。
-5. **Return to Menu** 會退出本次客戶端連線並恢復入口。遊戲開始後舊房間已關閉，若要開新一輪，先 End Test 再重新啟動測試。
-
-目前沒有加入虛擬鍵盤；可先在 Inspector 預填房名／地區。實體頭盔畫面、控制器按鍵與射線點擊仍須由有裝置的操作者驗收，桌面滑鼠測試不能代替這些結果。
-
-## 測試載入等待
-
-選 **Add Delayed Test Client (5 seconds)**。新 Client 的載入完成回報會延遲五秒；這段時間 Server 應顯示 Loaded 小於 Players，Start Game 停用。等回報後才可開始。
-
-Server 不計入玩家人數；開始條件是至少一位玩家且所有已連線玩家完成 Lobby 載入。不會自動開始，不需要 Ready 按鈕。
-
-## 獨立 Windows 程式
-
-一般測試建置入口：**LiveStock > Connection Test > Build Windows Connection Test**，使用 GDC Single Peer Build。輸出到 `Builds/ConnectionTest/LiveStockFlow.exe`。
-
-同一個二進位檔使用不同啟動參數，保持四個場景的 build index 完全一致：
-
-```powershell
-# 有桌面管理 UI 的 Server，不啟動 XR。
-& '.\Builds\ConnectionTest\LiveStockFlow.exe' -flow-server
-
-# 無頭盔的桌面 Client，仍由使用者按 CONNECT。
-& '.\Builds\ConnectionTest\LiveStockFlow.exe' -flow-desktop
-
-# VR Client：正常啟動，不加上述參數。
-& '.\Builds\ConnectionTest\LiveStockFlow.exe'
-```
-
-Server 要保留手動按鈕，所以使用有畫面的 Windows 程式，不加 `-nographics`。同一台電腦只讓 VR Client 使用頭盔。
-
-自動驗證另外使用 Development Build，暫時將專案既有 Unity Pipeline 的 Player 診斷烘焙到測試程式，以便讀取獨立 Server 狀態並觸發同一個 StartGame 方法；建置結束還原專案設定。這份診斷測試二進位檔不是正式發佈版。
-
-目前已產生的 EXE 就是這份 Development 診斷測試版。重現自動化建置可在專案根目錄執行 `& './Tools/ConnectionFlow/Build-Test.ps1' -WithDiagnostics`；此工具會等待乾淨的腳本重載，避免 Unity Pipeline 暫時執行組件干擾 Input System 建置，並在完成或失敗時還原診斷與 XR 設定。一般手動測試可直接使用上述 Unity 選單建置。
-
-## 場景與腳本對照
-
-| 項目 | 作用 |
+| Prefab | 內容與修改方式 |
 |---|---|
-| ServerBootstrap／ServerConnectionManager | 開房、Server UI、關房與手動換場 |
-| Menu_VRClient／ConnectionManager | 讀取輸入、連線、保存本機 Rig／UI、退出與返回選單 |
-| Lobby／MainGame | 共用場景，每個 Runner 有自己的場景副本 |
-| FlowSceneMarker | 標記 Lobby 或 MainGame，指定本機 VRSpawnPoint |
-| LobbySessionState Prefab | Server 權威的階段、人數與載入回報，跨場景保留 |
-| FlowLaunchOptions | 獨立程序的 Server／桌面啟動選擇與 XR 分流 |
-| DesktopTestPlayer | PC 測試相機的鍵盤滑鼠自由移動 |
-| Editor/LocalConnectionTestTools | GDC 模式切換、一次啟動兩端、增減測試玩家與測試結束還原 |
+| DesktopTestPlayer.prefab | 本機玩家根物件、DesktopTestPlayer 操作元件、第三人稱相機、AudioListener 與企鵝。可調速度、靈敏度、出生偏移、玩家間距及子相機位置 |
+| DesktopPenguinVisual.prefab | 共用企鵝外觀，內含原始 Pinguin_001.prefab 的巢狀實例，統一調整本機與網路外觀。此資產覆寫停用原模型的 CreatureMover、MovePlayerInput、CharacterController 及動畫 Root Motion，讓玩家根物件控制位置 |
+| NetworkDesktopPenguin.prefab | NetworkObject、NetworkTransform、DesktopNetworkAvatar 與企鵝外觀，由 Server 按玩家身分生成並同步 |
+| ConnectionTestClient.prefab | 完整未連線 Client 選單與 VR 引用，根物件在資產中保持停用，工具設定端別後啟用 |
+| LobbySessionState.prefab | 人數、載入回報、階段及 NetworkDesktopPenguin 的 Inspector 引用 |
 
-沒有修改 SessionLauncher.cs、SessionPanel.cs 或 GDC_METAVERSE 插件原始碼。新的等待狀態顯示整合在 ConnectionManager 的 SessionCanvas，沒有另建不必要的 UI 框架。
+ConnectionManager 的 Desktop Player Prefab 欄位指向專屬玩家資產，每次建立 Desktop Client 都會實例化該資產。Server 按發送 RPC 的 PlayerRef 生成網路企鵝，玩家離開後移除。模型、相機與玩家控制元件都保存在 Prefab 中。
 
-## 結果與限制
+桌面移動維持自由飛行，方便檢查場景。位姿以每秒 20 次送至 Server，再透過 NetworkTransform 同步。這是目前連線測試用的移動方式。
 
-- [完整測試結果與報告連結](VR_Lobby_Test_Results.md)：線上驗收 15/15、載入邊界 4/4、滑鼠點擊及獨立 Server＋Editor Client 跨程序測試通過。
-- 新增 PC 操作 12/12 與獨立 Server＋兩個 PC Client 的 10/10 驗收通過，兩位 PC 均可在換場後繼續操作。
-- Windows 建置成功，0 errors、192 warnings；警告主要來自既有 Sentis shader 與 Meta 套件，未以此推論實體 VR 已驗收。
-- 頭盔追蹤、控制器射線及遠端角色同步，各自獨立驗收；本次沒有實作遠端角色同步。
+工具選單與生命週期位於 `Editor/LocalConnectionTestTools.cs`。F2 與輸入路由位於 `ConnectionTestViews.cs`。連線流程位於 `ConnectionManager.cs`，Server 與企鵝生成同步位於 `ServerConnectionManager.cs`、`LobbySessionState.cs`。
 
-若遇到問題，請提供 Server 狀態、Players／Loaded、客戶端狀態，以及 Console 第一個紅色錯誤及堆疊。完整驗收工具位於 `Tools/ConnectionFlow/`，不在 Assets，不會自動成為遊戲腳本。
+## 驗收記錄
+
+新流程的 14 項自動驗收全部通過，記錄位於 [Connection_Test_Independent_Report.json](Connection_Test_Independent_Report.json)。先前 VR_Lobby 報告保留為改版前的歷史結果。Windows 建置完成狀態以 [建置報告](VR_Lobby_Build_Report.json) 為準。
+
+獨立 Windows Server 與兩個 Desktop Client 的 11 項驗收通過，詳見 [跨程序報告](VR_Lobby_PC_Multiplayer_Report.json)。Server 單獨啟動、未連線 Menu 與關閉 Client 的三項驗證詳見 [獨立入口報告](Connection_Test_Server_Entry_Report.json)。最新 Windows 建置為 0 errors、189 warnings。
+
+[兩位企鵝的 Editor 實測畫面](ConnectionFlowEvidence/penguin_peers.png)
+
+VR 與 Desktop 混合同步已加入現有羊模型的頭手 IK，無頭盔時的 Context Menu 連線步驟與驗收請見 [VR 混合連線說明](VR_Mixed_Connection_Guide.md)。
