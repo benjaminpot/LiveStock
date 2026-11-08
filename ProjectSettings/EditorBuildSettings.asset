@@ -6,12 +6,24 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/_flow test/Menu_VRClient.unity
+    guid: 3ef8eec1048bdb94c82d98cff2a6b02b
+  - enabled: 1
+    path: Assets/_Project/Scenes/_flow test/ServerBootstrap.unity
+    guid: 923fd1e66d5f0994388620f65910347a
+  - enabled: 1
+    path: Assets/_Project/Scenes/_flow test/Lobby.unity
+    guid: c436931981d910843b3df94f66403caf
+  - enabled: 1
+    path: Assets/_Project/Scenes/_flow test/MainGame.unity
+    guid: 57876576fd74d5047857e5731c264978
+  - enabled: 0
     path: Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity
     guid: 978e7046e1dd1ee439071a7056fe34a0
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/_ALPHA_DEMO/Lobby.unity
     guid: f6b915e10d74b354eb1bf7a935c987f2
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity
     guid: d2c488a17d5b04540bda9e02be806ce5
   - enabled: 0

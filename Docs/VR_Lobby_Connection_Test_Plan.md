@@ -1,14 +1,14 @@
 # VR Menu → Lobby → MainGame 測試計畫
 
-日期：2026-11-08。狀態：四項設計選擇已確認，實作計畫定案；尚未開始功能實作或執行測試。
+日期：2026-11-08。狀態：本次範圍的實作與桌面驗收已完成。Multi-Peer 線上驗收 15 項、載入期間離線等 4 項邊界檢查、滑鼠操作、Windows 建置及獨立 Server＋Editor Client 跨程序驗證皆通過。實體頭盔未驗證。完整結果見 [測試結果](VR_Lobby_Test_Results.md)。
 
 ## 目標與分工
 
 Server 先建立 Fusion 房間並進入 Lobby；VR 從現有 LogInMenu 加入；Server 顯示玩家人數，操作者手動按 Start Game，所有已連線玩家留在同一房間並進入 MainGame。
 
 - Codex：建立必要場景物件、Prefab、腳本、Inspector 引用及按鈕事件，整理 Build 場景設定與操作說明。程式使用英文 XML 文件、註解和 Inspector 提示。
-- 使用者：執行 Unity 編譯檢查、Play Mode、VR 操作、連線測試與 Build，回報結果及 Console 錯誤。
-- Codex 可在 Edit Mode 查看物件、引用、事件與儲存結果；不主動進入 Play Mode、啟動網路測試或 Build。
+- 使用者原先保留手動測試；後續已明確授權 Codex 接續完成檢查、Play Mode、連線測試與 Build。Codex 依此執行並保存報告。
+- 實體頭盔畫面與控制器操作，無法以桌面測試代替，仍由持有裝置的操作者驗收。
 - 不修改或重新依賴 SessionLauncher.cs、SessionPanel.cs，不改動 GDC_METAVERSE 插件原始碼。
 - 按階段交付，每階段提供「開哪個場景、按哪個按鈕、預期顯示什麼」；前一階段失敗先修正，不把問題帶到下一階段。
 
@@ -36,7 +36,7 @@ Editor 測試入口載入 ServerBootstrap 與 VR Menu，開房時保留尚未加
 
 共用場景從現有 Server／VRClient 版本比對後建立；先保留原本四份場景作為回復來源，不直接刪除。第一版的測試 Build 清單使用相同順序及 index，ServerBootstrap 與 Menu_VRClient 以啟動入口區分，不使用重新排序的角色專屬清單。
 
-## 目前檔案狀態（本次唯讀檢查）
+## 實作前檔案狀態（歷史基準）
 
 `Assets/_Project/Scenes/_flow test/` 已有：
 
@@ -79,6 +79,15 @@ Editor 測試入口載入 ServerBootstrap 與 VR Menu，開房時保留尚未加
 
 ## 階段 1：場景與設定整理
 
+交付狀態：已完成物件／設定整理與 Edit Mode 結構檢查。下列為第一階段當時的交付紀錄；後續功能和操作以 `Docs/VR_Lobby_Test_Guide.md` 為準。
+
+- 新增 ServerBootstrap，包含空的 ServerConnectionManager 掛載物件、桌面 Canvas、停用的 Start Game、獨立桌面相機與 EventSystem；尚未掛上 Server 開房腳本。
+- 共用 Lobby 由 Lobby_VRClient 複製，共用 MainGame 由 MainGame_VRClient 複製；原四份角色場景未修改，已比對 SHA-256。
+- 共用場景各有 VRSpawnPoint 初始標記，位置尚待使用者場景／頭盔驗收；場景預覽相機及 AudioListener 停用，避免未來與保留的 VR Rig 重複。
+- Menu_VRClient 的 ConnectionManager 已保存正確共用 Lobby 路徑，四個 UI 引用完整，舊 Session 元件停用。
+- Build 清單啟用順序：Menu_VRClient、ServerBootstrap、Lobby、MainGame；舊項目保留但停用。未發現自訂 Build Profile；原清單保存於 `Docs/VR_Lobby_Phase1_PreviousBuildScenes.json`。
+- GDC Peer Mode 保持 Single，沒有開始多人測試。第二階段的 Editor 測試入口才負責切換及恢復模式。
+
 Codex 工作：
 
 1. 比對既有兩端場景，建立共用 Lobby／MainGame，保留原版本與現有未完成 UI。
@@ -92,6 +101,8 @@ Codex 工作：
 使用者檢查：等 Unity 編譯，確認 Console 無紅色錯誤、可開啟入口場景，現有 VR Menu 可見。
 
 ## 階段 2：Server 開 Lobby，VR 從 Menu 加入
+
+交付狀態：已實作；真實 Photon Server／Client 連線、空白房名、重複點擊與不存在房間驗收通過。
 
 Codex 工作：
 
@@ -110,6 +121,8 @@ Codex 工作：
 
 ## 階段 3：人數同步與手動 Start Game
 
+交付狀態：已實作；零人不可開始、延遲玩家阻擋開始、人數加入／離開及桌面按鈕驗收通過。
+
 Codex 工作：
 
 1. 新增最小 LobbySessionState 網路狀態，保存階段與玩家數，權威在 Server。
@@ -123,6 +136,8 @@ Codex 工作：
 使用者測試 T5：玩家離開後人數下降；Server 不會被計入，也不會自動開始。
 
 ## 階段 4：Server 帶所有人進入 MainGame
+
+交付狀態：已實作；三個 Runner（Server＋兩位 Client）同步到 MainGame，網路狀態 ID 保持相同，重複開始不重複生成；晚加入 GameClosed、關服斷線與返回選單驗收通過。
 
 Codex 工作：
 
@@ -141,6 +156,8 @@ Codex 工作：
 
 ## 階段 5：第二位測試玩家與獨立程序
 
+交付狀態：第二位無 VR 測試玩家已實作並驗證；Windows 建置成功，獨立 Server＋Editor Single Client 已驗證 Lobby、MainGame、權威分工及返回選單。實體頭盔測試仍待使用者執行。
+
 Codex 工作：
 
 1. 提供 Editor 專用 Add Test Client／Leave Test Client，第二位不啟動 VR、不搶相機／AudioListener。
@@ -158,15 +175,16 @@ Codex 工作：
 
 ## 本次預計交付檔案與物件
 
-以下名稱為實作預定，若功能可合理合併則減少檔案，不建立額外框架。
+以下為最終實作對照；等待室 UI 與 Rig 保存合併到 ConnectionManager，減少額外腳本。
 
 | 項目 | 變更 |
 |---|---|
 | ConnectionManager.cs | 修改現有腳本，處理加入 Lobby、UI 狀態、退出及重試 |
 | ServerConnectionManager.cs | 新增 Server 開房、玩家集合、手動開始、關房及清理 |
 | LobbySessionState.cs＋網路 Prefab | 新增 Server 權威的玩家數、階段及載入回報 |
-| LobbyPanel.cs | 新增等待室狀態顯示；明確綁定所屬 Runner |
-| LocalVRRigLifecycle.cs | 必要時新增本機 Rig 跨場景保留／出生點設定，不傳送網路姿態 |
+| ConnectionManager 的 SessionCanvas | 等待室狀態顯示；明確綁定所屬 Runner，未另建 LobbyPanel.cs |
+| ConnectionManager／FlowSceneMarker | 本機 Rig 跨場景保留與出生點設定，不傳送網路姿態，未另建 LocalVRRigLifecycle.cs |
+| FlowLaunchOptions.cs | Server／桌面／VR 啟動選擇與 XR 啟動分流 |
 | Editor/LocalConnectionTestTools.cs | 新增一次啟動兩端、增減無 VR 測試玩家、結束與恢復測試設定 |
 | ServerBootstrap／Lobby／MainGame | 新增場景與必要 UI、狀態 Prefab、出生點 |
 | Menu_VRClient | 更新引用及事件，保留現有 VR 互動設定 |

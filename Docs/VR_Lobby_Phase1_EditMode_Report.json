@@ -1,0 +1,118 @@
+{
+  "phase": 1,
+  "editModeOnly": true,
+  "scenes": [
+    {
+      "scene": "ServerBootstrap",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "activeGameplay": [],
+      "spawn": false,
+      "vrRigs": 0,
+      "uiReferences": null,
+      "clientLobby": null,
+      "startButton": {
+        "enabled": false,
+        "listeners": 0
+      }
+    },
+    {
+      "scene": "Lobby",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "activeGameplay": [],
+      "spawn": true,
+      "vrRigs": 0,
+      "uiReferences": null,
+      "clientLobby": null,
+      "startButton": null
+    },
+    {
+      "scene": "MainGame",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "activeGameplay": [],
+      "spawn": true,
+      "vrRigs": 0,
+      "uiReferences": null,
+      "clientLobby": null,
+      "startButton": null
+    },
+    {
+      "scene": "Menu_VRClient",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "activeGameplay": [],
+      "spawn": false,
+      "vrRigs": 1,
+      "uiReferences": [
+        {
+          "name": "roomNameInput",
+          "assigned": true
+        },
+        {
+          "name": "regionInput",
+          "assigned": true
+        },
+        {
+          "name": "connectButton",
+          "assigned": true
+        },
+        {
+          "name": "statusText",
+          "assigned": true
+        }
+      ],
+      "clientLobby": "Assets/_Project/Scenes/_flow test/Lobby.unity",
+      "startButton": null
+    }
+  ],
+  "buildScenes": [
+    {
+      "path": "Assets/_Project/Scenes/_flow test/Menu_VRClient.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_Project/Scenes/_flow test/ServerBootstrap.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_Project/Scenes/_flow test/Lobby.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_Project/Scenes/_flow test/MainGame.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity",
+      "enabled": false
+    },
+    {
+      "path": "Assets/_Project/Scenes/_ALPHA_DEMO/Lobby.unity",
+      "enabled": false
+    },
+    {
+      "path": "Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity",
+      "enabled": false
+    },
+    {
+      "path": "Assets/_Project/Scenes/Farm_Multiplayer.unity",
+      "enabled": false
+    },
+    {
+      "path": "Assets/_Project/Scenes/test Network.unity",
+      "enabled": false
+    },
+    {
+      "path": "Assets/_Project/Scenes/SampleScene.unity",
+      "enabled": false
+    }
+  ],
+  "peerMode": "Single",
+  "activeScene": "Assets/_Project/Scenes/_flow test/Menu_VRClient.unity"
+}

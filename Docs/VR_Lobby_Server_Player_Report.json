@@ -1,0 +1,11 @@
+﻿{
+    "status":  "All connected players reached MainGame.",
+    "phase":  "InMainGame",
+    "players":  0,
+    "loaded":  0,
+    "canStart":  false,
+    "xrAuto":  false,
+    "xrLoader":  null,
+    "activeRigs":  0,
+    "frame":  11493
+}

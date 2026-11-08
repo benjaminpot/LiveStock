@@ -1,0 +1,150 @@
+{
+  "scenes": [
+    {
+      "name": "Menu_VRClient",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "vrRigs": 2,
+      "activeRigs": 1,
+      "references": [
+        {
+          "name": "roomNameInput",
+          "assigned": true
+        },
+        {
+          "name": "regionInput",
+          "assigned": true
+        },
+        {
+          "name": "connectButton",
+          "assigned": true
+        },
+        {
+          "name": "statusText",
+          "assigned": true
+        },
+        {
+          "name": "localVRRig",
+          "assigned": true
+        },
+        {
+          "name": "vrEventSystem",
+          "assigned": true
+        },
+        {
+          "name": "menuCanvas",
+          "assigned": true
+        },
+        {
+          "name": "sessionCanvas",
+          "assigned": true
+        },
+        {
+          "name": "sessionStatusText",
+          "assigned": true
+        },
+        {
+          "name": "desktopCamera",
+          "assigned": true
+        }
+      ],
+      "serverReferences": null,
+      "buttons": [
+        {
+          "name": "ConnectButton",
+          "methods": [
+            "Connect"
+          ]
+        },
+        {
+          "name": "ReturnToMenuButton",
+          "methods": [
+            "ReturnToMenu"
+          ]
+        }
+      ],
+      "stage": 0,
+      "spawn": false
+    },
+    {
+      "name": "ServerBootstrap",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "vrRigs": 0,
+      "activeRigs": 0,
+      "references": null,
+      "serverReferences": [
+        {
+          "name": "sessionStatePrefab",
+          "assigned": true
+        },
+        {
+          "name": "roomText",
+          "assigned": true
+        },
+        {
+          "name": "statusText",
+          "assigned": true
+        },
+        {
+          "name": "playerCountText",
+          "assigned": true
+        },
+        {
+          "name": "startGameButton",
+          "assigned": true
+        }
+      ],
+      "buttons": [
+        {
+          "name": "StartGameButton",
+          "methods": [
+            "StartGame"
+          ]
+        }
+      ],
+      "stage": 0,
+      "spawn": false
+    },
+    {
+      "name": "Lobby",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "vrRigs": 0,
+      "activeRigs": 0,
+      "references": null,
+      "serverReferences": null,
+      "buttons": [],
+      "stage": 1,
+      "spawn": true
+    },
+    {
+      "name": "MainGame",
+      "saved": true,
+      "missingScripts": 0,
+      "activeLegacy": 0,
+      "vrRigs": 0,
+      "activeRigs": 0,
+      "references": null,
+      "serverReferences": null,
+      "buttons": [],
+      "stage": 2,
+      "spawn": true
+    }
+  ],
+  "peerMode": "Single",
+  "xrAuto": true,
+  "playMode": false,
+  "runners": 0,
+  "diagnosticConfigPresent": false,
+  "activeScene": "Assets/_Project/Scenes/_flow test/Menu_VRClient.unity",
+  "buildScenes": [
+    "Assets/_Project/Scenes/_flow test/Menu_VRClient.unity",
+    "Assets/_Project/Scenes/_flow test/ServerBootstrap.unity",
+    "Assets/_Project/Scenes/_flow test/Lobby.unity",
+    "Assets/_Project/Scenes/_flow test/MainGame.unity"
+  ]
+}

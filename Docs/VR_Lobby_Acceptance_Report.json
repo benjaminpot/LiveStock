@@ -1,0 +1,195 @@
+[
+  {
+    "test": "Player loop advances",
+    "pass": true,
+    "evidence": {
+      "before": 123,
+      "after": 144
+    },
+    "utc": "2026-11-07T22:03:44.2145177Z"
+  },
+  {
+    "test": "T4 Server alone cannot start",
+    "pass": true,
+    "evidence": {
+      "frame": 144,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 0,
+      "loaded": 0,
+      "canStart": false,
+      "clientConnected": false,
+      "clientStatus": "Ready to connect.",
+      "clientStage": 0
+    },
+    "utc": "2026-11-07T22:03:44.2374570Z"
+  },
+  {
+    "test": "T3 Empty room is rejected locally",
+    "pass": true,
+    "evidence": "Please enter a room name.",
+    "utc": "2026-11-07T22:03:44.2542843Z"
+  },
+  {
+    "test": "T1 Menu button joins real online Lobby",
+    "pass": true,
+    "evidence": {
+      "frame": 306,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 1,
+      "loaded": 1,
+      "canStart": true,
+      "clientConnected": true,
+      "clientStatus": "Lobby | Players: 1 | Loaded: 1/1\nWaiting for the server to start.",
+      "clientStage": 1
+    },
+    "utc": "2026-11-07T22:03:45.9033899Z"
+  },
+  {
+    "test": "T3 Repeated Connect creates one client Runner",
+    "pass": true,
+    "evidence": {
+      "frame": 306,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 1,
+      "loaded": 1,
+      "canStart": true,
+      "clientConnected": true,
+      "clientStatus": "Lobby | Players: 1 | Loaded: 1/1\nWaiting for the server to start.",
+      "clientStage": 1
+    },
+    "utc": "2026-11-07T22:03:45.9053922Z"
+  },
+  {
+    "test": "T10 Loading client blocks Start Game",
+    "pass": true,
+    "evidence": {
+      "frame": 452,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 2,
+      "loaded": 1,
+      "canStart": false,
+      "clientConnected": true,
+      "clientStatus": "Lobby | Players: 1 | Loaded: 1/1\nWaiting for the server to start.",
+      "clientStage": 1
+    },
+    "utc": "2026-11-07T22:03:47.0959211Z"
+  },
+  {
+    "test": "T9 Two real players ready",
+    "pass": true,
+    "evidence": {
+      "frame": 1144,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 2,
+      "loaded": 2,
+      "canStart": true,
+      "clientConnected": true,
+      "clientStatus": "Lobby | Players: 2 | Loaded: 2/2\nWaiting for the server to start.",
+      "clientStage": 1
+    },
+    "utc": "2026-11-07T22:03:52.3387012Z"
+  },
+  {
+    "test": "T5 Player departure updates count",
+    "pass": true,
+    "evidence": {
+      "frame": 1199,
+      "serverRunning": true,
+      "phase": "Lobby",
+      "players": 1,
+      "loaded": 1,
+      "canStart": true,
+      "clientConnected": true,
+      "clientStatus": "Lobby | Players: 1 | Loaded: 1/1\nWaiting for the server to start.",
+      "clientStage": 1
+    },
+    "utc": "2026-11-07T22:03:52.6943662Z"
+  },
+  {
+    "test": "T7 Start closes room and ignores double click",
+    "pass": true,
+    "evidence": {
+      "frame": 2164,
+      "serverRunning": true,
+      "phase": "LoadingMainGame",
+      "players": 2,
+      "loaded": 0,
+      "canStart": false,
+      "clientConnected": true,
+      "clientStatus": "LoadingMainGame | Players: 2 | Loaded: 0/2",
+      "clientStage": 0
+    },
+    "utc": "2026-11-07T22:03:59.3627620Z"
+  },
+  {
+    "test": "T6 All peers reach MainGame in same session",
+    "pass": true,
+    "evidence": {
+      "frame": 2444,
+      "serverRunning": true,
+      "phase": "InMainGame",
+      "players": 2,
+      "loaded": 2,
+      "canStart": false,
+      "clientConnected": true,
+      "clientStatus": "InMainGame | Players: 2 | Loaded: 2/2",
+      "clientStage": 2
+    },
+    "utc": "2026-11-07T22:04:05.4694915Z"
+  },
+  {
+    "test": "T7 Exactly one state per peer",
+    "pass": true,
+    "evidence": {
+      "frame": 2444,
+      "serverRunning": true,
+      "phase": "InMainGame",
+      "players": 2,
+      "loaded": 2,
+      "canStart": false,
+      "clientConnected": true,
+      "clientStatus": "InMainGame | Players: 2 | Loaded: 2/2",
+      "clientStage": 2
+    },
+    "utc": "2026-11-07T22:04:05.4720169Z"
+  },
+  {
+    "test": "T12 Late join is rejected",
+    "pass": true,
+    "evidence": "Connection failed: GameClosed",
+    "utc": "2026-11-07T22:04:06.3834955Z"
+  },
+  {
+    "test": "T8 Server shutdown disconnects client",
+    "pass": true,
+    "evidence": {
+      "frame": 2554,
+      "serverRunning": false,
+      "phase": "none",
+      "players": -1,
+      "loaded": -1,
+      "canStart": false,
+      "clientConnected": false,
+      "clientStatus": "Disconnected: DisconnectedByPluginLogic",
+      "clientStage": 0
+    },
+    "utc": "2026-11-07T22:04:07.2198322Z"
+  },
+  {
+    "test": "Return to Menu restores current menu",
+    "pass": true,
+    "evidence": "Ready to connect.",
+    "utc": "2026-11-07T22:04:07.2258763Z"
+  },
+  {
+    "test": "T2 Missing room fails without creating a room",
+    "pass": true,
+    "evidence": "Connection failed: GameNotFound",
+    "utc": "2026-11-07T22:04:07.7973827Z"
+  }
+]

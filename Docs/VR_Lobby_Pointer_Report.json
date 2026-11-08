@@ -1,0 +1,10 @@
+{
+  "input": "simulate_pointer click on CONNECT and Server Start Game",
+  "connected": true,
+  "phase": "InMainGame",
+  "players": 1,
+  "loaded": 1,
+  "clientStage": 2,
+  "serverStage": 2,
+  "frame": 20739
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "path": "Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity",
+    "enabled": true
+  },
+  {
+    "path": "Assets/_Project/Scenes/_ALPHA_DEMO/Lobby.unity",
+    "enabled": true
+  },
+  {
+    "path": "Assets/_Project/Scenes/_ALPHA_DEMO/MainGame.unity",
+    "enabled": true
+  },
+  {
+    "path": "Assets/_Project/Scenes/Farm_Multiplayer.unity",
+    "enabled": false
+  },
+  {
+    "path": "Assets/_Project/Scenes/test Network.unity",
+    "enabled": false
+  },
+  {
+    "path": "Assets/_Project/Scenes/SampleScene.unity",
+    "enabled": false
+  }
+]
