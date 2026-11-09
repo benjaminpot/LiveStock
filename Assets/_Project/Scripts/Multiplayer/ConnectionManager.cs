@@ -51,7 +51,8 @@ public class ConnectionManager : MonoBehaviour
     readonly Dictionary<UnityEngine.Behaviour, bool> viewStates = new();
     Vector3 menuCameraPosition;
     Quaternion menuCameraRotation;
-    public NetworkRunner Runner { get; private set; }
+    NetworkSessionController session;
+    public NetworkRunner Runner => session != null ? session.Runner : null;
     public bool IsBusy { get; private set; }
     public bool IsConnected => Runner != null && Runner.IsRunning && Runner.IsClient && Runner.IsConnectedToServer;
     public string Status { get; private set; } = "Ready to connect.";
@@ -206,50 +207,28 @@ public class ConnectionManager : MonoBehaviour
         int index = SceneUtility.GetBuildIndexByScenePath(networkScenePath);
         if (index < 0) { SetStatus("Enable the Lobby scene in the build Scene List."); return false; }
         IsBusy = true;
-        GameObject go = null;
+        NetworkSessionController connecting = null;
         try
         {
             SetStatus($"Connecting to {room}...");
-            go = new GameObject(name + " Runner");
-            DontDestroyOnLoad(go);
-            Runner = go.AddComponent<NetworkRunner>();
-            go.AddComponent<RunnerEnableVisibility>();
-            Runner.ProvideInput = false; // Authenticated session RPCs carry desktop and VR poses.
-            var manager = go.AddComponent<NetworkSceneManagerDefault>();
-            manager.IsSceneTakeOverEnabled = false;
-            var events = go.AddComponent<NetworkEvents>();
-            events.OnDisconnectedFromServer ??= new NetworkEvents.DisconnectFromServerEvent();
-            events.OnDisconnectedFromServer.AddListener((runner, reason) =>
+            connecting = NetworkSessionController.Create(name + " Runner");
+            session = connecting;
+            connecting.BindClient(this);
+            connecting.Stopped += (stopped, reason) =>
             {
-                if (Runner != runner) return;
-                SetStatus("Disconnected: " + reason);
-                _ = runner.Shutdown();
-            });
-            events.OnShutdown ??= new NetworkEvents.ShutdownEvent();
-            events.OnShutdown.AddListener((runner, reason) =>
-            {
-                if (Runner == runner)
+                if (session == stopped)
                 {
-                    Runner = null;
+                    session = null;
                     SetStatus("Disconnected: " + reason);
                 }
-                Destroy(runner.gameObject);
-            });
-            Runner.AddCallbacks(events);
-            var settings = PhotonAppSettings.Global.AppSettings.GetCopy();
-            if (!string.IsNullOrEmpty(region)) settings.FixedRegion = region;
-            var scene = new NetworkSceneInfo();
-            scene.AddSceneRef(SceneRef.FromIndex(index), LoadSceneMode.Single);
-            var result = await Runner.StartGame(new StartGameArgs
-            {
-                GameMode = GameMode.Client, SessionName = room, CustomPhotonAppSettings = settings,
-                EnableClientSessionCreation = false, SceneManager = manager, Scene = scene
-            });
+            };
+            var result = await connecting.StartAsync(GameMode.Client, room, region, index);
             if (!result.Ok || !IsConnected)
             {
+                await connecting.ShutdownAsync();
                 SetStatus("Connection failed: " + result.ShutdownReason);
-                Runner = null;
-                if (go != null) Destroy(go);
+                if (session == connecting) session = null;
+                if (connecting != null) Destroy(connecting.gameObject);
                 return false;
             }
             // Only the visible VR/desktop operator client renders its copy of the world.
@@ -259,11 +238,11 @@ public class ConnectionManager : MonoBehaviour
         }
         catch (Exception exception)
         {
-            SetStatus("Connection failed: " + exception.Message);
             Debug.LogException(exception, this);
-            var failed = Runner; Runner = null;
-            if (failed != null) await failed.Shutdown();
-            if (go != null) Destroy(go);
+            if (connecting != null) await connecting.ShutdownAsync();
+            if (session == connecting) session = null;
+            if (connecting != null) Destroy(connecting.gameObject);
+            SetStatus("Connection failed: " + exception.Message);
             return false;
         }
         finally { IsBusy = false; }
@@ -274,7 +253,7 @@ public class ConnectionManager : MonoBehaviour
     {
         if (IsBusy || Runner == null) return;
         IsBusy = true;
-        try { await Runner.Shutdown(); SetStatus("Disconnected. Return to Menu to join again."); }
+        try { await session.ShutdownAsync(); SetStatus("Disconnected. Return to Menu to join again."); }
         finally { IsBusy = false; }
     }
 

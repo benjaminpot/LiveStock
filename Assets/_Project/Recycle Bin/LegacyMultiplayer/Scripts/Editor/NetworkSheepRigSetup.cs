@@ -7,7 +7,7 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class NetworkSheepRigSetup
 {
-    const string Path = "Assets/Prefabs/Networked/NetworkSK_Sheep_white_final.prefab";
+    const string Path = "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkSK_Sheep_white_final.prefab";
     static NetworkSheepRigSetup() => EditorApplication.delayCall += Setup;
 
     [MenuItem("Tools/LiveStock/Setup Network Sheep Rig")]

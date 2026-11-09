@@ -3363,6 +3363,7 @@ GameObject:
   - component: {fileID: 1675020324719839866}
   - component: {fileID: 1526668204617744768}
   - component: {fileID: 6570794608164051047}
+  - component: {fileID: 8961714670493895856}
   m_Layer: 0
   m_Name: NetworkVRSheep
   m_TagString: Untagged
@@ -3406,6 +3407,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 1526668204617744768}
   - {fileID: 6570794608164051047}
+  - {fileID: 8961714670493895856}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1526668204617744768
 MonoBehaviour:
@@ -3461,6 +3463,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRNetworkAvatar
   visualTargets: {fileID: 8934307508588121839}
+  _TrackingValid:
+    RawValue: 0
+--- !u!114 &8961714670493895856
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5031742066727269652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0595e145c0ec8cd439c4e1d759bc4cc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkTargetPose
+  headTarget: {fileID: 1187720270110767931}
+  leftTarget: {fileID: 4671414948484021735}
+  rightTarget: {fileID: 2889389641998474026}
+  captureOnServer: 0
   _HasPose:
     RawValue: 0
 --- !u!1 &5063770829547129872

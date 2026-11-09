@@ -41,6 +41,7 @@ namespace LiveStock.Multiplayer
         private bool authorityUpdateRotation;
         private bool referencesCached;
         private byte appliedMotion = byte.MaxValue;
+        private NetworkTargetPose targetPose;
         private Renderer[] renderers = System.Array.Empty<Renderer>();
         private Collider[] colliders = System.Array.Empty<Collider>();
         private bool[] rendererDefaults = System.Array.Empty<bool>();
@@ -51,6 +52,9 @@ namespace LiveStock.Multiplayer
 
         public bool IsHitFlashing => hitFlashApplied;
         public bool IsHitAudioPlaying => hitAudioSource != null && hitAudioSource.isPlaying;
+
+        [ContextMenu("Network/Test damage (Server)")]
+        private void TestDamage() => TryApplyDamage(1);
 
         private void Awake()
         {
@@ -189,6 +193,7 @@ namespace LiveStock.Multiplayer
             }
 
             referencesCached = true;
+            targetPose = GetComponent<NetworkTargetPose>();
         }
 
         private void CachePresentation()
@@ -212,7 +217,7 @@ namespace LiveStock.Multiplayer
         private void ApplyRigState()
         {
             if (playback != null)
-                playback.enabled = true;
+                playback.enabled = targetPose == null || Object.HasStateAuthority;
 
             foreach (var rigBuilder in GetComponentsInChildren<RigBuilder>(true))
                 rigBuilder.enabled = true;
@@ -231,7 +236,7 @@ namespace LiveStock.Multiplayer
         private void ApplyMotionState()
         {
             if (Object == null || !Object.IsValid || Object.HasStateAuthority || Health <= 0 ||
-                playback == null || appliedMotion == MotionIndex)
+                playback == null || targetPose != null || appliedMotion == MotionIndex)
                 return;
 
             if (playback.motions == null || MotionIndex >= playback.motions.Count)

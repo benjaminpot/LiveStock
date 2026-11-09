@@ -18,7 +18,8 @@ public sealed class ServerConnectionManager : MonoBehaviour
     [SerializeField] UnityEngine.UI.Button startGameButton;
     [SerializeField] bool startOnPlay = true;
 
-    public NetworkRunner Runner { get; private set; }
+    NetworkSessionController session;
+    public NetworkRunner Runner => session != null ? session.Runner : null;
     public bool IsBusy { get; private set; }
     public string Status { get; private set; } = "Server not started.";
     public LobbySessionState State => LobbySessionState.For(Runner);
@@ -42,35 +43,21 @@ public sealed class ServerConnectionManager : MonoBehaviour
             || string.IsNullOrWhiteSpace(PhotonAppSettings.Global.AppSettings.AppIdFusion))
         { Status = "Check Fusion App ID, room name, Lobby scene and session-state prefab."; return false; }
         IsBusy = true;
-        GameObject go = null;
+        NetworkSessionController starting = null;
         try
         {
             Status = "Opening Lobby...";
-            go = new GameObject("Lobby Server Runner");
-            DontDestroyOnLoad(go);
-            Runner = go.AddComponent<NetworkRunner>();
-            go.AddComponent<RunnerEnableVisibility>();
-            var manager = go.AddComponent<NetworkSceneManagerDefault>();
-            manager.IsSceneTakeOverEnabled = false; // Do not consume the unconnected VR menu's scene.
-            var events = go.AddComponent<NetworkEvents>();
-            events.OnShutdown ??= new NetworkEvents.ShutdownEvent();
-            events.OnShutdown.AddListener((runner, reason) =>
+            starting = NetworkSessionController.Create("Lobby Server Runner");
+            session = starting;
+            starting.Stopped += (stopped, reason) =>
             {
-                Status = "Server stopped: " + reason;
-                if (Runner == runner) Runner = null;
-                Destroy(runner.gameObject);
-            });
-            Runner.AddCallbacks(events);
-            var settings = PhotonAppSettings.Global.AppSettings.GetCopy();
-            if (!string.IsNullOrWhiteSpace(region)) settings.FixedRegion = region.Trim().ToLowerInvariant();
-            var scene = new NetworkSceneInfo();
-            scene.AddSceneRef(SceneRef.FromIndex(lobbyIndex), LoadSceneMode.Single);
-            var result = await Runner.StartGame(new StartGameArgs
-            {
-                GameMode = GameMode.Server, SessionName = roomName.Trim(), PlayerCount = playerLimit,
-                CustomPhotonAppSettings = settings, SceneManager = manager, Scene = scene,
-                IsOpen = true, IsVisible = true
-            });
+                if (session == stopped)
+                {
+                    session = null;
+                    Status = "Server stopped: " + reason;
+                }
+            };
+            var result = await starting.StartAsync(GameMode.Server, roomName, region, lobbyIndex, playerLimit);
             if (!result.Ok) throw new InvalidOperationException(result.ShutdownReason.ToString());
             // Fusion's persistence flag applies on all replicas, not just the server instance.
             await Runner.SpawnAsync(sessionStatePrefab, flags: NetworkSpawnFlags.DontDestroyOnLoad);
@@ -80,11 +67,11 @@ public sealed class ServerConnectionManager : MonoBehaviour
         }
         catch (Exception ex)
         {
-            Status = "Server failed: " + ex.Message;
             Debug.LogException(ex, this);
-            var failed = Runner; Runner = null;
-            if (failed != null) await failed.Shutdown();
-            if (go != null) Destroy(go);
+            if (starting != null) await starting.ShutdownAsync();
+            if (session == starting) session = null;
+            if (starting != null) Destroy(starting.gameObject);
+            Status = "Server failed: " + ex.Message;
             return false;
         }
         finally { IsBusy = false; }
@@ -108,7 +95,7 @@ public sealed class ServerConnectionManager : MonoBehaviour
     {
         if (IsBusy || Runner == null) return;
         IsBusy = true;
-        try { await Runner.Shutdown(); }
+        try { await session.ShutdownAsync(); }
         finally { IsBusy = false; }
     }
 

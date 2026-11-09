@@ -2,6 +2,8 @@
 
 目前工具使用單一動作選單，每個 Client 都從未連線的 Menu 開始。測試入口位於 Unity 上方的 **LiveStock > Connection Test**。
 
+本版的 Network Input、三 target、60 隻 NPC 與教學物件驗收請依 [Fusion 同步與驗收說明](Fusion_Synchronization_Acceptance_Guide.md) 操作。
+
 ## 選單功能
 
 | 選單 | 動作 |
@@ -44,13 +46,13 @@ VR 測試時改用 Open VR Client Menu，再自行選擇是否開 Server、何�
 | DesktopPenguinVisual.prefab | 共用企鵝外觀，內含原始 Pinguin_001.prefab 的巢狀實例，統一調整本機與網路外觀。此資產覆寫停用原模型的 CreatureMover、MovePlayerInput、CharacterController 及動畫 Root Motion，讓玩家根物件控制位置 |
 | NetworkDesktopPenguin.prefab | NetworkObject、NetworkTransform、DesktopNetworkAvatar 與企鵝外觀，由 Server 按玩家身分生成並同步 |
 | ConnectionTestClient.prefab | 完整未連線 Client 選單與 VR 引用，根物件在資產中保持停用，工具設定端別後啟用 |
-| LobbySessionState.prefab | 人數、載入回報、階段及 NetworkDesktopPenguin 的 Inspector 引用 |
+| LobbySessionState.prefab | 人數、載入回報與階段，以及集中生成與 Prefab 綁定的 NetworkWorld |
 
-ConnectionManager 的 Desktop Player Prefab 欄位指向專屬玩家資產，每次建立 Desktop Client 都會實例化該資產。Server 按發送 RPC 的 PlayerRef 生成網路企鵝，玩家離開後移除。模型、相機與玩家控制元件都保存在 Prefab 中。
+ConnectionManager 的 Desktop Player Prefab 欄位指向專屬玩家資產，每次建立 Desktop Client 都會實例化該資產。Server 在載入回報後按 PlayerRef 登記角色並生成網路企鵝，玩家離開後移除。模型、相機與玩家控制元件都保存在 Prefab 中。
 
-桌面移動維持自由飛行，方便檢查場景。位姿以每秒 20 次送至 Server，再透過 NetworkTransform 同步。這是目前連線測試用的移動方式。
+桌面移動維持自由飛行，方便檢查場景。NetworkInputSource 快取本機位姿，依 Fusion tick 輸入傳至 Server，再透過 NetworkTransform 同步。
 
-工具選單與生命週期位於 `Editor/LocalConnectionTestTools.cs`。F2 與輸入路由位於 `ConnectionTestViews.cs`。連線流程位於 `ConnectionManager.cs`，Server 與企鵝生成同步位於 `ServerConnectionManager.cs`、`LobbySessionState.cs`。
+工具選單位於 `Editor/LocalConnectionTestTools.cs`。F2 與本機視角路由位於 `ConnectionTestViews.cs`。ConnectionManager 與 ServerConnectionManager 共用 NetworkSessionController，分身與場景物件生成由 NetworkWorld 管理。
 
 ## 驗收記錄
 

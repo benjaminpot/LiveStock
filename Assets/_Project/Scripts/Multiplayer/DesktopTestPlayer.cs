@@ -10,7 +10,6 @@ public sealed class DesktopTestPlayer : MonoBehaviour
     [SerializeField, Tooltip("Offset from the scene spawn point for the third-person test rig.")] Vector3 spawnOffset = new Vector3(0, 0, 3);
     [SerializeField, Min(0f), Tooltip("Horizontal spacing between connected test players.")] float spawnSpacing = 1.5f;
     ConnectionManager owner;
-    float nextPose;
     public Camera ViewCamera => viewCamera;
     public bool CanControl => owner != null && owner.IsDesktop && owner.ViewSelected && owner.IsConnected
         && !owner.IsBusy && !owner.Runner.IsSceneManagerBusy && owner.State != null
@@ -43,13 +42,6 @@ public sealed class DesktopTestPlayer : MonoBehaviour
                 float speed = keys.leftShiftKey.isPressed || keys.rightShiftKey.isPressed ? moveSpeed * 2f : moveSpeed;
                 transform.position += transform.rotation * Vector3.ClampMagnitude(input, 1f) * speed * Mathf.Min(Time.unscaledDeltaTime, .1f);
             }
-        }
-        // Every connected desktop view reports poses, including views currently deselected by F2.
-        if (owner != null && owner.IsConnected && owner.State != null && !owner.Runner.IsSceneManagerBusy
-            && FlowSceneMarker.For(owner.Runner) != null && Time.unscaledTime >= nextPose)
-        {
-            nextPose = Time.unscaledTime + .05f;
-            owner.State.RPC_DesktopPose(transform.position, transform.rotation);
         }
     }
 }

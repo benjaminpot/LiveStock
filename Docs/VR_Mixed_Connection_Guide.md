@@ -2,6 +2,8 @@
 
 VR 入口直接載入 `Assets/_Project/Scenes/_flow test/Menu_VRClient.unity`。保留該場景的環境、VR Rig 與 World Space LogInMenu，按 Connect 後才建立 Client Runner、加入 Server 的 Lobby。
 
+本輪更新的輸入、三 target 與 NPC 驗收請依 [Fusion 同步與驗收說明](Fusion_Synchronization_Acceptance_Guide.md) 操作。下方保留原有測試入口與前版驗證記錄。
+
 ## 本次回退與修正
 
 - 移除「XR loader 不存在就自動切成預覽」的行為。一般 VR 入口維持 VR 模式。
@@ -40,9 +42,11 @@ VR 入口直接載入 `Assets/_Project/Scenes/_flow test/Menu_VRClient.unity`。
 |---|---|
 | `Editor/LocalConnectionTestTools.cs` | VR 載入 Menu 場景、Desktop 建立 prefab、Server 與測試設定 |
 | `ConnectionManager.cs` | Menu 輸入、Connect、Rig／Menu 保存、F2 相機狀態 |
-| `LobbySessionState.cs` | Server 人數／載入狀態、羊與企鵝生成、姿態接收 |
+| `LobbySessionState.cs` | Server 人數／載入狀態與階段 |
+| `NetworkWorld.cs` | Server 角色登記、生成、輸入接收與離散互動 |
+| `NetworkInputSource.cs` | 每個 Client 的本機姿態快取與 Fusion tick 輸入 |
 | `VRClientPoseSource.cs` | 本機頭手 IK Target 取樣 |
-| `VRNetworkAvatar.cs` | 遠端羊的根節點與頭手姿態 |
+| `VRNetworkAvatar.cs`、`NetworkTargetPose.cs` | 遠端羊的根節點、追蹤狀態與三 target 插值 |
 | `NetworkVRSheep.prefab` | 現有羊模型與 IK 的網路 prefab |
 
 `SessionLauncher.cs`、`SessionPanel.cs`、GDC_METAVERSE 及原有模型未因這次修正變更。

@@ -2,6 +2,7 @@ using Fusion;
 using UnityEngine;
 
 /// <summary>Root-relative IK target poses captured from the local VR sheep rig.</summary>
+[System.Serializable]
 public struct VRTrackedPose : INetworkStruct
 {
     public Vector3 RootPosition, Head, LeftHand, RightHand;
@@ -11,10 +12,11 @@ public struct VRTrackedPose : INetworkStruct
         && RootPosition.sqrMagnitude < 100000000f && Head.sqrMagnitude < 100f
         && LeftHand.sqrMagnitude < 100f && RightHand.sqrMagnitude < 100f;
     static bool Finite(Vector3 value) => float.IsFinite(value.x + value.y + value.z);
-    static bool Finite(Quaternion value) => float.IsFinite(value.x + value.y + value.z + value.w);
+    static bool Finite(Quaternion value) => float.IsFinite(value.x + value.y + value.z + value.w)
+        && value.x * value.x + value.y * value.y + value.z * value.z + value.w * value.w > .000001f;
 }
 
-/// <summary>Publishes this Client's calibrated VR IK targets through its own session state.</summary>
+/// <summary>Provides this Client's calibrated VR IK targets to the Runner's input source.</summary>
 [DefaultExecutionOrder(1000)]
 public sealed class VRClientPoseSource : MonoBehaviour
 {
@@ -23,7 +25,6 @@ public sealed class VRClientPoseSource : MonoBehaviour
     [SerializeField] Transform headAnchor, leftHandAnchor, rightHandAnchor;
     [SerializeField] Transform headTarget, leftHandTarget, rightHandTarget;
     ConnectionManager owner;
-    float nextPose;
     public Transform RigRoot => rigRoot;
     public OVRCameraRig TrackingRig => trackingRig;
     public Transform HeadAnchor => headAnchor;
@@ -60,12 +61,4 @@ public sealed class VRClientPoseSource : MonoBehaviour
         RightRotation = Quaternion.Inverse(rigRoot.rotation) * rightHandTarget.rotation
     };
 
-    void LateUpdate()
-    {
-        if (owner == null || owner.IsDesktop || !owner.IsConnected || !TrackingAvailable || !IsConfigured
-            || owner.State == null || owner.Runner.IsSceneManagerBusy || FlowSceneMarker.For(owner.Runner) == null
-            || owner.State.Phase == LobbySessionState.SessionPhase.LoadingMainGame || Time.unscaledTime < nextPose) return;
-        nextPose = Time.unscaledTime + .05f;
-        owner.State.RPC_VRPose(ReadPose());
-    }
 }

@@ -1,0 +1,9 @@
+{
+  "result": "Succeeded",
+  "totalErrors": 0,
+  "totalWarnings": 190,
+  "size": 373732066,
+  "seconds": 60.261168,
+  "output": "Builds/FusionValidation/LiveStockFusion.exe",
+  "errors": []
+}

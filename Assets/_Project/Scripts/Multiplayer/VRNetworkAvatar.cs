@@ -6,12 +6,26 @@ using UnityEngine;
 public sealed class VRNetworkAvatar : NetworkBehaviour
 {
     [SerializeField] RemoteVRPoseTargets visualTargets;
-    [Networked] public VRTrackedPose Pose { get; set; }
-    [Networked] public NetworkBool HasPose { get; set; }
+    NetworkTargetPose targets;
+    public bool HasPose => targets != null && targets.HasPose;
+    [Networked] public NetworkBool TrackingValid { get; private set; }
+    public VRTrackedPose Pose => new VRTrackedPose
+    {
+        RootPosition = transform.position, RootRotation = transform.rotation,
+        Head = targets.State.Head, LeftHand = targets.State.Left, RightHand = targets.State.Right,
+        HeadRotation = targets.State.HeadRotation, LeftRotation = targets.State.LeftRotation,
+        RightRotation = targets.State.RightRotation
+    };
     public RemoteVRPoseTargets VisualTargets => visualTargets;
+
+    public void SetTrackingValid(bool valid)
+    {
+        if (Object.HasStateAuthority) TrackingValid = valid;
+    }
 
     public override void Spawned()
     {
+        targets = GetComponent<NetworkTargetPose>();
         foreach (var animator in GetComponentsInChildren<Animator>(true))
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         if (Object.InputAuthority == Runner.LocalPlayer)
@@ -23,15 +37,6 @@ public sealed class VRNetworkAvatar : NetworkBehaviour
     {
         if (!Object.HasStateAuthority) return;
         transform.SetPositionAndRotation(pose.RootPosition, pose.RootRotation.normalized);
-        Pose = pose;
-        HasPose = true;
-    }
-
-    public override void Render()
-    {
-        if (!HasPose || visualTargets == null) return;
-        var pose = Pose;
-        visualTargets.ApplyPose(transform, pose.Head, pose.HeadRotation, pose.LeftHand, pose.LeftRotation,
-            pose.RightHand, pose.RightRotation);
+        targets.SetPose(ThreeTargetPose.FromTracked(pose));
     }
 }

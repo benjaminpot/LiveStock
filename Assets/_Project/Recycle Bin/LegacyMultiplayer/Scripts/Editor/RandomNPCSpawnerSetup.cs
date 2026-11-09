@@ -7,7 +7,7 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class RandomNPCSpawnerSetup
 {
-    public const string Path = "Assets/_Project/Prefabs/Multiplayer/RandomNPCSpawner.prefab";
+    public const string Path = "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RandomNPCSpawner.prefab";
 
     static RandomNPCSpawnerSetup() => EditorApplication.delayCall += CreatePrefab;
 
@@ -21,7 +21,7 @@ public static class RandomNPCSpawnerSetup
             var spawner = go.AddComponent<RandomNPCSpawner>();
             spawner.Groups = new[] { new RandomNPCSpawner.NPCGroup
             {
-                Prefab = AssetDatabase.LoadAssetAtPath<NetworkObject>("Assets/Prefabs/Networked/NetworkSK_Sheep_white_final.prefab")
+                Prefab = AssetDatabase.LoadAssetAtPath<NetworkObject>("Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkSK_Sheep_white_final.prefab")
             } };
             PrefabUtility.SaveAsPrefabAsset(go, Path);
             Debug.Log("NPC 生成器 Prefab 已存檔：" + Path);

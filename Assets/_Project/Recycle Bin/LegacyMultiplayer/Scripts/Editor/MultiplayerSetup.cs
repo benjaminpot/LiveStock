@@ -14,7 +14,7 @@ public static class MultiplayerSetup
         if (Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount).Any(i => UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty))
             throw new System.InvalidOperationException("Save your open scenes before setup.");
         System.IO.Directory.CreateDirectory("Assets/_Project/Prefabs/Multiplayer");
-        const string prefabPath = "Assets/_Project/Prefabs/Multiplayer/NetworkPlayer.prefab";
+        const string prefabPath = "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkPlayer.prefab";
         var prefab = AssetDatabase.LoadAssetAtPath<NetworkObject>(prefabPath);
         if (prefab == null)
         {
@@ -49,10 +49,10 @@ public static class MultiplayerSetup
         EditorSceneManager.RestoreSceneManagerSetup(previous);
         Debug.Log("LiveStock Stage 4 setup complete. Open Menu and press Play.");
     }
-    public static void ConfigureRoles(string prefabPath = "Assets/_Project/Prefabs/Multiplayer/NetworkPlayer.prefab")
+    public static void ConfigureRoles(string prefabPath = "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkPlayer.prefab")
     {
         const string source = "Assets/_Project/model/VR_sheep_player.prefab";
-        const string remotePath = "Assets/_Project/Prefabs/Multiplayer/RemoteSheepVisual.prefab";
+        const string remotePath = "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual.prefab";
         var vr = AssetDatabase.LoadAssetAtPath<GameObject>(source);
         if (vr == null) throw new System.InvalidOperationException("Missing VR_sheep_player prefab");
         var remote = PrefabUtility.LoadPrefabContents(source);
