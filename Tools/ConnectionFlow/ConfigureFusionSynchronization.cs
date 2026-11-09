@@ -143,21 +143,19 @@ public static class ConfigureFusionSynchronization
             }
             finally { UnityEngine.Object.DestroyImmediate(go); }
         }
-        const string roomPath = "Assets/_Project/Prefabs/Multiplayer/LobbySessionState.prefab";
-        var root = PrefabUtility.LoadPrefabContents(roomPath);
-        try
+        var scene = EditorSceneManager.OpenScene(NetworkSceneSettings.Current.MainGameScene);
+        var setup = UnityEngine.Object.FindFirstObjectByType<MapNetworkSetup>();
+        var so = new SerializedObject(setup);
+        var array = so.FindProperty("sceneObjects");
+        array.arraySize = 2;
+        for (int i = 0; i < 2; i++)
         {
-            var so = new SerializedObject(root.GetComponent<NetworkWorld>());
-            var array = so.FindProperty("sceneObjects"); array.arraySize = 2;
-            for (int i = 0; i < 2; i++)
-            {
-                array.GetArrayElementAtIndex(i).FindPropertyRelative("Prefab").objectReferenceValue = prefabs[i];
-                array.GetArrayElementAtIndex(i).FindPropertyRelative("Offset").vector3Value = new Vector3(i == 0 ? -1.5f : 1f, .75f, 2f);
-            }
-            so.ApplyModifiedPropertiesWithoutUndo();
-            new NetworkObjectBakerEditTime().Bake(root); PrefabUtility.SaveAsPrefabAsset(root, roomPath);
+            array.GetArrayElementAtIndex(i).FindPropertyRelative("Prefab").objectReferenceValue = prefabs[i];
+            array.GetArrayElementAtIndex(i).FindPropertyRelative("Offset").vector3Value = new Vector3(i == 0 ? -1.5f : 1f, .75f, 2f);
         }
-        finally { PrefabUtility.UnloadPrefabContents(root); }
+        so.ApplyModifiedPropertiesWithoutUndo();
+        PrefabUtility.RecordPrefabInstancePropertyModifications(setup);
+        EditorSceneManager.SaveScene(scene);
         NetworkProjectConfigUtilities.RebuildPrefabTable();
         return new { examples = prefabs.Select(p => AssetDatabase.GetAssetPath(p)).ToArray() };
     }

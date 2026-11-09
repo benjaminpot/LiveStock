@@ -84,8 +84,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkWorld
   desktopAvatarPrefab: {fileID: 788149333441283388, guid: 1b88f62c5f28086449172bb0f64d1ada, type: 3}
   vrAvatarPrefab: {fileID: 1675020324719839866, guid: 817dd7bf8e10714448d6f8a51bf13952, type: 3}
-  sceneObjects:
-  - Prefab: {fileID: 3300721908297290701, guid: df3c5905ccd51a347a6da15b6c8a1cd1, type: 3}
-    Offset: {x: -1.5, y: 0.75, z: 2}
-  - Prefab: {fileID: 9017691266913020363, guid: 61146eff1c934cc4e8cd6c6a3bb45feb, type: 3}
-    Offset: {x: 1, y: 0.75, z: 2}
+  acceptedInputCount: 0

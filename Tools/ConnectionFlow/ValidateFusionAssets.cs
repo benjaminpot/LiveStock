@@ -39,7 +39,7 @@ public static class ValidateFusionAssets
         }).ToArray();
         bool pass = archived.All(a=>a.pass) && prefabs.All(p=>p.missing==0) && scenes.All(s=>s.inactive&&s.missing==0);
         var result = new {pass,archived,prefabs,scenes};
-        File.WriteAllText("Docs/Fusion_Sync_Asset_Report.json",
+        File.WriteAllText("Docs/Fusion_Map_Asset_Report.json",
             Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
         if (!pass) throw new InvalidOperationException("Asset validation failed. Read the report.");
         return result;

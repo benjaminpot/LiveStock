@@ -42,7 +42,7 @@ public static class FusionSyncMixedAcceptance
     static async Task<object> Run(bool vrFirst)
     {
         results.Clear();
-        report = "Docs/Fusion_Sync_" + (vrFirst ? "VRFirst" : "DesktopFirst") + "_Report.json";
+        report = "Docs/Fusion_Map_" + (vrFirst ? "VRFirst" : "DesktopFirst") + "_Report.json";
         await Wait(() => ConnectionManager.Clients.Count == 1, "Initial disconnected Menu");
         ServerConnectionManager server = null;
         ConnectionManager pc = null;
@@ -112,8 +112,8 @@ public static class FusionSyncMixedAcceptance
         await Task.Delay(1000);
         float pcError = Penguins().Max(p => Vector3.Distance(p.transform.position, actor.transform.position));
         Check("PC penguin keeps syncing after VR joins", pcError < .1f && pc.Runner.IsConnectedToServer && vr.Runner.IsConnectedToServer, pcError);
-        server.StartGame();
-        await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.InMainGame && vr.State.Phase == LobbySessionState.SessionPhase.InMainGame && pc.State.Phase == LobbySessionState.SessionPhase.InMainGame, "Shared MainGame");
+        server.LoadMainGame();
+        await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.AwaitingStart && vr.State.Phase == LobbySessionState.SessionPhase.AwaitingStart && pc.State.Phase == LobbySessionState.SessionPhase.AwaitingStart, "Shared MainGame");
         Check("Mixed clients stay connected across MainGame", vr.IsConnected && pc.IsConnected && server.State.LoadedPlayers == 2 && Sheep().Length == 3 && Penguins().Length == 3);
         ConnectionTestViews.Instance.Select(vr);
         vr.ReturnToMenu();

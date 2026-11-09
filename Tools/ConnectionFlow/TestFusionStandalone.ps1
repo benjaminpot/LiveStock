@@ -1,9 +1,9 @@
-param([int]$SampleSeconds = 30)
+param([int]$SampleSeconds = 30, [switch]$UseGraphics)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $executable = Join-Path $projectRoot 'Builds/FusionValidation/LiveStockFusion.exe'
 $runRoot = Join-Path $projectRoot ('.tmp/FusionStandalone-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-$reportPath = Join-Path $projectRoot 'Docs/Fusion_Sync_Standalone_Report.json'
+$reportPath = Join-Path $projectRoot 'Docs/Fusion_Map_Standalone_Report.json'
 New-Item -ItemType Directory -Path $runRoot -Force | Out-Null
 $processes = @{}
 $checks = [Collections.Generic.List[object]]::new()
@@ -43,7 +43,8 @@ function Distance($A, $B) {
 
 try {
     foreach ($role in @('server','desktop','vr-preview')) {
-        $arguments = @('-batchmode','-nographics',('-flow-'+$role),'-logFile',
+        $graphicsOption = if ($UseGraphics) { '-force-d3d11' } else { '-nographics' }
+        $arguments = @('-batchmode',$graphicsOption,('-flow-'+$role),'-logFile',
             (Join-Path $runRoot ($role+'.log')),'-fusion-probe-output',(Join-Path $runRoot ($role+'.json')))
         $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
     }
@@ -55,7 +56,7 @@ try {
     Send-Command 'vr-preview' 'connect'
     Wait-For { (Read-Peer 'server').loaded -eq 2 -and (Read-Peer 'vr-preview').connected } 'VR connection'
     Wait-For { (Read-Peer 'server').vr.Count -eq 1 -and (Read-Peer 'desktop').vr.Count -eq 1 -and (Read-Peer 'vr-preview').desktop.Count -eq 1 } 'mixed replicas'
-    Check 'Both roles replicate across three processes' ((Read-Peer 'server').canStart -and (Read-Peer 'server').players -eq 2)
+    Check 'Both roles replicate across three processes' (!(Read-Peer 'server').canStart -and (Read-Peer 'server').players -eq 2)
     $beforeVR = (Read-Peer 'vr-preview').local
     $beforePC = (Read-Peer 'desktop').local
     Send-Command 'desktop' 'move'
@@ -76,10 +77,13 @@ try {
         $targetError = [Math]::Max($targetError,(Distance $pc.vr[0].$target $vr.local.$target))
     }
     Check 'All three VR targets reach Server and Desktop' ($targetError -lt .01) $targetError
+    Send-Command 'server' 'load'
+    Wait-For { (Read-Peer 'server').canStart -and (Read-Peer 'desktop').phase -eq 'AwaitingStart' -and (Read-Peer 'vr-preview').phase -eq 'AwaitingStart' } 'map readiness'
+    Check 'Loaded map waits with zero NPCs' ((Read-Peer 'server').npcs -eq 0 -and (Read-Peer 'desktop').npcs -eq 0 -and (Read-Peer 'vr-preview').npcs -eq 0)
     Send-Command 'server' 'start'
     Wait-For {
         $server = Read-Peer 'server'; $pc = Read-Peer 'desktop'; $vr = Read-Peer 'vr-preview'
-        $server.phase -eq 'InMainGame' -and $pc.phase -eq 'InMainGame' -and $vr.phase -eq 'InMainGame' -and
+        $server.phase -eq 'Running' -and $pc.phase -eq 'Running' -and $vr.phase -eq 'Running' -and
             $server.npcs -eq 60 -and $pc.npcs -eq 60 -and $vr.npcs -eq 60
     } 'MainGame and 60 NPCs' 150
     Check 'All processes enter MainGame and receive 60 NPCs' $true
@@ -102,7 +106,7 @@ try {
     Check 'Independent processes remain connected with stable NPC count' ($minimumNPCs -eq 60) @{
         seconds=$timer.Elapsed.TotalSeconds; minimumNPCs=$minimumNPCs
         observedServerTicksPerSecond=($end.tick-$start.tick)/$timer.Elapsed.TotalSeconds
-        peers=$measurements; scope='Three headless Development Players on one Windows computer. Frame intervals include the 60 FPS cap and startup. GPU and HMD are unmeasured.'
+        peers=$measurements; scope=('Three Development Players on one Windows computer. Graphics enabled = '+[bool]$UseGraphics+'. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.')
     }
     Check 'Server continues accepting inputs during NPC simulation' ($end.acceptedInputs -gt $start.acceptedInputs)
     Send-Command 'server' 'stop'

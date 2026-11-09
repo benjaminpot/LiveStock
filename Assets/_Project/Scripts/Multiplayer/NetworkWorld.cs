@@ -19,8 +19,6 @@ public sealed class NetworkWorld : NetworkBehaviour
         [Tooltip("Offset relative to the MainGame player spawn point.")]
         public Vector3 Offset;
     }
-    [SerializeField, Tooltip("Server-spawned examples or game objects created when MainGame is ready.")]
-    SceneSpawn[] sceneObjects = System.Array.Empty<SceneSpawn>();
     readonly List<NetworkObject> spawnedSceneObjects = new();
 
     sealed class PlayerEntry
@@ -100,14 +98,10 @@ public sealed class NetworkWorld : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         if (!Object.HasStateAuthority) return;
-        if (!npcsStarted && state.Phase == LobbySessionState.SessionPhase.InMainGame && !Runner.IsSceneManagerBusy)
+        if (!npcsStarted && state.Phase == LobbySessionState.SessionPhase.Running && !Runner.IsSceneManagerBusy)
         {
             npcsStarted = true;
-            LiveStock.Multiplayer.RandomNPCSpawner.SpawnFor(Runner);
-            var spawn = FlowSceneMarker.For(Runner)?.VRSpawnPoint;
-            if (spawn != null)
-                foreach (var item in sceneObjects)
-                    if (item.Prefab != null) SpawnObject(item.Prefab, spawn.position + spawn.rotation * item.Offset, spawn.rotation);
+            FlowSceneMarker.For(Runner)?.GetComponent<MapNetworkSetup>()?.StartGameplay(this);
         }
         departed.Clear();
         foreach (var pair in players)
@@ -170,7 +164,7 @@ public sealed class NetworkWorld : NetworkBehaviour
     /// <summary>Creates a registered Fusion prefab on this Server and tracks its scene lifetime.</summary>
     public NetworkObject SpawnObject(NetworkObject prefab, Vector3 position, Quaternion rotation)
     {
-        if (!Object.HasStateAuthority || state.Phase != LobbySessionState.SessionPhase.InMainGame || Runner.IsSceneManagerBusy) return null;
+        if (!Object.HasStateAuthority || state.Phase != LobbySessionState.SessionPhase.Running || Runner.IsSceneManagerBusy) return null;
         var obj = Runner.Spawn(prefab, position, rotation);
         if (obj != null) spawnedSceneObjects.Add(obj);
         return obj;
@@ -185,7 +179,7 @@ public sealed class NetworkWorld : NetworkBehaviour
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     void RPC_RequestToggle(NetworkId targetId, RpcInfo info = default)
     {
-        if (state.Phase != LobbySessionState.SessionPhase.InMainGame || !players.TryGetValue(info.Source, out var player)
+        if (state.Phase != LobbySessionState.SessionPhase.Running || !players.TryGetValue(info.Source, out var player)
             || player.Stage != 2 || player.Avatar == null || !Runner.TryFindObject(targetId, out var target)
             || Vector3.Distance(player.Avatar.transform.position, target.transform.position) > 3f) return;
         target.GetComponent<NetworkSwitch>()?.ToggleAsServer();

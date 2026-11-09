@@ -1,0 +1,85 @@
+[
+  {
+    "test": "Three independent Players start with zero Lobby NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop joins the independent Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both roles replicate across three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-selected roots reach the other Client",
+    "pass": true,
+    "evidence": 0.00039064884185791016
+  },
+  {
+    "test": "All three VR targets reach Server and Desktop",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "Loaded map waits with zero NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "All processes enter MainGame and receive 60 NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Independent processes remain connected with stable NPC count",
+    "pass": true,
+    "evidence": {
+      "peers": [
+        {
+          "role": "server",
+          "npcs": 60,
+          "frame": 2518,
+          "averageFrameIntervalMs": 17.097354888916016,
+          "allocatedBytes": 155113950
+        },
+        {
+          "role": "desktop",
+          "npcs": 60,
+          "frame": 2524,
+          "averageFrameIntervalMs": 17.048114776611328,
+          "allocatedBytes": 165831745
+        },
+        {
+          "role": "vr-preview",
+          "npcs": 60,
+          "frame": 2495,
+          "averageFrameIntervalMs": 17.27305793762207,
+          "allocatedBytes": 165823476
+        }
+      ],
+      "observedServerTicksPerSecond": 64.29472861537255,
+      "seconds": 30.390463,
+      "minimumNPCs": 60,
+      "scope": "Three Development Players on one Windows computer. Graphics enabled = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured."
+    }
+  },
+  {
+    "test": "Server continues accepting inputs during NPC simulation",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Stopping Server disconnects both Clients and removes NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Player logs contain no detected runtime exceptions or render-pass errors",
+    "pass": true,
+    "evidence": []
+  }
+]

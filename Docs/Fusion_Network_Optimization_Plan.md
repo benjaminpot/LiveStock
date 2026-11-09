@@ -36,7 +36,7 @@ P1 的歷史結果位於 [P1 驗證摘要](Fusion_P1_Implementation_Report.json)
 - VR 羊與 NPC 共用 NetworkTargetPose，使用 root-relative 的頭、左前肢、右前肢位置與旋轉。遠端讀取 snapshot 插值，換場重設插值版本。下行 root 交給 NetworkTransform。
 - NPC 的 AI、導航與錄製來源只在 Server 執行。遠端保留 IK、伸縮與蒙皮，以三 target 驅動。已比對固定姿態下的 target 與完整骨架。
 - MainGame 的 Network NPCs 設為 60 隻，每幀分批生成，使用既有 NavMeshSurface 烘焙資料及各 Runner 場景內的 waypoint。重複生成請求保持數量。
-- NetworkMovingBox 示範 root，NetworkSwitch 示範 Networked 持續狀態與集中 RequestToggle。Prefab 已設定於 NetworkWorld 的 Scene Objects。
+- NetworkMovingBox 示範 root，NetworkSwitch 示範 Networked 持續狀態與集中 RequestToggle。Prefab 現在設定於 MainGame 的 MapNetworkSetup > Scene Objects，作為場景 override。
 - 60 隻持續 600.4 秒，100 隻持續 60.6 秒，Server tick 均約 64/s。三端共處 Editor，平均影格間隔分別為 79.5 ms 與 119.3 ms。流量採 Fusion 統計取樣，完整數據與量測範圍見 soak 報告。
 
 真實 HMD、CPU／GPU 與 IK 分項耗時、延遲／丟包完整矩陣仍待量測。現有 Editor 數據尚不足以判定 VR 刷新率或獨立 Server 的 tick 耗時預算。
@@ -329,4 +329,9 @@ MultiplayerSetup 中指向搬移 Prefab 的字串路徑同步更新。收納清�
 - [ ] Server／Client 同版本建置通過，編譯、Editor 多開、跨程序與頭盔結果分別記錄。
 
 下一輪依同步驗收說明完成實體頭盔操作，量測分開執行的 Server／Client 及 IK 成本，再依瓶頸調整視覺更新率與精度。未勾選的效能與裝置項目繼續保留。
+
+
+## 地圖接入與兩階段開始更新
+
+已加入 MapNetworkSetup Prefab 和 Resources/NetworkSceneSettings.asset。正式 runtime 的 Lobby、MainGame、Menu 與 Server 場景引用集中於設定資產。Server 的 Load MainGame 負責換場與玩家定位，Start Game 在所有玩家載入完成後才啟動 Running 與 NPC 生成。詳細地圖接入和驗收步驟見 Fusion_Synchronization_Acceptance_Guide.md。本輪報告使用 Fusion_Map_ 前綴。
 

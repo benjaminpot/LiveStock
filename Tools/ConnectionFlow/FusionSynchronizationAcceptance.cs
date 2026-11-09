@@ -19,7 +19,7 @@ public static class FusionSynchronizationAcceptance
     static void Check(string test, bool pass, object evidence = null)
     {
         checks.Add(new { test, pass, evidence });
-        System.IO.File.WriteAllText("Docs/Fusion_Sync_Acceptance_Report.json", Newtonsoft.Json.JsonConvert.SerializeObject(checks, Newtonsoft.Json.Formatting.Indented));
+        System.IO.File.WriteAllText("Docs/Fusion_Map_Acceptance_Report.json", Newtonsoft.Json.JsonConvert.SerializeObject(checks, Newtonsoft.Json.Formatting.Indented));
         if (!pass) throw new InvalidOperationException(test);
     }
     static async Task Wait(Func<bool> predicate, string label, int seconds = 120)
@@ -45,14 +45,34 @@ public static class FusionSynchronizationAcceptance
         await Wait(() => ConnectionManager.Clients.Count==2,"VR menu");
         var vr=ConnectionManager.Clients.Single(c=>!c.IsDesktop);
         await vr.ConnectAsync(server.RoomName,server.Region);
-        await Wait(() => server.State.CanStart,"Lobby ready");
+        await Wait(() => server.State.CanLoadMap,"Lobby ready");
         Check("Lobby contains no generated NPCs",Npcs().Length==0);
         Check("Each Client provides its own tick input",pc.Runner.ProvideInput&&vr.Runner.ProvideInput&&!server.Runner.ProvideInput
             &&pc.Runner.GetComponent<NetworkInputSource>()!=vr.Runner.GetComponent<NetworkInputSource>());
         await Wait(() => server.State.World.AcceptedInputCount>10,"Server consumes input");
         Check("Server consumes continuous Fusion input",server.State.World.AcceptedInputCount>10);
+        Check("Lobby cannot formally start gameplay",!server.State.CanStart);
         server.StartGame();
-        await Wait(() => server.State.Phase==LobbySessionState.SessionPhase.InMainGame &&Npcs().Length==180,"60 NPCs on three Runners");
+        Check("Start Game in Lobby leaves phase unchanged",server.State.Phase==LobbySessionState.SessionPhase.Lobby);
+        var buttons=new SerializedObject(server);
+        var load=(UnityEngine.UI.Button)buttons.FindProperty("loadMapButton").objectReferenceValue;
+        var start=(UnityEngine.UI.Button)buttons.FindProperty("startGameButton").objectReferenceValue;
+        Check("Server has two distinct wired buttons",load!=null&&start!=null&&load!=start&&load.onClick.GetPersistentMethodName(0)==nameof(ServerConnectionManager.LoadMainGame)&&start.onClick.GetPersistentMethodName(0)==nameof(ServerConnectionManager.StartGame));
+        load.onClick.Invoke();
+        await Wait(()=>server.State.CanStart&&pc.State.Phase==LobbySessionState.SessionPhase.AwaitingStart&&vr.State.Phase==LobbySessionState.SessionPhase.AwaitingStart,"Map ready without gameplay");
+        Check("All Runners use configured gameplay scene",new[]{server.Runner,pc.Runner,vr.Runner}.All(r=>r.GetSceneRef(FlowSceneMarker.For(r).gameObject)==r.GetSceneRef(NetworkSceneSettings.Current.MainGameScene)),NetworkSceneSettings.Current.MainGameScene);
+        await Task.Delay(2000);
+        Check("Ready map waits without NPCs or demo objects",Npcs().Length==0&&UnityEngine.Object.FindObjectsByType<NetworkSwitch>(FindObjectsSortMode.None).Length==0);
+        Check("Each Runner has portable map setup",UnityEngine.Object.FindObjectsByType<MapNetworkSetup>(FindObjectsSortMode.None).Length==3);
+        var actorBeforeStart=pc.GetComponentInChildren<DesktopTestPlayer>();
+        actorBeforeStart.transform.position+=Vector3.right*.5f;
+        await Task.Delay(700);
+        server.State.World.TryGetPlayer(pc.Runner.LocalPlayer,out var beforeAvatar);
+        Check("Client movement already synchronizes while awaiting start",Vector3.Distance(beforeAvatar.transform.position,actorBeforeStart.transform.position)<.01f);
+        Check("Load is disabled and Start is enabled after readiness",!load.interactable&&start.interactable&&!pc.State.CanStart);
+        start.onClick.Invoke();
+        start.onClick.Invoke();
+        await Wait(() => server.State.Phase==LobbySessionState.SessionPhase.Running &&Npcs().Length==180,"60 NPCs on three Runners");
         await Wait(() => Npcs().All(n=>n.GetComponent<NetworkTargetPose>().HasPose),"NPC target snapshots");
         var npcs=Npcs();
         Check("Every Runner receives exactly 60 NPC identities",npcs.GroupBy(n=>n.Runner).Count()==3&&npcs.GroupBy(n=>n.Runner).All(g=>g.Count()==60),
@@ -104,7 +124,7 @@ public static class FusionSynchronizationAcceptance
         Check("The root-only example moves on all peers",boxes.Length==3&&Mathf.Abs(boxes.First().transform.position.y-before)>.001f);
         server.Runner.SessionInfo.IsOpen=true;
         var late=await LocalConnectionTestTools.AddClientAsync(0);
-        await Wait(()=>late.State!=null&&late.State.Phase==LobbySessionState.SessionPhase.InMainGame&&Npcs().Length==240,"Late join state");
+        await Wait(()=>late.State!=null&&late.State.Phase==LobbySessionState.SessionPhase.Running&&Npcs().Length==240,"Late join state");
         await Wait(()=>UnityEngine.Object.FindObjectsByType<NetworkSwitch>(FindObjectsSortMode.None).All(s=>s.IsOn),"Late join switch");
         Check("Late join receives the current switch and 60 NPCs",Npcs().Count(n=>n.Runner==late.Runner)==60);
         await late.DisconnectAsync();UnityEngine.Object.Destroy(late.gameObject);server.Runner.SessionInfo.IsOpen=false;
@@ -156,7 +176,7 @@ public static class FusionSynchronizationAcceptance
             allocatedMemoryDeltaBytes=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong()-startMemory,
             sampledTraffic=runners.Select((r,i)=>new{runner=r.name,inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
             errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."};
-        System.IO.File.WriteAllText("Docs/Fusion_Sync_Soak_"+count+"_Report.json",Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
+        System.IO.File.WriteAllText("Docs/Fusion_Map_Soak_"+count+"_Report.json",Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
         if(minNpcs!=count||errors.Count>0)throw new InvalidOperationException("Soak failed. Read the report.");
         return result;
     }

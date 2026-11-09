@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>Server-owned room state that survives Lobby-to-MainGame scene changes.</summary>
 public sealed class LobbySessionState : NetworkBehaviour
 {
-    public enum SessionPhase { Lobby = 1, LoadingMainGame = 2, InMainGame = 3 }
+    public enum SessionPhase { Lobby = 1, LoadingMainGame = 2, AwaitingStart = 3, Running = 4 }
     [Networked] public SessionPhase Phase { get; set; }
     [Networked] public int PlayerCount { get; set; }
     [Networked] public int LoadedPlayers { get; set; }
@@ -20,8 +20,11 @@ public sealed class LobbySessionState : NetworkBehaviour
 
     void Awake() => World = GetComponent<NetworkWorld>();
 
-    public bool CanStart => Object != null && Object.IsValid && Object.HasStateAuthority
-        && Phase == SessionPhase.Lobby && PlayerCount > 0 && LoadedPlayers == PlayerCount
+    public bool CanLoadMap => ReadyAt(SessionPhase.Lobby);
+    public bool CanStart => ReadyAt(SessionPhase.AwaitingStart);
+
+    bool ReadyAt(SessionPhase phase) => Object != null && Object.IsValid && Object.HasStateAuthority
+        && Phase == phase && PlayerCount > 0 && LoadedPlayers == PlayerCount
         && PlayerCount == Runner.ActivePlayers.Count() && !Runner.IsSceneManagerBusy;
 
     /// <summary>Returns the replicated state for a specific peer, never another local Runner.</summary>
@@ -48,7 +51,7 @@ public sealed class LobbySessionState : NetworkBehaviour
         var marker = FlowSceneMarker.For(Runner);
         if (Phase == SessionPhase.LoadingMainGame && !Runner.IsSceneManagerBusy
             && marker != null && marker.Stage == 2 && LoadedPlayers == PlayerCount)
-            Phase = SessionPhase.InMainGame;
+            Phase = SessionPhase.AwaitingStart;
     }
 
     void Update()

@@ -1,0 +1,79 @@
+{
+  "date": "2026-11-09T17:40:37.195247+08:00",
+  "changes": [
+    "MapNetworkSetup portable prefab with stage marker, player spawn and NPC spawner",
+    "NetworkSceneSettings Resources asset for runtime Lobby, MainGame, Menu and Server paths",
+    "Server LoadMainGame and StartGame buttons with separate readiness gates",
+    "AwaitingStart keeps input and pose synchronization active with no gameplay spawns",
+    "Running starts map NPCs and map-local object list once"
+  ],
+  "tests": [
+    {
+      "report": "Fusion_Map_Acceptance_Report.json",
+      "passed": 28
+    },
+    {
+      "report": "Fusion_Map_World_Report.json",
+      "passed": 15
+    },
+    {
+      "report": "Fusion_Map_DesktopFirst_Report.json",
+      "passed": 15
+    },
+    {
+      "report": "Fusion_Map_VRFirst_Report.json",
+      "passed": 16
+    },
+    {
+      "report": "Fusion_Map_Standalone_Report.json",
+      "passed": 11
+    }
+  ],
+  "loadingEdges": {
+    "formalStartBlocked": true,
+    "readyWithoutNPCs": true,
+    "lobbyLoadingBlocksStart": true,
+    "clientCannotStart": true,
+    "departedLobbyLoaderRemoved": true,
+    "departedMainGameLoaderRemoved": true,
+    "phase": "AwaitingStart",
+    "players": 1,
+    "loaded": 1
+  },
+  "mapSwap": {
+    "testedScene": "Assets/_Project/Tests/MapSwapAcceptance.unity",
+    "restoredScene": "Assets/_Project/Scenes/_flow test/MainGame.unity",
+    "temporarySceneRemoved": true,
+    "sceneVerification": "Each Runner marker mapped to configured Fusion SceneRef"
+  },
+  "decisions": [
+    "Players may move and synchronize poses before formal start",
+    "The two example cubes remain MainGame-specific overrides. The reusable map prefab object list is empty."
+  ],
+  "pending": [
+    "Physical HMD, XR UI and rendered-device performance acceptance",
+    "Previous package and shader build warnings"
+  ],
+  "guide": "Fusion_Synchronization_Acceptance_Guide.md",
+  "build": {
+    "result": "Succeeded",
+    "totalErrors": 0,
+    "totalWarnings": 193,
+    "size": 373828026,
+    "seconds": 59.802957799999994,
+    "output": "Builds/FusionValidation/LiveStockFusion.exe",
+    "errors": []
+  },
+  "assetValidation": {
+    "report": "Fusion_Map_Asset_Report.json",
+    "prefabs": 17,
+    "archiveGuids": 16,
+    "scenes": 2,
+    "pass": true
+  },
+  "headlessIssue": {
+    "report": "Fusion_Map_Headless_Report.json",
+    "rerun": "Same Fusion checks passed with D3D11 graphics enabled. CCTV scripts were outside this change.",
+    "exception": "CCTV WebRTC VideoStreamSender: Graphics device type Null not supported"
+  }
+}

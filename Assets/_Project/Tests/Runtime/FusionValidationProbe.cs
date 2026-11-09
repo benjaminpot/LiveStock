@@ -104,6 +104,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
         string command = File.ReadAllText(path).Trim();
         File.Delete(path);
         if (command == "connect" && client != null) client.Connect();
+        else if (command == "load" && server != null) server.LoadMainGame();
         else if (command == "start" && server != null) server.StartGame();
         else if (command == "stop" && server != null) server.StopServer();
         else if (command == "move" && client != null)

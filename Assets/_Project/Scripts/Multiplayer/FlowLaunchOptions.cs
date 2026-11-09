@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -60,11 +60,11 @@ public static class FlowLaunchOptions
     static void SelectEntry()
     {
         if (ServerOnly || DesktopClient || VRPreview) Application.targetFrameRate = 60;
-        if (ServerOnly && SceneManager.GetActiveScene().path != ServerConnectionManager.SceneFolder + "ServerBootstrap.unity")
+        if (ServerOnly && SceneManager.GetActiveScene().path != NetworkSceneSettings.Current.ServerScene)
         {
             foreach (var client in UnityEngine.Object.FindObjectsByType<ConnectionManager>(FindObjectsSortMode.None))
                 UnityEngine.Object.Destroy(client.gameObject);
-            SceneManager.LoadScene(ServerConnectionManager.SceneFolder + "ServerBootstrap.unity");
+            SceneManager.LoadScene(NetworkSceneSettings.Current.ServerScene);
         }
     }
 }

@@ -13,7 +13,7 @@ public static class NetworkWorldAcceptance
     static void Check(string test, bool pass, object evidence = null)
     {
         checks.Add(new { test, pass, evidence });
-        System.IO.File.WriteAllText("Docs/Fusion_Sync_World_Report.json",
+        System.IO.File.WriteAllText("Docs/Fusion_Map_World_Report.json",
             Newtonsoft.Json.JsonConvert.SerializeObject(checks, Newtonsoft.Json.Formatting.Indented));
         if (!pass) throw new InvalidOperationException(test);
     }
@@ -43,7 +43,7 @@ public static class NetworkWorldAcceptance
         }, "Server startup");
         Check("Client connects through the shared session controller", await client.ConnectAsync(server.RoomName, server.Region));
         var world = server.State.World;
-        await Wait(() => server.State.CanStart && world.AvatarCount == 1, "Desktop avatar without any pose packets");
+        await Wait(() => server.State.CanLoadMap && world.AvatarCount == 1, "Desktop avatar without any pose packets");
         Check("Desktop avatar exists before its pose sender runs", world.RegisteredPlayerCount == 1 && !actor.enabled);
         Check("Each peer owns one controller and one Runner", client.Runner.GetComponent<NetworkSessionController>() != null
             && server.Runner.GetComponent<NetworkSessionController>() != null
@@ -73,14 +73,14 @@ public static class NetworkWorldAcceptance
 
         var delayed = await LocalConnectionTestTools.AddClientAsync(30);
         await Wait(() => server.State.PlayerCount == 2 && server.State.LoadedPlayers == 1, "Delayed readiness gate");
-        Check("Unready players block Start Game and have no registered avatar", !server.State.CanStart
+        Check("Unready players block Start Game and have no registered avatar", !server.State.CanLoadMap
             && world.RegisteredPlayerCount == 1 && world.AvatarCount == 1);
         var controller = delayed.Runner.GetComponent<NetworkSessionController>();
         Task first = controller.ShutdownAsync();
         Task second = controller.ShutdownAsync();
         Check("Repeated shutdown shares the same operation", ReferenceEquals(first, second));
         await first;
-        await Wait(() => server.State.CanStart && server.State.PlayerCount == 1, "Departed loader removed");
+        await Wait(() => server.State.CanLoadMap && server.State.PlayerCount == 1, "Departed loader removed");
         UnityEngine.Object.Destroy(delayed.gameObject);
 
         var oldRunner = client.Runner;
@@ -89,10 +89,10 @@ public static class NetworkWorldAcceptance
         Check("Disconnect removes the registration and network avatar", !world.TryGetPlayer(player, out _));
         Check("Disconnected Client can reconnect with a fresh Runner", await client.ConnectAsync(server.RoomName, server.Region)
             && client.Runner != oldRunner);
-        await Wait(() => server.State.CanStart && world.AvatarCount == 1, "Reconnected avatar");
-        server.StartGame();
-        await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.InMainGame
-            && client.State.Phase == LobbySessionState.SessionPhase.InMainGame, "MainGame readiness");
+        await Wait(() => server.State.CanLoadMap && world.AvatarCount == 1, "Reconnected avatar");
+        server.LoadMainGame();
+        await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.AwaitingStart
+            && client.State.Phase == LobbySessionState.SessionPhase.AwaitingStart, "MainGame readiness");
         Check("Scene loading keeps exactly one registered avatar", world.AvatarCount == 1 && world.RegisteredPlayerCount == 1);
         actor.enabled = true;
         await Task.Delay(500);

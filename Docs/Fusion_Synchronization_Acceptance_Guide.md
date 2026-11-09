@@ -2,13 +2,13 @@
 
 本版使用集中 Network Input 傳送玩家姿態，共用 NetworkTargetPose 同步 VR 羊與 NPC 的頭、左前肢、右前肢，root 由 NetworkTransform 同步。玩家 Client 決定移動，NPC 的 AI、導航、動作來源和生命狀態由 Server 控制。
 
-各輪結果與剩餘驗收項目彙整於 [實作測試摘要](Fusion_Sync_Implementation_Report.json)。
+本輪地圖接入與兩階段開始結果彙整於 [實作測試摘要](Fusion_Map_Implementation_Report.json)。先前同步與壓測結果保留於 Fusion_Sync_Implementation_Report.json。
 
 ## 先確認資產
 
 | 位置 | 應有內容 |
 | --- | --- |
-| `Assets/_Project/Prefabs/Multiplayer/LobbySessionState.prefab` | LobbySessionState 與 NetworkWorld。NetworkWorld 的 Player Prefabs 指向企鵝與 VR 羊，Scene Objects 包含兩個教學物件 |
+| `Assets/_Project/Prefabs/Multiplayer/LobbySessionState.prefab` | LobbySessionState 與 NetworkWorld。NetworkWorld 保存企鵝與 VR 羊的 Player Prefabs，地圖物件清單由 MapNetworkSetup 保存 |
 | `NetworkVRSheep.prefab` | NetworkObject、NetworkTransform、VRNetworkAvatar、NetworkTargetPose。Capture On Server 關閉，三 target 都有引用 |
 | `NPC_sheep.prefab` | NetworkObject、NetworkTransform、NetworkNpcAuthorityGate、NetworkTargetPose。Capture On Server 開啟，三 target 都有引用 |
 | `_flow test/MainGame.unity` | Navigation 已綁定烘焙資料，Network NPCs 的數量與上限皆為 60 |
@@ -24,8 +24,8 @@
 3. 選 `Start Server`，等待 Lobby 開啟。
 4. 在 VR 的 ConnectionManager 元件標題按右鍵，執行 `Connect to server`。
 5. 選 `Open Desktop Client Menu`，在 PC 選單按 CONNECT。
-6. 用 F2 切到 Server，應看到 Players 2、Loaded 2/2，Start Game 可按。此時生成的網路 NPC 數為 0。
-7. 按 Start Game。三端應進入 MainGame，各端收到 60 隻網路 NPC、一隻 VR 羊及一隻企鵝。生成分批執行，等待數量穩定。
+6. 用 F2 切到 Server，應看到 Players 2、Loaded 2/2。Load MainGame 可按，Start Game 停用，此時網路 NPC 為 0。
+7. 按 Load MainGame。三端進入 MainGame 並重新定位玩家，階段停在 AwaitingStart，NPC 與教學 Cube 都為 0。等待 Loaded 2/2，Start Game 才可按。此時玩家走動和姿態仍同步。按 Start Game 後階段為 Running，各端才收到 60 隻 NPC 及兩個教學 Cube。生成分批執行，等待數量穩定。
 8. 在 Desktop 畫面使用 WASD、右鍵、Q／E、Shift，切到其他端確認企鵝位置與朝向跟隨。
 9. 選 VR 的 ConnectionManager 上 `VRClientPoseSource`。透過 Head Anchor、Left Hand Anchor、Right Hand Anchor 引用選取對應物件，調整局部位置或旋轉。其他端的羊頭與前肢應跟隨。
 10. 選 Rig Root 引用的本機物件，調整其世界位置與旋轉。其他端的整隻 VR 羊應移動，頭手仍保持正確的相對位置。
@@ -68,7 +68,7 @@ RPC 用於載入完成回報與離散互動。玩家連續姿態已改走 Networ
 
 ## 互動開關與 root 範例
 
-MainGame 載入完成後，玩家出生點附近會出現兩個方塊。NetworkMovingBox 由 Server 上下移動，用於示範 root 同步。
+MainGame 載入完成並按下正式 Start Game 後，玩家出生點附近會出現兩個方塊。NetworkMovingBox 由 Server 上下移動，用於示範 root 同步。
 
 NetworkSwitch 用於示範持續狀態。讓 Desktop 企鵝移到距離開關 3 公尺內，在該 Client 的開關物件上對 NetworkSwitch 元件執行 `Network/Request toggle`。所有端應看到同一顏色，IsOn 保存在 Networked 狀態中。超出距離或未完成 MainGame 載入的請求會被 Server 拒絕。
 
@@ -81,7 +81,7 @@ NetworkSwitch 用於示範持續狀態。讓 Desktop 企鵝移到距離開關 3 
 1. 複製 NetworkMovingBox Prefab 作為範例。
 2. 保留 NetworkObject 和 NetworkTransform，替換外觀與實際移動來源。
 3. 在 Server 的 FixedUpdateNetwork 更新 root。
-4. 將 Prefab 加入 Fusion Prefab 表，在 LobbySessionState Prefab 的 NetworkWorld > Scene Objects 加入該 Prefab 和出生偏移。
+4. 將 Prefab 加入 Fusion Prefab 表，在目前地圖的 MapNetworkSetup > Scene Objects 加入該 Prefab 和出生偏移。
 5. 啟動兩個 Client，驗證生成、移動、換場與清理。
 
 ### 有可保存的狀態
@@ -108,7 +108,7 @@ world.SpawnObject(prefab, position, rotation);
 3. 戴上頭盔，檢查原本 3D Menu、VR 射線與 CONNECT 按鈕。
 4. 啟動 Server、連接 VR，再加入 Desktop Client。
 5. 由 Desktop 觀察 VR 玩家轉頭、抬手、蹲下與移動，檢查身高、左右前肢與模型伸縮。
-6. 開始 MainGame，靠近 NPC，觀察姿態平順程度與實際 CPU／GPU frame time。
+6. 先 Load MainGame，確認等待狀態，再 Start Game，靠近 NPC，觀察姿態平順程度與實際 CPU／GPU frame time。
 7. 測試追蹤暫失、恢復、返回選單與關服。
 
 VR 預覽測試提供模擬追蹤資料。實體 HMD、控制器、XR UI 與實際刷新率需以這一輪裝置操作驗收。
@@ -171,5 +171,26 @@ unity command run_script --caller plugin --skill unity-cli --timeout 240 --forma
 重跑跨程序自動驗收時，在專案根目錄執行以下命令。腳本會啟動並結束它建立的三個隱藏程序，輸出 Standalone 報告。
 
 ```powershell
-& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -SampleSeconds 30
+& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -SampleSeconds 30 -UseGraphics
 ```
+
+
+## 新地圖接入流程
+
+1. 將新場景加入 Build Scene List，Server 與 Client 使用同版本及順序。
+2. 在場景拖入 `Assets/_Project/Prefabs/Multiplayer/MapNetworkSetup.prefab`，每張玩法地圖一份。這是一般場景 Prefab，Runner 與房間狀態由既有連線流程建立。
+3. 調整子物件 VRSpawnPoint 的位置與朝向。根物件 FlowSceneMarker 保持 Stage 2，VR Spawn Point 指向該子物件。
+4. 調整子物件 Network NPCs 的種類、數量、生成範圍與上限。新地圖建立 AnimalWaypoint 和符合 NPC Agent Type 的 NavMeshSurface，烘焙自己的導航資料。生成器會取得所屬 Runner 地圖內的 waypoint。
+5. MapNetworkSetup 的 Scene Objects 設定正式開始時生成的物件。共用 Prefab 的預設清單為空，目前 MainGame 的兩個 Cube 是該場景的 Prefab override。可清空清單停用示範。
+6. 在 `Assets/Resources/NetworkSceneSettings.asset` 修改 Main Game Scene 路徑。Lobby、Menu 與 Server 入口也集中在這份資產。保留單一 Resources 設定資產，名稱為 NetworkSceneSettings。
+7. 重跑兩種加入順序、Load MainGame、等待零 NPC、Start Game、生成數量、姿態與離線清理驗收。
+
+每個 Runner 的 FlowSceneMarker 和地圖設定依所屬場景查找。地形、美術、waypoint 與 NavMesh 資料留在各地圖，地圖接入 Prefab 保存出生點、生成器與開始時生成清單。Editor 的 Connection Test 選單仍指向專案內的測試入口場景。
+
+房間階段依序為 Lobby、LoadingMainGame、AwaitingStart、Running。Server 的 CanLoadMap 只在 Lobby 且所有玩家載入完成時成立。CanStart 只在 AwaitingStart 且所有玩家載入完成時成立。NPC、教學物件與開關互動在 Running 執行。等待階段仍允許玩家移動與追蹤同步。
+
+本輪新報告使用 `Fusion_Map_` 前綴。先前 `Fusion_Sync_` 報告保留為上一輪歷史結果。
+
+本輪驗證包含替代地圖完整 28 項、生命週期 15 項、兩種加入順序 15／16 項、載入邊界 6 項與跨程序 11 項。新版 Windows 建置成功，0 errors、193 warnings，去重警告保存在 Fusion_Map_Build_Warnings.json。
+
+跨程序預設無顯示卡模式曾在 Server 的 CCTV/WebRTC 收到影像串流 offer 時出現 Graphics device type Null not supported。該輪 Fusion 功能檢查已通過，日誌檢查判失敗，保存在 Fusion_Map_Headless_Report.json。以 -UseGraphics 使用 D3D11 圖形裝置重跑後 11 項全部通過，結果在 Fusion_Map_Standalone_Report.json。這輪測試沒有量測 GPU frame time 或實體頭盔。

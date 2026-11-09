@@ -56,7 +56,7 @@ public static class FusionWeakNetworkAcceptance
                 if (!await pc.ConnectAsync(server.RoomName, server.Region)
                     || !await vr.ConnectAsync(server.RoomName, server.Region))
                     throw new InvalidOperationException("Client connection failed under simulated conditions.");
-                await Wait(() => server.State.CanStart && server.State.LoadedPlayers == 2, "Lobby readiness");
+                await Wait(() => server.State.CanLoadMap && server.State.LoadedPlayers == 2, "Lobby readiness");
                 source.RigRoot.position += new Vector3(.6f, .1f, .4f);
                 source.RigRoot.rotation = Quaternion.Euler(0, 35, 0);
                 source.HeadAnchor.localPosition += new Vector3(.03f, .04f, 0);
@@ -76,8 +76,10 @@ public static class FusionWeakNetworkAcceptance
                     return error < .01f && sheep.All(s => Quaternion.Angle(s.transform.rotation, expected.RootRotation) < 1f);
                 }, "Static root and three-target convergence");
                 double convergenceSeconds = timer.Elapsed.TotalSeconds;
+                server.LoadMainGame();
+                await Wait(()=>server.State.CanStart,"Ready to start gameplay");
                 server.StartGame();
-                await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.InMainGame
+                await Wait(() => server.State.Phase == LobbySessionState.SessionPhase.Running
                     && UnityEngine.Object.FindObjectsByType<NetworkNpcAuthorityGate>(FindObjectsSortMode.None).Length == 180,
                     "60 NPCs on each peer");
                 int accepted = server.State.World.AcceptedInputCount;
@@ -95,7 +97,7 @@ public static class FusionWeakNetworkAcceptance
                     configuredJitterMs=scenario.jitter*1000, observedAverageClientRttMs=rtt.Average(),
                     convergenceSeconds, maximumStaticPositionErrorMetres=error, npcCountPerRunner=60,
                     scope="SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."});
-                File.WriteAllText("Docs/Fusion_Sync_WeakNetwork_Report.json",
+                File.WriteAllText("Docs/Fusion_Map_WeakNetwork_Report.json",
                     Newtonsoft.Json.JsonConvert.SerializeObject(results, Newtonsoft.Json.Formatting.Indented));
                 if (!pass) throw new InvalidOperationException("Input or NPC count failed under simulated conditions.");
                 await server.StopServerAsync();

@@ -21,8 +21,7 @@ public class ConnectionManager : MonoBehaviour
     [Header("Connection defaults")]
     [SerializeField] string defaultRoomName = "LIVESTOCK-DEV";
     [SerializeField] string defaultRegion = "asia";
-    [Tooltip("Must be enabled at the same build index on server and client.")]
-    [SerializeField] string networkScenePath = ServerConnectionManager.SceneFolder + "Lobby.unity";
+
     [Header("Local presentation - never a network avatar")]
     [SerializeField] GameObject localVRRig;
     [SerializeField] GameObject vrEventSystem;
@@ -204,7 +203,7 @@ public class ConnectionManager : MonoBehaviour
         if (string.IsNullOrWhiteSpace(room)) { SetStatus("Please enter a room name."); return false; }
         if (string.IsNullOrWhiteSpace(PhotonAppSettings.Global.AppSettings.AppIdFusion))
         { SetStatus("Set App Id Fusion in Fusion > Realtime Settings first."); return false; }
-        int index = SceneUtility.GetBuildIndexByScenePath(networkScenePath);
+        int index = SceneUtility.GetBuildIndexByScenePath(NetworkSceneSettings.Current.LobbyScene);
         if (index < 0) { SetStatus("Enable the Lobby scene in the build Scene List."); return false; }
         IsBusy = true;
         NetworkSessionController connecting = null;
@@ -283,7 +282,7 @@ public class ConnectionManager : MonoBehaviour
         {
             Destroy(gameObject); // Destroy the preserved rig/UI before a fresh menu creates replacements.
             await Task.Yield(); // Let the old rig's OnDestroy clear headset SDK singletons first.
-            SceneManager.LoadScene(ServerConnectionManager.SceneFolder + "Menu_VRClient.unity");
+            SceneManager.LoadScene(NetworkSceneSettings.Current.MenuScene);
         }
     }
 
