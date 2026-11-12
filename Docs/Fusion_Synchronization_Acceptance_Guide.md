@@ -115,66 +115,48 @@ VR 預覽測試提供模擬追蹤資料。實體 HMD、控制器、XR UI 與實�
 
 ## 如何閱讀結果
 
-| 報告 | 驗證內容 |
+| 目前報告 | 驗證內容 |
 | --- | --- |
-| `Fusion_Sync_VRFirst_Report.json`、`Fusion_Sync_DesktopFirst_Report.json` | 兩種加入順序、姿態與換場 |
-| `Fusion_Sync_World_Report.json` | 角色、無姿態生成、重連、重複關閉與清理 |
-| `Fusion_Sync_LoadingEdge_Report.json` | Lobby 與 MainGame 載入期間離線，剩餘玩家仍能通過門檻 |
-| `Fusion_Sync_Acceptance_Report.json` | 三 target、完整骨架、60 NPC、傷害重生、教學物件與晚加入 |
-| `Fusion_Sync_Soak_60_Report.json` | 60 隻持續運作與量測 |
-| `Fusion_Sync_Soak_100_Report.json` | 100 隻容量壓測 |
-| `Fusion_Sync_Build_Report.json` | 同版本 Windows Development Player 的建置結果 |
-| `Fusion_Sync_Build_Warnings.json` | 建置警告的去重內容 |
-| `Fusion_Sync_Standalone_Report.json` | 三個獨立程序的姿態、60 NPC 與關服清理 |
-| `Fusion_Sync_WeakNetwork_Report.json` | 三組 SDK 模擬網路條件下的收斂、NPC 與生命週期 |
-| `Fusion_Sync_Asset_Report.json` | 16 項搬移 GUID、16 個 Prefab 與兩個場景的腳本引用 |
+| `Fusion_Acceptance_Entry_Report.json` | 統一入口、工具收納及本輪回歸結果 |
+| `Fusion_Acceptance_Tool_Archive_Report.json` | 舊工具、指南原文與 Editor 快照的 SHA256 |
+| `Fusion_Map_VRFirst_Report.json`、`Fusion_Map_DesktopFirst_Report.json` | 兩種加入順序、姿態與換場 |
+| `Fusion_Map_World_Report.json` | 角色、重連、重複關閉與清理 |
+| `Fusion_Map_LoadingEdge_Report.json` | 載入期間離線、開始門檻與零 NPC |
+| `Fusion_Map_Acceptance_Report.json` | 兩階段開始、三 target、骨架、60 NPC、生命狀態及晚加入 |
+| `Fusion_Map_Standalone_Report.json` | D3D11 跨程序功能測試 |
+| `Fusion_Map_Asset_Report.json` | 收納 GUID、17 個 Prefab 與兩個場景的腳本引用 |
+| `Fusion_Map_Build_Report.json`、`Fusion_Map_Build_Warnings.json` | 最近驗收建置與警告 |
+| `Fusion_Sync_Soak_60_Report.json`、`Fusion_Sync_Soak_100_Report.json` | 上一輪 Editor 長測／短壓測 |
+| `Fusion_Sync_WeakNetwork_Report.json` | 上一輪三組代表性弱網 |
 
 Editor 多開時，影格間隔和記憶體包含整個 Editor、所有 Runner 與場景複本。獨立程式的 Server、PC Client 和 VR Client 應分別量測。頭盔效能以實體設備的 CPU／GPU frame time 和刷新率判斷。
 
 Server 與 Client 每次都使用同版本建置，本輪已變更輸入和 Prefab 的網路資料結構。
 
-### 本輪量測範圍
+### 歷史量測與驗收限制
 
-60 隻在 Editor Multi-Peer 持續約 600.4 秒，平均影格間隔 79.5 ms，P95 101.4 ms。100 隻持續約 60.6 秒，平均 119.3 ms，P95 143.9 ms。兩輪 Server tick 約 64/s，NPC 數量穩定。詳細流量取樣、記憶體變化及條件保存在各自 JSON 中。
+上一輪同步測試中，60 隻在 Editor Multi-Peer 持續約 600.4 秒，平均影格間隔 79.5 ms，P95 101.4 ms。100 隻持續約 60.6 秒，平均 119.3 ms，P95 143.9 ms。兩輪 Server tick 約 64/s，NPC 數量穩定。詳細流量取樣、記憶體變化及條件保存在各自 JSON 中。
 
 影格間隔包含所有本機 Runner 與 Editor 工作。tick 推進率、CPU tick 執行時間與 GPU frame time 分別量測。100 隻這輪為短壓測，完整弱網矩陣、IK 分項耗時與實體 HMD 刷新率仍待驗收。
 
-獨立程序測試以同一台 Windows 上的 Server、Desktop 與 VR 預覽執行，60 隻採樣約 30 秒，Server tick 約 64/s。三端使用無顯示卡模式與 60 FPS 上限，平均影格間隔約 17 ms，未包含畫面繪製負載。
+上一輪獨立程序測試以同一台 Windows 上的 Server、Desktop 與 VR 預覽執行，60 隻採樣約 30 秒，Server tick 約 64/s。三端使用無顯示卡模式與 60 FPS 上限，平均影格間隔約 17 ms，未包含畫面繪製負載。
 
-弱網測試涵蓋基準，以及每封包 50 ms 延遲／2% 丟包／10 ms jitter 和 100 ms 延遲／5% 丟包／20 ms jitter。模擬套用於三個 Runner，量得 Client 平均 RTT 約 77、229、230 ms。RTT 包含處理時間，並受路由與模擬實際作用方向影響，因此保留設定值和實測值。三組均通過靜止姿態收斂、各端 60 隻、持續輸入及關服重開。完整延遲／丟包矩陣與主觀平順度繼續列為待驗收。
+上一輪弱網測試涵蓋基準，以及每封包 50 ms 延遲／2% 丟包／10 ms jitter 和 100 ms 延遲／5% 丟包／20 ms jitter。模擬套用於三個 Runner，量得 Client 平均 RTT 約 77、229、230 ms。RTT 包含處理時間，並受路由與模擬實際作用方向影響，因此保留設定值和實測值。三組均通過靜止姿態收斂、各端 60 隻、持續輸入及關服重開。完整延遲／丟包矩陣與主觀平順度繼續列為待驗收。
 
-Windows 驗收建置成功，0 errors、190 warnings。警告包括 OpenXR 遷移提示、Sentis Shader，以及 Meta 套件的 `FusionAvatarSdk28Plus.prefab` Missing Script。專案同步與收納 Prefab 的 16 個檢查結果皆為零 Missing Script，套件警告內容保存在 Build Warnings 報告。
+上一輪 Windows 驗收建置成功，0 errors、190 warnings。警告包括 OpenXR 遷移提示、Sentis Shader，以及 Meta 套件的 `FusionAvatarSdk28Plus.prefab` Missing Script。專案同步與收納 Prefab 的 16 個檢查結果皆為零 Missing Script，套件警告內容保存在 Build Warnings 報告。
 
 ### 重跑自動測試
 
-`Tools/ConnectionFlow` 中的驗收腳本由 Unity Pipeline `run_script` 執行，每輪先 End Test，再開一個對應的未連線 Menu。
-
-| 腳本與入口 | 起始狀態 |
-| --- | --- |
-| `FusionSyncMixedAcceptance.VRFirst` | 先開無頭盔 VR Menu |
-| `FusionSyncMixedAcceptance.DesktopFirst` | 先開 Desktop Menu |
-| `NetworkWorldAcceptance.Run` | 先開 Desktop Menu |
-| `FusionSyncLoadingEdges.Run` | 先開 Desktop Menu |
-| `FusionSynchronizationAcceptance.Run` | 先開 Desktop Menu |
-| `FusionSynchronizationAcceptance.Soak(600, 60)` | 上一項成功後，保留 Server、Desktop 與 VR 在 MainGame |
-| `FusionWeakNetworkAcceptance.Run` | 先開 Desktop Menu，三組結束後還原記憶體中的模擬設定 |
-| `ValidateFusionAssets.Run` | Edit Mode |
-
-以 DesktopFirst 為例，在專案根目錄執行以下指令。
+目前自動驗收統一從 [Test-Fusion.ps1 索引](../Tools/ConnectionFlow/README.md) 啟動。
 
 ```powershell
-unity command run_script --caller plugin --skill unity-cli --timeout 240 --format json -- --file Tools/ConnectionFlow/FusionSyncMixedAcceptance.cs --entry FusionSyncMixedAcceptance.DesktopFirst --timeout_ms 220000
+& ./Tools/ConnectionFlow/Test-Fusion.ps1 -Suite Editor
+& ./Tools/ConnectionFlow/Test-Fusion.ps1 -Suite Assets
 ```
 
-獨立執行檔可透過 `LiveStock > Connection Test > Build Fusion Validation Player` 重建。輸出位於 `Builds/FusionValidation/LiveStockFusion.exe`，包含明確啟用的 Development 驗收 probe。平常建置不會包含該 probe。Server 使用 `-flow-server`，PC 使用 `-flow-desktop`，無頭盔 VR 使用 `-flow-vr-preview`。實體 VR 啟動時使用一般入口。
+Editor 套件會自行為每輪建立 Menu、執行測試並 End Test。Standalone、弱網、換圖及持續測試使用相同指令的 Suite 參數，詳細範圍見索引。
 
-重跑跨程序自動驗收時，在專案根目錄執行以下命令。腳本會啟動並結束它建立的三個隱藏程序，輸出 Standalone 報告。
-
-```powershell
-& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -SampleSeconds 30 -UseGraphics
-```
-
-
+驗收建置使用 LiveStock > Connection Test > Build Fusion Validation Player，輸出 Builds/FusionValidation/LiveStockFusion.exe。Standalone 套件採用 D3D11 模式，測試完關閉它建立的程序。實體頭盔依上方人工步驟驗收。
 ## 新地圖接入流程
 
 1. 將新場景加入 Build Scene List，Server 與 Client 使用同版本及順序。

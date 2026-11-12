@@ -15,6 +15,11 @@ public static class FusionSyncLoadingEdges
     {
         var server=UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>();
         var client=UnityEngine.Object.FindObjectsByType<ConnectionManager>(FindObjectsSortMode.None).Single(c=>!c.name.StartsWith("Test Client"));
+        if(server==null)
+        {
+            LocalConnectionTestTools.StartServer();
+            await Wait(()=>{server=UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>();return server!=null&&server.State!=null;},"Server startup");
+        }
         if(server.State==null)await server.StartServerAsync();
         if(!client.IsConnected)await client.ConnectAsync(server.RoomName,server.Region);
         await Wait(()=>server.State?.CanLoadMap==true,"Primary player never ready");

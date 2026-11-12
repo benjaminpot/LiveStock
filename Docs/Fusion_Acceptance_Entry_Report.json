@@ -1,0 +1,218 @@
+{
+  "date": "2026-11-09T20:41:51.5052852+08:00",
+  "entry": "Tools/ConnectionFlow/Test-Fusion.ps1",
+  "index": "Tools/ConnectionFlow/README.md",
+  "validatedSuites": [
+    "Assets",
+    "Editor",
+    "MapSwap"
+  ],
+  "editorChecks": 80,
+  "cases": [
+    {
+      "name": "DesktopFirst",
+      "report": "Fusion_Map_DesktopFirst_Report.json",
+      "passed": 15
+    },
+    {
+      "name": "VRFirst",
+      "report": "Fusion_Map_VRFirst_Report.json",
+      "passed": 16
+    },
+    {
+      "name": "World",
+      "report": "Fusion_Map_World_Report.json",
+      "passed": 15
+    },
+    {
+      "name": "MapAndNPC",
+      "report": "Fusion_Map_Acceptance_Report.json",
+      "passed": 28
+    }
+  ],
+  "loadingEdgeChecks": 6,
+  "assetValidation": {
+    "pass": true,
+    "archived": [
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/SessionLauncher.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/SessionPanel.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkPlayer.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/ObserverCamera.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/SessionLauncherEditor.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/MultiplayerSetup.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkPlayer.prefab",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/MultiplayerDemo.prefab",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual.prefab",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual_old.prefab",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkSheepRig.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkSheepSelectable.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/NetworkSheepRigSetup.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/RandomNPCSpawnerSetup.cs",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkSK_Sheep_white_final.prefab",
+        "pass": true
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RandomNPCSpawner.prefab",
+        "pass": true
+      }
+    ],
+    "prefabs": [
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/[BuildingBlock] Camera Rig Variant.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/ConnectionTestClient.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/DesktopPenguinVisual.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/DesktopTestPlayer.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/Examples/NetworkMovingBox.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/Examples/NetworkSwitch.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/LobbySessionState.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/MapNetworkSetup.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/NetworkDesktopPenguin.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/NetworkVRSheep.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Prefabs/Multiplayer/NPC_sheep.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/MultiplayerDemo.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkPlayer.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkSK_Sheep_white_final.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RandomNPCSpawner.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual.prefab",
+        "missing": 0
+      },
+      {
+        "path": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual_old.prefab",
+        "missing": 0
+      }
+    ],
+    "scenes": [
+      {
+        "name": "MainGame",
+        "archivedChildren": 2,
+        "inactive": true,
+        "missing": 0
+      },
+      {
+        "name": "Menu_VRClient",
+        "archivedChildren": 3,
+        "inactive": true,
+        "missing": 0
+      }
+    ]
+  },
+  "mapSwapWrapper": {
+    "restorePassed": true,
+    "gameplayChecks": 28,
+    "preparePassed": true,
+    "temporarySceneRemoved": true,
+    "snapshotRemoved": true
+  },
+  "archive": {
+    "report": "Fusion_Acceptance_Tool_Archive_Report.json",
+    "editorSnapshot": 1,
+    "sha256Verified": 17,
+    "guides": 2,
+    "tools": 14
+  },
+  "editor": {
+    "legacyBuildMethod": false,
+    "playing": false,
+    "xrStartup": true,
+    "compilationFailed": false,
+    "mainGame": "Assets/_Project/Scenes/_flow test/MainGame.unity",
+    "compilation": "completed",
+    "currentBuildMethod": true,
+    "controllers": 0,
+    "peerMode": "Single"
+  },
+  "pending": [
+    "New-flow long soak and full network-condition matrix",
+    "Physical headset, rendered-device performance and visual acceptance",
+    "Standalone, WeakNetwork and Soak wrapper suites were not rerun in this cleanup. Their underlying historical reports remain version-scoped.",
+    "Existing package warnings and CCTV/WebRTC headless issue"
+  ]
+}

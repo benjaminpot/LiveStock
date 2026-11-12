@@ -1,4 +1,6 @@
-# VR Lobby 第一階段測試結果
+# VR Lobby 第一階段測試結果（歷史）
+
+目前驗收入口見 [驗收索引](../Tools/ConnectionFlow/README.md)。以下內容為當時版本的結果。
 
 本次依使用者回報回退 VR 桌面介面替換，改為直接載入原本 Menu_VRClient。最新原場景混合驗收共 40 項通過，包含完整本機 VR Rig 啟用後加入兩位已連線 Desktop 的測試。結果與裝置驗收限制見 [最新 VR 操作說明](VR_Mixed_Connection_Guide.md)。下列前次報告保留為歷史記錄。
 

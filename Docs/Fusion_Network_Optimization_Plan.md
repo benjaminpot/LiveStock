@@ -1,8 +1,8 @@
 # Fusion 網路同步優化計畫
 
-更新日期為 2026-11-09。本文件保留分階段設計與後續量測項目。P0 至 P5 的程式與 Prefab 已實作，P6 已完成 Editor 的 60 隻 10 分鐘與 100 隻 1 分鐘測試。實際操作與新增物件步驟見 [同步驗收說明](Fusion_Synchronization_Acceptance_Guide.md)。
+更新日期為 2026-11-09。P0 至 P5 的主要功能已實作，P6 部分完成。自動驗收統一使用 [Test-Fusion.ps1](../Tools/ConnectionFlow/README.md)，手動及實體裝置操作見 [同步驗收指南](Fusion_Synchronization_Acceptance_Guide.md)。目前功能證據以 Fusion_Map_ 報告為準，Fusion_P1_ 與 Fusion_Sync_ 報告保留各自版本的歷史結果。
 
-收納時已驗證 10 項資產 GUID、9 個 Prefab 與新版 Menu 的 Missing Script，並通過 VR 先加入 16 項、Desktop 先加入 15 項既有回歸。完整結果位於 [收納與回歸報告](Legacy_Connection_Archive_Report.json)。
+初次資產收納時已驗證 10 項資產 GUID、9 個 Prefab 與新版 Menu 的 Missing Script，並通過 VR 先加入 16 項、Desktop 先加入 15 項既有回歸。完整結果位於 [收納與回歸報告](Legacy_Connection_Archive_Report.json)。
 
 ## P1 已完成的實作
 
@@ -28,7 +28,7 @@ ConnectionManager.ConnectAsync / ServerConnectionManager.StartServerAsync
 
 Server 程式可以呼叫 `NetworkWorld.For(runner).TryGetPlayer(player, out avatar)` 取得該房間玩家的分身。玩家登記表由 Server 持有，Client 端以 Fusion 複寫出的分身和 Networked 狀態呈現。
 
-P1 的歷史結果位於 [P1 驗證摘要](Fusion_P1_Implementation_Report.json)。本輪後續報告使用 `Fusion_Sync_` 前綴，包含輸入、三 target、完整骨架、生命狀態、教學物件、晚加入與持續測試。
+P1 的歷史結果位於 [P1 驗證摘要](Fusion_P1_Implementation_Report.json)。該輪後續報告使用 `Fusion_Sync_` 前綴，包含輸入、三 target、完整骨架、生命狀態、教學物件、晚加入與持續測試。
 
 ## P2 至 P6 的實作狀態
 
@@ -37,11 +37,11 @@ P1 的歷史結果位於 [P1 驗證摘要](Fusion_P1_Implementation_Report.json)
 - NPC 的 AI、導航與錄製來源只在 Server 執行。遠端保留 IK、伸縮與蒙皮，以三 target 驅動。已比對固定姿態下的 target 與完整骨架。
 - MainGame 的 Network NPCs 設為 60 隻，每幀分批生成，使用既有 NavMeshSurface 烘焙資料及各 Runner 場景內的 waypoint。重複生成請求保持數量。
 - NetworkMovingBox 示範 root，NetworkSwitch 示範 Networked 持續狀態與集中 RequestToggle。Prefab 現在設定於 MainGame 的 MapNetworkSetup > Scene Objects，作為場景 override。
-- 60 隻持續 600.4 秒，100 隻持續 60.6 秒，Server tick 均約 64/s。三端共處 Editor，平均影格間隔分別為 79.5 ms 與 119.3 ms。流量採 Fusion 統計取樣，完整數據與量測範圍見 soak 報告。
+- 上一輪同步測試的 60 隻持續 600.4 秒，100 隻持續 60.6 秒，Server tick 均約 64/s。三端共處 Editor，平均影格間隔分別為 79.5 ms 與 119.3 ms。流量採 Fusion 統計取樣，完整數據與量測範圍見 soak 報告。
 
 真實 HMD、CPU／GPU 與 IK 分項耗時、延遲／丟包完整矩陣仍待量測。現有 Editor 數據尚不足以判定 VR 刷新率或獨立 Server 的 tick 耗時預算。
 
-已補上三個獨立 Windows 程序的 10 項驗收，以及三組代表性 SDK 弱網測試。跨程序驗證 root、三 target、各端 60 隻與關服清理。弱網設定涵蓋每封包 50／100 ms 延遲、2%／5% 丟包與 jitter，保留實測 RTT。Windows Development 建置成功，套件及 Shader 警告仍列於驗收說明。
+上一輪同步測試包含三個獨立 Windows 程序的 10 項驗收，以及三組代表性 SDK 弱網測試。新版兩階段流程另有 Fusion_Map_Standalone_Report 的 11 項驗收。跨程序驗證 root、三 target、各端 60 隻與關服清理。弱網設定涵蓋每封包 50／100 ms 延遲、2%／5% 丟包與 jitter，保留實測 RTT。Windows Development 建置成功，套件及 Shader 警告仍列於驗收說明。
 
 ## 已確認的需求
 
@@ -96,6 +96,11 @@ LobbySessionState.prefab                 跨 Lobby／MainGame 保存
 ├─ NetworkObject
 ├─ LobbySessionState                     Phase、人數、載入回報
 └─ NetworkWorld                          玩家登記、生成／銷毀、離散操作請求
+
+每張玩法地圖一份 MapNetworkSetup
+├─ FlowSceneMarker 與玩家出生點
+├─ Network NPCs 生成器
+└─ Scene Objects 正式開始時生成清單
 
 每名玩家一個網路分身
 NetworkVRSheep / NetworkDesktopPenguin
@@ -210,16 +215,30 @@ Client 的錄製播放器和其他 target 來源按角色停用。RigBuilder、F
 | P1 集中生命週期，已完成 | 抽出 NetworkSessionController 和 NetworkWorld，搬出 LobbySessionState 的生成邏輯 | 已通過混合連線、角色登記、重連、換場和清理回歸 |
 | P2 玩家傳輸統一，已實作 | PlayerNetworkInput 與 OnInput，NetworkWorld 集中讀取 | Client 決定 root，兩端 root／target 可比對，無追蹤先生成分身 |
 | P3 三 target 共用與插值，已實作 | NetworkTargetPose 套用於 VR 和 NPC，移除重複下行 root | 基準 target 與骨架比對通過，網路抖動下的視覺觀察待驗收 |
-| P4 NPC 生命週期與規模，已實作 | spawner 接入 NetworkWorld，準備完成後分批生成 60 隻 | 60 隻生成、死亡重生、權限與重複請求通過 |
+| P4 NPC 生命週期與規模，已實作 | spawner 接入 MapNetworkSetup，由 NetworkWorld 在 Running 階段分批生成 60 隻 | 60 隻生成、死亡重生、權限與重複請求通過 |
 | P5 新物件教學，已實作 | 同步 root、互動開關、三 target 三份實例與 Inspector 欄位說明 | 生成、持續狀態及晚加入通過，使用者依說明實作新物件待驗收 |
 | P6 壓測與依賴收斂，部分完成 | 已完成 Editor 60／100 隻測試，舊骨骼同步收納 | 仍待 HMD、完整弱網矩陣及分項效能量測 |
+
+### 狀態判讀
+
+「已實作」表示程式與 Prefab 已接入。「自動測試通過」依具名 JSON 報告判定。「人工／實機待驗收」保留給裝置、外觀及使用者接入操作。舊版本的壓測資料單獨標示。
+
+| 範圍 | 實作 | 自動測試證據 | 人工／實機待驗收 |
+| --- | --- | --- | --- |
+| P0 收納與 P1 生命週期 | 已完成主要功能 | Fusion_Map_Asset、World、LoadingEdge | 舊 CCTV／ServerOnly 依賴另列 |
+| P2 玩家 Input | 已完成主要功能 | 兩種加入順序、World、Acceptance、Standalone | 實體頭盔追蹤與控制器 |
+| P3 三 target | 已完成共享元件與 snapshot 插值 | 靜止 target、完整骨架與追蹤恢復通過 | 快速轉身、大幅移動、瞬移外觀及延遲 |
+| P4 NPC | 已完成 Server 權限、生命狀態、分批生成 | 60 隻、死亡重生、晚加入及清理通過 | 新兩階段流程長測與裝置容量 |
+| P5 教學與地圖接入 | 已完成範例、MapNetworkSetup 與兩階段開始 | 複製地圖切換及兩顆按鈕通過 | 空白地圖接入與使用者自行新增物件 |
+| P6 效能與依賴 | 部分完成 | 舊流程 Editor 60 隻 10 分鐘、100 隻 1 分鐘；三組代表性弱網 | 新流程長測、完整弱網矩陣、CPU／GPU／IK 分項及頭盔 |
+| 驗收入口整理 | 已移走舊工具，保留單一指令入口 | 本次入口驗證見 Fusion_Acceptance_Entry_Report | 裝置項目沿用下方待辦 |
 
 ### P0 和 P1 的生命週期細節
 
 - [x] 每名玩家完成載入回報便登記角色，保留目前載入完成回報與 VR 無追蹤也生成的行為。Desktop 分身也改由明確的生成時點建立。
 - [x] 生成中保存 pending 狀態。SpawnAsync 返回時確認原 Runner、玩家和場景代次仍有效，過期結果在原 Runner 清理。
 - [x] 將角色在同次連線期間固定，重新加入時再設定。避免封包順序決定玩家分身種類。
-- [x] 連線完成、場景完成與玩法可執行分別檢查。維持 Start Game 的玩家載入門檻。
+- [x] 連線完成、場景完成與玩法可執行分別檢查。Load MainGame 與 Start Game 各有載入門檻，AwaitingStart 保持零 NPC。
 - [x] RPC 與 Input 只作用於來源玩家的分身。Server 自己的管理操作使用 Server 入口。
 - [x] 場景切換保留玩家分身的既有跨場景策略，清除前一場的 NPC 與場景物件，重新定位後清除舊插值。
 - [x] callback 註冊和解除配對，Shutdown 後清掉本 Runner 的生成表與快取。
@@ -232,7 +251,7 @@ Client 的錄製播放器和其他 target 來源按角色停用。RigBuilder、F
 - [x] HasPose 輸入為 false 時保留有效姿態或中立姿態，依條件恢復。缺一個封包與實際失去追蹤分開處理。
 - [x] 三 target 組成一份完整狀態，預先快取 Transform 和元件引用，查找放在初始化階段。
 - [ ] 比對實際 Render tick，測試 root 快速轉向時 target 仍附著於正確的身體位置。
-- [ ] 為首次生成、追蹤恢復、換場及瞬移寫明插值重設條件。
+- [x] 記錄首次有效姿態、追蹤中斷與換場的插值規則。人工瞬移協調及外觀測試仍列為待驗收。
 
 ### P4 和 P6 的效能量測
 
@@ -314,24 +333,49 @@ MultiplayerSetup 中指向搬移 Prefab 的字串路徑同步更新。收納清�
 
 收納完成後的檢查包含 GUID 一致、MonoScript 可載入、新舊 Prefab 引用、Missing Script、Editor 編譯、兩種加入順序與換場回歸。完整移除舊依賴須等 P1 至 P4 的對應責任完成。
 
-## 最終驗收清單
+## 驗收狀態與剩餘工作
 
-- [x] Server 先開、VR／Desktop 任一順序加入，都建立正確數量的分身。
-- [x] VR 無追蹤資料仍有分身，追蹤恢復後 head／left／right 正常更新。
-- [x] 玩家 Client 移動決定 root，Server 與其他 Client 接收到相同結果。
-- [ ] root 旋轉、快速移動及瞬移時，三 target 與完整羊模型外觀正確。
-- [x] Lobby 載入門檻、MainGame 切換、返回選單、重試及 Server 停止都通過。
-- [x] 60 隻 NPC 在每端建立，AI 由 Server 執行，所有端三 target 與血量等持續狀態一致。
-- [x] 重新開始、死亡／重生及離線清理後，NPC 與玩家數量可核對。
-- [ ] 60 隻的 10 分鐘測試和延遲／丟包矩陣留有測量結果，100 隻容量結果另列。
-- [ ] 新增實例 Prefab 能依文件完成生成、同步、互動及清理。
-- [ ] 真實頭盔追蹤、VR UI 與 IK 外觀分別留有裝置驗收。
-- [ ] Server／Client 同版本建置通過，編譯、Editor 多開、跨程序與頭盔結果分別記錄。
+### 已實作並有自動測試證據
 
-下一輪依同步驗收說明完成實體頭盔操作，量測分開執行的 Server／Client 及 IK 成本，再依瓶頸調整視覺更新率與精度。未勾選的效能與裝置項目繼續保留。
+- [x] Server 先開，VR／Desktop 任一順序加入，分身與角色正確。
+- [x] VR 無追蹤先生成分身，追蹤恢復後更新三 target。
+- [x] Client 決定 root，Server 與其他端收到姿態。
+- [x] Load MainGame 完成定位後停在 AwaitingStart，Start Game 才進入 Running 並生成 NPC。
+- [x] 載入期間有人離線仍能通過門檻，未完成載入時禁止正式開始。
+- [x] 每端 60 隻，Server AI、三 target、生命狀態、晚加入與清理通過。
+- [x] 同版本 Windows 建置及 D3D11 跨程序功能測試通過。
+- [x] 教學物件生成、開關持續狀態、地圖複本路徑切換通過。
 
+### 已有歷史量測
 
+- [x] Fusion_Sync_Soak_60_Report 留有上一輪 Editor 60 隻約 10 分鐘數據。
+- [x] Fusion_Sync_Soak_100_Report 留有上一輪 Editor 100 隻約 1 分鐘數據。
+- [x] Fusion_Sync_WeakNetwork_Report 留有三組代表條件的收斂結果。
+
+### 待自動量測或依賴整理
+
+- [ ] 新兩階段流程的 60 隻 10 分鐘與更長 100 隻容量測試。
+- [ ] 完整延遲／丟包矩陣及姿態更新間隔量測。
+- [ ] 分離程序的 CPU／GPU、Server tick 執行時間、IK、GC 與頻寬分項量測。
+- [ ] 依量測瓶頸再決定更新頻率、LOD、AOI 或資料精度調整。
+- [ ] 解除 ServerOnly 到 SessionLauncher 的兩處依賴，另行驗證 CCTV 與 Server 呈現。
+- [ ] 處理建置套件／Shader 警告與 CCTV/WebRTC 無顯示卡例外。
+
+### 待人工／實體裝置驗收
+
+- [ ] 真實頭盔、控制器、XR UI、追蹤中斷恢復與身高校正。
+- [ ] 快速 root 旋轉、大幅移動、瞬移時的三 target 與完整模型外觀。
+- [ ] 弱網下的主觀平順度與裝置 CPU／GPU frame time。
+- [ ] 從空白建立地圖，接入 MapNetworkSetup、waypoint 與 NavMesh。
+- [ ] 使用者依教學新增一個 Prefab，驗證生成、同步、互動與清理。
+
+首次生成以 HasPose 控制有效資料，追蹤中斷保留最後有效姿態，換場使用 Teleport 並重設 target epoch。完整人工瞬移協調路徑及其裝置外觀仍列於待驗收，資料收斂測試與裝置觀察各自記錄。
+
+## 舊驗收工具收納
+
+舊版單階段開始、早期姿態、診斷建置、重現及 P1 遷移工具已搬至根目錄 Recycle Bin/ConnectionFlow。舊版 Editor 建置選單與 reload token 回呼已移除，原文保存在回收桶快照。保留 Build Fusion Validation Player 作為目前驗收建置入口。
+
+搬移清單及 SHA256 見 Fusion_Acceptance_Tool_Archive_Report.json。操作索引以 Tools/ConnectionFlow/README.md 為準。歷史報告仍留在 Docs，報告本身代表當時版本的測試條件。
 ## 地圖接入與兩階段開始更新
 
 已加入 MapNetworkSetup Prefab 和 Resources/NetworkSceneSettings.asset。正式 runtime 的 Lobby、MainGame、Menu 與 Server 場景引用集中於設定資產。Server 的 Load MainGame 負責換場與玩家定位，Start Game 在所有玩家載入完成後才啟動 Running 與 NPC 生成。詳細地圖接入和驗收步驟見 Fusion_Synchronization_Acceptance_Guide.md。本輪報告使用 Fusion_Map_ 前綴。
-
