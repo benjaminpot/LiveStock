@@ -1,0 +1,172 @@
+{
+  "date": "2026-11-09T13:55:15.1801805+08:00",
+  "unity": "6000.3.25f1",
+  "fusion": "2.1.3.2390",
+  "implemented": [
+    "Runner lifecycle and Client input gateway",
+    "Room player registry, role and stage checks, spawn and cleanup",
+    "Shared root-relative three-target snapshots for VR and NPC",
+    "Server-authoritative NPC AI and life state, batched 60-NPC generation",
+    "Root mover and persistent interactive switch examples"
+  ],
+  "tests": [
+    {
+      "report": "Fusion_Sync_VRFirst_Report.json",
+      "passed": 16
+    },
+    {
+      "report": "Fusion_Sync_DesktopFirst_Report.json",
+      "passed": 15
+    },
+    {
+      "report": "Fusion_Sync_World_Report.json",
+      "passed": 15
+    },
+    {
+      "report": "Fusion_Sync_Acceptance_Report.json",
+      "passed": 20
+    },
+    {
+      "report": "Fusion_Sync_Standalone_Report.json",
+      "passed": 10
+    }
+  ],
+  "loadingEdgeChecks": [
+    true,
+    true,
+    true,
+    true
+  ],
+  "weakNetworkCases": [
+    {
+      "pass": true,
+      "configuredPacketDelayMs": 0.0,
+      "configuredLoss": 0.0,
+      "configuredJitterMs": 0.0,
+      "observedAverageClientRttMs": 76.54134500000006,
+      "convergenceSeconds": 0.2287671,
+      "maximumStaticPositionErrorMetres": 0.000586172042,
+      "npcCountPerRunner": 60,
+      "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+    },
+    {
+      "pass": true,
+      "configuredPacketDelayMs": 50.0,
+      "configuredLoss": 0.02,
+      "configuredJitterMs": 10.0,
+      "observedAverageClientRttMs": 229.12633000000042,
+      "convergenceSeconds": 0.21741919999999998,
+      "maximumStaticPositionErrorMetres": 0.000586172042,
+      "npcCountPerRunner": 60,
+      "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+    },
+    {
+      "pass": true,
+      "configuredPacketDelayMs": 100.0,
+      "configuredLoss": 0.05,
+      "configuredJitterMs": 20.0,
+      "observedAverageClientRttMs": 230.4304975000001,
+      "convergenceSeconds": 0.468273,
+      "maximumStaticPositionErrorMetres": 0.000586172042,
+      "npcCountPerRunner": 60,
+      "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+    }
+  ],
+  "soak60": {
+    "npcCount": 60,
+    "seconds": 600.4269002,
+    "frames": 7559,
+    "averageFrameMs": 79.4521942,
+    "p95FrameMs": 101.4153,
+    "observedServerTicksPerSecond": 64.02438273400932,
+    "minNpcs": 60,
+    "peerCount": 3,
+    "allocatedMemoryDeltaBytes": -4266536,
+    "sampledTraffic": [
+      {
+        "runner": "Lobby Server Runner",
+        "inBytesPerSecond": 4138.231976271253,
+        "outBytesPerSecond": 54103.25521097186
+      },
+      {
+        "runner": "Desktop Client 1 Runner",
+        "inBytesPerSecond": 27065.934188659554,
+        "outBytesPerSecond": 1527.5118016588365
+      },
+      {
+        "runner": "ConnectionManager Runner",
+        "inBytesPerSecond": 27065.93412104304,
+        "outBytesPerSecond": 2610.736076873033
+      }
+    ],
+    "errors": [],
+    "scope": "All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."
+  },
+  "soak100": {
+    "npcCount": 100,
+    "seconds": 60.627323999999994,
+    "frames": 512,
+    "averageFrameMs": 119.255135,
+    "p95FrameMs": 143.8981,
+    "observedServerTicksPerSecond": 64.0140367063513,
+    "minNpcs": 100,
+    "peerCount": 3,
+    "allocatedMemoryDeltaBytes": 20415881,
+    "sampledTraffic": [
+      {
+        "runner": "Lobby Server Runner",
+        "inBytesPerSecond": 2482.1956930756005,
+        "outBytesPerSecond": 34475.25506082074
+      },
+      {
+        "runner": "Desktop Client 1 Runner",
+        "inBytesPerSecond": 17222.159831598394,
+        "outBytesPerSecond": 919.6924272346746
+      },
+      {
+        "runner": "ConnectionManager Runner",
+        "inBytesPerSecond": 17222.159519128683,
+        "outBytesPerSecond": 1567.942040551813
+      }
+    ],
+    "errors": [],
+    "scope": "All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."
+  },
+  "build": {
+    "result": "Succeeded",
+    "totalErrors": 0,
+    "totalWarnings": 190,
+    "size": 373732066,
+    "seconds": 60.261168,
+    "output": "Builds/FusionValidation/LiveStockFusion.exe",
+    "errors": []
+  },
+  "archive": {
+    "assetGuidChecks": 16,
+    "prefabChecks": 16,
+    "sceneChecks": 2,
+    "report": "Fusion_Sync_Asset_Report.json",
+    "decision": "Original cow and sheep local previews were grouped intact under inactive MainGame Recycle Bin to keep network counts unambiguous."
+  },
+  "pending": [
+    "Physical headset, controllers and XR UI acceptance",
+    "Rendered standalone Client CPU/GPU and IK profiling",
+    "Full RTT/loss matrix and observed visual smoothness",
+    "Package/shader build warnings including Meta FusionAvatarSdk28Plus prefab missing script"
+  ],
+  "guide": "Fusion_Synchronization_Acceptance_Guide.md",
+  "finalCompilation": {
+    "errors": [],
+    "status": "completed",
+    "failed": false
+  },
+  "restoredEditorState": {
+    "preloadedAssets": 0,
+    "simulatedNetwork": false,
+    "controllers": 0,
+    "xrStartup": true,
+    "standalonePlayers": 0,
+    "playing": false,
+    "peerMode": "Single"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "npcCount": 100,
+  "seconds": 60.627323999999994,
+  "frames": 512,
+  "averageFrameMs": 119.255135,
+  "p95FrameMs": 143.8981,
+  "observedServerTicksPerSecond": 64.0140367063513,
+  "minNpcs": 100,
+  "peerCount": 3,
+  "allocatedMemoryDeltaBytes": 20415881,
+  "sampledTraffic": [
+    {
+      "runner": "Lobby Server Runner",
+      "inBytesPerSecond": 2482.1956930756005,
+      "outBytesPerSecond": 34475.255060820738
+    },
+    {
+      "runner": "Desktop Client 1 Runner",
+      "inBytesPerSecond": 17222.159831598394,
+      "outBytesPerSecond": 919.6924272346746
+    },
+    {
+      "runner": "ConnectionManager Runner",
+      "inBytesPerSecond": 17222.159519128683,
+      "outBytesPerSecond": 1567.9420405518131
+    }
+  ],
+  "errors": [],
+  "scope": "All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."
+}

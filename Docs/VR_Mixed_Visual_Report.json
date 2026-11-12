@@ -1,0 +1,20 @@
+[
+  {
+    "runner": "Lobby Server Runner",
+    "root": "(12.00, 2.02, -12.00)",
+    "maxDistance": 1.53661573,
+    "targets": true
+  },
+  {
+    "runner": "Desktop Client 2 Runner",
+    "root": "(12.00, 2.02, -12.00)",
+    "maxDistance": 1.53661561,
+    "targets": true
+  },
+  {
+    "runner": "VR Client 1 (no headset) Runner",
+    "root": "(12.00, 2.02, -12.00)",
+    "maxDistance": 1.53661573,
+    "targets": true
+  }
+]

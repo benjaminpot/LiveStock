@@ -1,0 +1,75 @@
+[
+  {
+    "test": "Desktop opens at disconnected Menu without a Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Manual connect without Server fails",
+    "pass": true,
+    "evidence": "Connection failed: GameNotFound"
+  },
+  {
+    "test": "Starting Server leaves Client disconnected",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Second Desktop opens disconnected with its own prefab",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "F2 selects Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "F2 selects first Client",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "F2 selects second Client",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server and both clients each receive two penguins",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Selected PC moves and replicated penguin matches on all peers",
+    "pass": true,
+    "evidence": {
+      "error": 0.000460663839,
+      "replicas": 3
+    }
+  },
+  {
+    "test": "Penguin meshes remain attached to their player roots",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Deselected PC ignores shared keyboard",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both players and penguins survive MainGame",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Disconnect returns only selected peer to Menu and removes its penguin",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Stopping Server disconnects remaining Client",
+    "pass": true,
+    "evidence": null
+  }
+]

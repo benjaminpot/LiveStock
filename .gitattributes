@@ -69,7 +69,7 @@
 Assets/Plugins/**           linguist-generated
 Packages/packages-lock.json linguist-generated
 
-# Unity binary
+# Unity binary assets
 *.cubemap               binary
 *.unitypackage          binary
 

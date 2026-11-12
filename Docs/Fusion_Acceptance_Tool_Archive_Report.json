@@ -1,0 +1,87 @@
+[
+  {
+    "from": "Tools/ConnectionFlow/Build-Test.ps1",
+    "to": "Recycle Bin/ConnectionFlow/Build-Test.ps1",
+    "sha256": "16B66113132D84CFF61FB59AC309B895812675E73BCCDC0F26B9CB08B43626A8"
+  },
+  {
+    "from": "Tools/ConnectionFlow/ConfigureNetworkWorld.cs",
+    "to": "Recycle Bin/ConnectionFlow/ConfigureNetworkWorld.cs",
+    "sha256": "D7FC271ABB4FE3EDA12BBA3F95B55B279E3D70F8214BB889ADF10AD7E7C5BA52"
+  },
+  {
+    "from": "Tools/ConnectionFlow/FlowAcceptance.cs",
+    "to": "Recycle Bin/ConnectionFlow/FlowAcceptance.cs",
+    "sha256": "64454D6EB317CC87DF91B1A2346C92B2C738D63D96D204428F0570C9BD62335F"
+  },
+  {
+    "from": "Tools/ConnectionFlow/FlowDesktopControls.cs",
+    "to": "Recycle Bin/ConnectionFlow/FlowDesktopControls.cs",
+    "sha256": "2102C7BE11CED6136F7A5DAF4333B5B6473083EEE31968AE220E8266573D7705"
+  },
+  {
+    "from": "Tools/ConnectionFlow/FlowExternalClient.cs",
+    "to": "Recycle Bin/ConnectionFlow/FlowExternalClient.cs",
+    "sha256": "D04EB254DA3EB619DAD84B419DFBE63FBDEFAE1E487536B1C14232543F39F304"
+  },
+  {
+    "from": "Tools/ConnectionFlow/FlowLoadingEdges.cs",
+    "to": "Recycle Bin/ConnectionFlow/FlowLoadingEdges.cs",
+    "sha256": "1F42A10B163B33B6635199B27FB4678621517DE7E074FDBF479B242401B9C816"
+  },
+  {
+    "from": "Tools/ConnectionFlow/FlowSingleReturn.cs",
+    "to": "Recycle Bin/ConnectionFlow/FlowSingleReturn.cs",
+    "sha256": "6136E3578CB4E8D1B882162C23BACBE7FEEAAF92620E1CE190DB516592F188DA"
+  },
+  {
+    "from": "Tools/ConnectionFlow/IndependentServerEntryCheck.cs",
+    "to": "Recycle Bin/ConnectionFlow/IndependentServerEntryCheck.cs",
+    "sha256": "D9D39D8242F2D38DCFED59BE5AAE35F13CB520333D0F8A5DF514E12292420DF7"
+  },
+  {
+    "from": "Tools/ConnectionFlow/MixedVRRepro.cs",
+    "to": "Recycle Bin/ConnectionFlow/MixedVRRepro.cs",
+    "sha256": "286BB1A57E101B54B267275CA0879F7710229C87D101BBB174ECB367FF9363A7"
+  },
+  {
+    "from": "Tools/ConnectionFlow/SimplePeerAcceptance.cs",
+    "to": "Recycle Bin/ConnectionFlow/SimplePeerAcceptance.cs",
+    "sha256": "1E3DF28D672BBB5354430F7A7DAC4EFB6B22D020B97264C3DDE91A2C10A0A48C"
+  },
+  {
+    "from": "Tools/ConnectionFlow/VRExternalMixedAcceptance.cs",
+    "to": "Recycle Bin/ConnectionFlow/VRExternalMixedAcceptance.cs",
+    "sha256": "06A3C05834E437B1680052805E91426071DDDC3E015324382E176885A999C38C"
+  },
+  {
+    "from": "Tools/ConnectionFlow/VRMenuSceneAcceptance.cs",
+    "to": "Recycle Bin/ConnectionFlow/VRMenuSceneAcceptance.cs",
+    "sha256": "E3740D9766E277DBF40F5C6615E0761825D429FB423A180862AB5D079ED48841"
+  },
+  {
+    "from": "Tools/ConnectionFlow/VRMixedAcceptance.cs",
+    "to": "Recycle Bin/ConnectionFlow/VRMixedAcceptance.cs",
+    "sha256": "47B7EAC6CFDE6D0FA92332EF34E04018012E7A35019DD3F3357E398220DC0EA9"
+  },
+  {
+    "from": "Tools/ConnectionFlow/VRMixedVisualDemo.cs",
+    "to": "Recycle Bin/ConnectionFlow/VRMixedVisualDemo.cs",
+    "sha256": "036BAC29709654E10FAE97122A71593AA29D786B4039186511631E51CD3FD95F"
+  },
+  {
+    "from": "Docs/VR_Lobby_Test_Guide.md",
+    "to": "Recycle Bin/ConnectionFlow/Docs/VR_Lobby_Test_Guide.md",
+    "sha256": "71A17110790893C7E238367F6446D70CE85E81CA212F1826BC443289590ECF60"
+  },
+  {
+    "from": "Docs/VR_Mixed_Connection_Guide.md",
+    "to": "Recycle Bin/ConnectionFlow/Docs/VR_Mixed_Connection_Guide.md",
+    "sha256": "D829B98CCC28F8A919FE452CDC6E0895123E4986A9BEAA28CBE7AD68541C7D0F"
+  },
+  {
+    "from": "Assets/_Project/Scripts/Multiplayer/Editor/LocalConnectionTestTools.cs (snapshot before removing legacy build)",
+    "to": "Recycle Bin/ConnectionFlow/LocalConnectionTestTools.BeforeCleanup.cs.txt",
+    "sha256": "80B089560777001E9F23617904EB068162EB029A3658FE45B3FE900072589F94"
+  }
+]

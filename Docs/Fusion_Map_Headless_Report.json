@@ -1,0 +1,87 @@
+[
+  {
+    "test": "Three independent Players start with zero Lobby NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop joins the independent Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both roles replicate across three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-selected roots reach the other Client",
+    "pass": true,
+    "evidence": 0.00039064884185791016
+  },
+  {
+    "test": "All three VR targets reach Server and Desktop",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "Loaded map waits with zero NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "All processes enter MainGame and receive 60 NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Independent processes remain connected with stable NPC count",
+    "pass": true,
+    "evidence": {
+      "minimumNPCs": 60,
+      "peers": [
+        {
+          "role": "server",
+          "npcs": 60,
+          "frame": 2592,
+          "averageFrameIntervalMs": 17.198762893676758,
+          "allocatedBytes": 115297013
+        },
+        {
+          "role": "desktop",
+          "npcs": 60,
+          "frame": 2616,
+          "averageFrameIntervalMs": 16.991580963134766,
+          "allocatedBytes": 123422870
+        },
+        {
+          "role": "vr-preview",
+          "npcs": 60,
+          "frame": 2646,
+          "averageFrameIntervalMs": 17.02161407470703,
+          "allocatedBytes": 122984652
+        }
+      ],
+      "observedServerTicksPerSecond": 63.282217196436065,
+      "seconds": 30.3864632,
+      "scope": "Three headless Development Players on one Windows computer. Frame intervals include the 60 FPS cap and startup. GPU and HMD are unmeasured."
+    }
+  },
+  {
+    "test": "Server continues accepting inputs during NPC simulation",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Stopping Server disconnects both Clients and removes NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Player logs contain no detected runtime exceptions or render-pass errors",
+    "pass": false,
+    "evidence": [
+      "ArgumentException: Graphics device type Null not supported"
+    ]
+  }
+]

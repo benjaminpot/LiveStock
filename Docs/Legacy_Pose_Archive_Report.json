@@ -1,0 +1,32 @@
+[
+  {
+    "from": "Assets/_Project/Scripts/Multiplayer/NetworkSheepRig.cs",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkSheepRig.cs",
+    "guid": "c633672a26180394cb9feae64cbd201a"
+  },
+  {
+    "from": "Assets/_Project/Scripts/Multiplayer/NetworkSheepSelectable.cs",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkSheepSelectable.cs",
+    "guid": "0a75bd31c3703384c81afe7ea62fe74a"
+  },
+  {
+    "from": "Assets/_Project/Editor/NetworkSheepRigSetup.cs",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/NetworkSheepRigSetup.cs",
+    "guid": "9df87bcd9e1ec6a439e28b4ccac665b7"
+  },
+  {
+    "from": "Assets/_Project/Editor/RandomNPCSpawnerSetup.cs",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/RandomNPCSpawnerSetup.cs",
+    "guid": "71bfc1f603a377f43957634c51d5768e"
+  },
+  {
+    "from": "Assets/Prefabs/Networked/NetworkSK_Sheep_white_final.prefab",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkSK_Sheep_white_final.prefab",
+    "guid": "c09a1432141fd2d44b2334755513fd66"
+  },
+  {
+    "from": "Assets/_Project/Prefabs/Multiplayer/RandomNPCSpawner.prefab",
+    "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RandomNPCSpawner.prefab",
+    "guid": "e2cf3736e9a75a14abb0355ef68e8a25"
+  }
+]

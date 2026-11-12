@@ -1,0 +1,9 @@
+{
+  "lobbyLoadingBlocksStart": true,
+  "clientCannotStart": true,
+  "departedLobbyLoaderRemoved": true,
+  "departedMainGameLoaderRemoved": true,
+  "phase": "InMainGame",
+  "players": 1,
+  "loaded": 1
+}

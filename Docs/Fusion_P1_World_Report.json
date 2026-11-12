@@ -1,0 +1,77 @@
+[
+  {
+    "test": "Client connects through the shared session controller",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop avatar exists before its pose sender runs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Each peer owns one controller and one Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "World lookup is scoped to its Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client cannot register authoritative avatars",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "A registered player cannot change role",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "A Desktop sender's VR pose cannot move its avatar",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Repeated Connect does not create another Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Unready players block Start Game and have no registered avatar",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Repeated shutdown shares the same operation",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Disconnect removes the registration and network avatar",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Disconnected Client can reconnect with a fresh Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Scene loading keeps exactly one registered avatar",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-owned root updates resume after MainGame",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Shutdown leaves no Runner controllers",
+    "pass": true,
+    "evidence": null
+  }
+]

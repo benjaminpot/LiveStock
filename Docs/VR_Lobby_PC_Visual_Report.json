@@ -1,0 +1,9 @@
+{
+  "connected": true,
+  "stage": 2,
+  "canControl": true,
+  "uiText": "InMainGame | Players: 1 | Loaded: 1/1\nPC: WASD move | RMB look | Q/E down/up | Shift fast",
+  "overflow": false,
+  "cameraEnabled": true,
+  "activeNavAgents": 0
+}

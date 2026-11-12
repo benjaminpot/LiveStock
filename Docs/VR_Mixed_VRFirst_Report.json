@@ -1,0 +1,84 @@
+[
+  {
+    "test": "VR-first VR role has calibrated source and explicit device-free mode",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR-first ContextMenu Connect reports missing Server",
+    "pass": true,
+    "evidence": "Connection failed: GameNotFound"
+  },
+  {
+    "test": "VR-first Real Server and both Clients stay connected",
+    "pass": true,
+    "evidence": {
+      "players": 2,
+      "loaded": 2
+    }
+  },
+  {
+    "test": "VR-first One sheep and one penguin per Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR-first Remote sheep is free of cameras and XR managers",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR-first Tracked head and both hands reach all network replicas",
+    "pass": true,
+    "evidence": {
+      "head": 0.0,
+      "left": 0.0,
+      "right": 0.0
+    }
+  },
+  {
+    "test": "VR-first Replicated poses drive existing sheep IK targets",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "VR-first Sheep skeleton responds after target movement",
+    "pass": true,
+    "evidence": 6.55527
+  },
+  {
+    "test": "VR-first Desktop penguin keeps syncing while VR view is selected",
+    "pass": true,
+    "evidence": 0.0004368387
+  },
+  {
+    "test": "VR-first Same sheep and mixed players survive shared scene change",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR-first Sheep mesh remains aligned with its network root after loading",
+    "pass": true,
+    "evidence": 1.71397054
+  },
+  {
+    "test": "VR-first VR root follows the loaded scene spawn",
+    "pass": true,
+    "evidence": 0.000468730927
+  },
+  {
+    "test": "VR-first VR exit removes only its sheep and preserves Desktop",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR-first VR ContextMenu rejects closed game",
+    "pass": true,
+    "evidence": "Connection failed: GameClosed"
+  },
+  {
+    "test": "VR-first Actual disconnect clears Desktop connection state",
+    "pass": true,
+    "evidence": null
+  }
+]

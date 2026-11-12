@@ -1,0 +1,11 @@
+{
+  "formalStartBlocked": true,
+  "readyWithoutNPCs": true,
+  "lobbyLoadingBlocksStart": true,
+  "clientCannotStart": true,
+  "departedLobbyLoaderRemoved": true,
+  "departedMainGameLoaderRemoved": true,
+  "phase": "AwaitingStart",
+  "players": 1,
+  "loaded": 1
+}

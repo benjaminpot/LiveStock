@@ -1,0 +1,25 @@
+{
+  "vrConnected": true,
+  "pcConnected": true,
+  "players": 2,
+  "loaded": 2,
+  "menuScene": true,
+  "localServers": 0,
+  "headError": 0.0,
+  "pcError": 0.0004368387,
+  "head": [
+    0.343999863,
+    1.31999993,
+    0.91899997
+  ],
+  "left": [
+    -0.258999825,
+    1.723,
+    0.888
+  ],
+  "right": [
+    -0.0909996,
+    1.823,
+    1.535
+  ]
+}
