@@ -39,18 +39,42 @@ export class CCTVPanel {
     this.reset();
     this.channel = channel;
     this.setConnection('WAITING FOR FEED');
-    channel.addEventListener('open', () => {
-      if (this.channel === channel) this.send({ type: 'cctv-ready' });
-    });
+    let readySent = false;
     channel.addEventListener('message', event => {
       if (this.channel !== channel) return;
       let state;
       try { state = JSON.parse(event.data); } catch { return; }
-      if (state.type === 'cctv-fire-result') {
+      if (state?.type === 'money-state') {
+        this.onMoneyState?.(state);
+        return;
+      }
+      if (state?.type === 'shop-state') {
+        this.onShopState?.(state);
+        return;
+      }
+      if (state?.type === 'shop-result') {
+        this.onShopResult?.(state);
+        return;
+      }
+      if (state?.type === 'item-state') {
+        this.onItemState?.(state);
+        return;
+      }
+      if (state?.type === 'item-result') {
+        this.onItemResult?.(state);
+        return;
+      }
+      if (state?.type === 'cctv-fire-result') {
         this.onFireResult?.(state);
         return;
       }
-      if (state.type !== 'cctv-state' || !Array.isArray(state.monitors)) return;
+      if (state?.type !== 'cctv-state' || !Array.isArray(state.monitors)) return;
+      if (!readySent) {
+        // A server snapshot proves its channel callbacks are installed.
+        // Send the existing handshake once, not before Unity can receive it.
+        readySent = true;
+        this.send({ type: 'cctv-ready' });
+      }
       this.state = state;
       this.render();
       this.onState?.(state);
@@ -58,11 +82,16 @@ export class CCTVPanel {
     channel.addEventListener('close', () => {
       if (this.channel === channel) this.reset();
     });
-    if (channel.readyState === 'open') this.send({ type: 'cctv-ready' });
   }
 
   send(command) {
-    if (this.channel?.readyState === 'open') this.channel.send(JSON.stringify(command));
+    if (this.channel?.readyState !== 'open') return false;
+    try {
+      this.channel.send(JSON.stringify(command));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   setConnection(text) {

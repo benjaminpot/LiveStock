@@ -6,6 +6,10 @@ import { Signaling, WebSocketSignaling } from "../../module/signaling.js";
 import { CCTVPanel } from "./cctv-panel.js";
 import { CCTVVideo } from "./cctv-video.js";
 import { CCTVAim } from "./cctv-aim.js";
+import { MoneyPanel } from "./money-panel.js";
+import { ShopPanel } from "./shop-panel.js";
+import { InventoryPanel } from "./inventory-panel.js";
+import { ItemUseController } from "./item-use-controller.js";
 import { sfx } from "./sfx.js";
 
 /** @type {Element} */
@@ -26,12 +30,48 @@ const lockMouseCheck = document.getElementById('lockMouseCheck');
 const videoPlayer = new VideoPlayer();
 const cctvPanel = new CCTVPanel(document.getElementById('cctvPanel'), document.getElementById('cctvBlackout'));
 const cctvVideo = new CCTVVideo(videoPlayer, document.getElementById('secondaryVideo'));
+const moneyPanel = new MoneyPanel(document.querySelector('[data-money-panel]'));
+const shopPanel = new ShopPanel(document.querySelector('[data-shop-panel]'),
+  command => cctvPanel.send(command));
+const inventoryPanel = new InventoryPanel(document.querySelector('[data-inventory-panel]'));
 const cctvAim = new CCTVAim(
   [...document.querySelectorAll('.cctv-screen')],
   document.getElementById('fireResult'),
-  command => cctvPanel.send(command));
-cctvPanel.onFireResult = result => cctvAim.showResult(result);
-cctvPanel.onReset = () => cctvAim.reset();
+  command => itemUseController.fire(command));
+const itemUseHints = [...document.querySelectorAll('[data-item-use-hint]')]
+  .map(element => ({ element, legacyText: element.textContent }));
+const itemUseController = new ItemUseController({
+  send: command => cctvPanel.send(command),
+  getSelectedItemId: () => inventoryPanel.selectedItemId,
+  onResult: result => cctvAim.showResult(result),
+  onFeedback: text => cctvAim.showFeedback(text),
+  onModeChange: active => {
+    for (const { element, legacyText } of itemUseHints) {
+      element.textContent = active
+        ? '球形投射物測試：選取道具後點監視器畫面使用；捕捉、射線與範圍爆炸尚未接入。'
+        : legacyText;
+    }
+    if (active) cctvAim.result.textContent = 'Select an inventory item, then click inside the video';
+  }
+});
+cctvPanel.onFireResult = result => {
+  if (!itemUseController.active) cctvAim.showResult(result);
+};
+cctvPanel.onItemState = state => itemUseController.setState(state);
+cctvPanel.onItemResult = result => itemUseController.showResult(result);
+cctvPanel.onMoneyState = state => moneyPanel.setState(state);
+cctvPanel.onShopState = state => {
+  shopPanel.setState(state);
+  inventoryPanel.setState(state);
+};
+cctvPanel.onShopResult = result => shopPanel.showResult(result);
+cctvPanel.onReset = () => {
+  cctvAim.reset();
+  itemUseController.reset();
+  moneyPanel.reset();
+  shopPanel.reset();
+  inventoryPanel.reset();
+};
 cctvPanel.onState = state => {
   cctvVideo.setState(state);
   videoPlayer.resizeVideo();

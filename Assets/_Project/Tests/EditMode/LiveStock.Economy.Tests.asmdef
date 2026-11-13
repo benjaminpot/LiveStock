@@ -1,0 +1,12 @@
+{
+  "name": "LiveStock.Economy.Tests",
+  "references": [
+    "LiveStock.Economy"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

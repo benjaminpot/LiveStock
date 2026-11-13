@@ -68,6 +68,25 @@
         </section>
 
         <section id="cctvPanel" class="control-deck" aria-label="CCTV controls">
+          <div class="money-panel" data-money-panel role="status" aria-live="polite" hidden>
+            <span>餘額</span>
+            <strong data-money-balance>—</strong>
+          </div>
+          <section class="inventory-panel" data-inventory-panel aria-label="個人物品欄" hidden>
+            <div class="inventory-header">
+              <h2>物品欄</h2>
+              <button type="button" data-inventory-clear disabled>取消選取</button>
+            </div>
+            <div class="inventory-slots" aria-label="選取持有的物品">
+              <button type="button" data-inventory-item="capture-ball" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+              <button type="button" data-inventory-item="bow" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+              <button type="button" data-inventory-item="sniper" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+              <button type="button" data-inventory-item="bomb" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+            </div>
+            <p class="inventory-empty" data-inventory-empty hidden>尚無道具，請先到商店購買。</p>
+            <p class="inventory-status" data-inventory-status role="status" aria-live="polite">等待伺服器物品資料</p>
+            <p class="inventory-hint">道具數量以伺服器資料為準；選取不會消耗道具。</p>
+          </section>
           <div class="section-heading">
             <div><span class="eyebrow">CAMERA NETWORK</span><h2 id="cameras">Select a feed</h2></div>
             <div class="cooldown-card" data-cooldown-card>
@@ -86,7 +105,7 @@
             <div class="interaction-copy">
               <span class="eyebrow">LIVE INTERACTION</span>
               <strong id="fireResult" role="status">Click inside the video to fire</strong>
-              <small>Place the pointer on a sheep. The shot fires immediately on click.</small>
+              <small data-item-use-hint>Place the pointer on a sheep. The shot fires immediately on click.</small>
             </div>
             <span class="instant-fire-badge"><b>◎</b> CLICK TO FIRE</span>
           </div>
@@ -116,14 +135,15 @@
           </form>
         </section>
 
-        <section id="store" class="store-panel" aria-label="Hunting gear store">
+        <section id="store" class="store-panel" data-shop-panel aria-label="Hunting gear store and inventory">
           <div class="store-header"><div><span class="eyebrow">ARSENAL</span><h2>Hunting Gear</h2></div><span>4 ITEMS</span></div>
           <div class="store-grid">
-            <article class="store-item"><span class="item-icon">◉</span><div><h3>寶貝球 <small>CAPTURE BALL</small></h3><p>Arc throw</p></div><strong>100</strong><button type="button" disabled>COMING SOON</button></article>
-            <article class="store-item"><span class="item-icon">➶</span><div><h3>弓箭 <small>BOW</small></h3><p>Slow projectile</p></div><strong>100</strong><button type="button" disabled>COMING SOON</button></article>
-            <article class="store-item rare"><span class="item-icon">⌖</span><div><h3>狙擊槍 <small>SNIPER</small></h3><p>Point-and-hit</p></div><strong>599</strong><button type="button" disabled>COMING SOON</button></article>
-            <article class="store-item rare"><span class="item-icon">✹</span><div><h3>炸彈 <small>BOMB</small></h3><p>Arc · area damage</p></div><strong>599</strong><button type="button" disabled>COMING SOON</button></article>
+            <article class="store-item" data-shop-item="capture-ball"><span class="item-icon">◉</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+            <article class="store-item" data-shop-item="bow"><span class="item-icon">➶</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+            <article class="store-item rare" data-shop-item="sniper"><span class="item-icon">⌖</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+            <article class="store-item rare" data-shop-item="bomb"><span class="item-icon">✹</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
           </div>
+          <p data-shop-status role="status" aria-live="polite">商店尚未開放，等待伺服器商品資料。</p>
         </section>
       </aside>
     </main>

@@ -1,0 +1,12 @@
+{
+  "name": "LiveStock.ItemPhysics.Tests",
+  "references": [
+    "LiveStock.Economy"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

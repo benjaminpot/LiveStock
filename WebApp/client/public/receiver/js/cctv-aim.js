@@ -20,6 +20,14 @@ export function formatFireResult(message) {
     : message.status === 'hit' ? `Hit confirmed: ${message.objectName}`
     : message.status === 'launched' ? 'Projectile launched'
     : message.status === 'miss' ? 'Missed · projectile cleared'
+    : message.status === 'item-required' ? 'Select an inventory item to use this feed'
+    : message.status === 'no-stock' ? 'No stock · select another inventory item'
+    : message.status === 'invalid-item' ? 'Item unavailable · select another inventory item'
+    : message.status === 'invalid-request' ? 'Invalid item request · reacquire target'
+    : message.status === 'unknown-player' ? 'Player not ready · reconnect to use items'
+    : message.status === 'cooldown' ? 'Item cooling down · try again'
+    : message.status === 'stale-request' ? 'Item request expired · try again'
+    : message.status === 'unavailable' ? 'Item use unavailable · reacquire target'
     : 'Feed changed or unavailable · reacquire target';
 }
 
@@ -46,12 +54,13 @@ export class CCTVAim {
         }
         const now = performance.now();
         if (now - this.lastFireAt < 200) return;
+        const aim = { slot, index, ...point };
+        if (this.send({ type: 'cctv-fire', ...aim }) === false) return;
         this.lastFireAt = now;
-        this.aim = { slot, index, ...point };
+        this.aim = aim;
         this.result.textContent = 'Target locked · firing…';
         this.render();
         sfx.play('shoot');
-        this.send({ type: 'cctv-fire', ...this.aim });
       });
     }
     this.reset();
@@ -75,9 +84,15 @@ export class CCTVAim {
     this.result.textContent = formatFireResult(message);
   }
 
+  showFeedback(text) {
+    this.result.textContent = text;
+    sfx.play('unavailable');
+  }
+
   reset() {
     this.state = null;
     this.aim = null;
+    this.lastFireAt = Number.NEGATIVE_INFINITY;
     this.result.textContent = 'Click inside the video to fire';
     this.render();
   }

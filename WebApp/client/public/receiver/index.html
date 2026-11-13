@@ -31,6 +31,25 @@
     </div>
 
     <section id="cctvPanel" aria-label="監視器控制">
+      <div class="money-panel" data-money-panel role="status" aria-live="polite" hidden>
+        <span>餘額</span>
+        <strong data-money-balance>—</strong>
+      </div>
+      <section class="inventory-panel" data-inventory-panel aria-label="個人物品欄" hidden>
+        <div class="inventory-header">
+          <h2>物品欄</h2>
+          <button type="button" data-inventory-clear disabled>取消選取</button>
+        </div>
+        <div class="inventory-slots" aria-label="選取持有的物品">
+          <button type="button" data-inventory-item="capture-ball" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+          <button type="button" data-inventory-item="bow" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+          <button type="button" data-inventory-item="sniper" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+          <button type="button" data-inventory-item="bomb" aria-pressed="false" disabled><span data-inventory-name>—</span><span class="inventory-count">持有 <b data-inventory-quantity>—</b></span></button>
+        </div>
+        <p class="inventory-empty" data-inventory-empty hidden>尚無道具，請先到商店購買。</p>
+        <p class="inventory-status" data-inventory-status role="status" aria-live="polite">等待伺服器物品資料</p>
+        <p class="inventory-hint">道具數量以伺服器資料為準；選取不會消耗道具。</p>
+      </section>
       <p data-connection role="status">尚未連線</p>
       <p>目前鏡頭：<strong data-current>—</strong>　切換冷卻：<span data-cooldown>—</span></p>
       <button type="button" data-next disabled>下一台監視器</button>
@@ -43,7 +62,18 @@
       <p data-secondary-current hidden></p>
       <div data-monitors></div>
       <p id="fireResult" role="status">點擊影片即可發射</p>
-      <p>操作方式：連線成功後，直接點擊監視器影片內的羊；系統會在「＋」準星位置立即發射。命中羊會造成擊殺，約 3 秒後重生。</p>
+      <p data-item-use-hint>操作方式：連線成功後，直接點擊監視器影片內的羊；系統會在「＋」準星位置立即發射。命中羊會造成擊殺，約 3 秒後重生。</p>
+    </section>
+
+    <section class="shop-panel" data-shop-panel aria-label="商店與個人庫存">
+      <h2>商店與庫存</h2>
+      <div class="shop-grid">
+        <article data-shop-item="capture-ball"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+        <article data-shop-item="bow"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+        <article data-shop-item="sniper"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+        <article data-shop-item="bomb"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+      </div>
+      <p data-shop-status role="status" aria-live="polite">商店尚未開放，等待伺服器商品資料。</p>
     </section>
 
     <div class="box">

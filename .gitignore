@@ -115,3 +115,7 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# WebApp client dependencies and generated test coverage
+/WebApp/client/node_modules/
+/WebApp/client/coverage/

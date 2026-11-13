@@ -107,3 +107,43 @@ body {
   width: 140px;
   accent-color: #bc4a22;
 }
+
+.money-panel:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  min-width: 0;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid currentColor;
+}
+
+.money-panel strong {
+  min-width: 0;
+  max-width: 100%;
+  font-size: clamp(20px, 5vw, 28px);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.shop-panel { margin: 1rem 0; padding: 0.75rem; border: 1px solid currentColor; }
+.shop-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.shop-grid article { min-width: 0; padding: 0.5rem; border: 1px solid #888; }
+.shop-grid h3 { margin: 0 0 0.5rem; }
+.shop-grid p, [data-shop-status] { font-size: 14px; overflow-wrap: anywhere; }
+.shop-grid button { width: 100%; min-height: 44px; white-space: normal; }
+[data-shop-price], [data-shop-quantity] { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.inventory-panel { min-width: 0; margin: 1rem 0; padding: 0.75rem; border: 1px solid currentColor; }
+.inventory-panel[hidden] { display: none; }
+.inventory-header { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; }
+.inventory-header h2 { margin: 0; font-size: 18px; }
+.inventory-slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+#cctvPanel .inventory-slots button { display: flex; flex-direction: column; justify-content: center; gap: 0.5rem; width: 100%; min-width: 0; min-height: 70px; padding: 0.5rem 0.2rem; border: 1px solid currentColor; font-size: 12px; overflow-wrap: anywhere; }
+.inventory-slots button[aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: -3px; font-weight: bold; }
+.inventory-slots button:disabled { opacity: 0.5; }
+.inventory-count { font-size: 11px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.inventory-status, .inventory-empty, .inventory-hint { margin: 0.75rem 0 0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.inventory-hint { font-size: 12px; }

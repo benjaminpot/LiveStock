@@ -24,6 +24,10 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     [Tooltip("The existing Video Stream Sender provides settings for each connection's own sender.")]
     [SerializeField] private VideoStreamSender videoSender;
 
+    [SerializeField] private LiveStock.Economy.MoneyManager moneyManager;
+    [SerializeField] private LiveStock.Economy.ShopManager shopManager;
+    [SerializeField] private LiveStock.Items.ItemUseManager itemUseManager;
+
     [Tooltip("For each CCTV group, assign its CCTV camera and local preview camera.")]
     [SerializeField] private CCTVView[] views = Array.Empty<CCTVView>();
 
@@ -109,6 +113,59 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     }
 
     [Serializable]
+    private sealed class MoneyStatusMessage
+    {
+        public string type = "money-state";
+        public int balance;
+    }
+
+    [Serializable]
+    private sealed class ShopStatusMessage
+    {
+        public string type = "shop-state";
+        public int lastRequestId;
+        public ShopProductMessage[] items;
+    }
+
+    [Serializable]
+    private sealed class ShopProductMessage
+    {
+        public string id;
+        public string name;
+        public int price;
+        public int quantity;
+    }
+
+    [Serializable]
+    private sealed class ShopResultMessage
+    {
+        public string type = "shop-result";
+        public int requestId;
+        public string itemId;
+        public string status;
+    }
+
+    [Serializable]
+    private sealed class ItemStatusMessage
+    {
+        public string type = "item-state";
+        public int lastRequestId;
+    }
+
+    [Serializable]
+    private sealed class ItemResultMessage
+    {
+        public string type = "item-result";
+        public int requestId;
+        public string itemId;
+        public int slot;
+        public int index;
+        public string status;
+        public string objectName;
+        public int kills;
+    }
+
+    [Serializable]
     private sealed class MonitorMessage
     {
         public string name;
@@ -126,6 +183,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public int slot;
         public float x;
         public float y;
+        public string itemId;
+        public int requestId;
     }
 
     [Serializable]
@@ -217,6 +276,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         signalingManager.AddSignalingHandler(this);
         signalingManager.AddSignalingHandler(sourceBroadcast);
         registered = true;
+        if (moneyManager != null) moneyManager.BalanceChanged += OnMoneyChanged;
+        if (itemUseManager != null) itemUseManager.Impact += OnItemImpact;
         foreach (var view in views) view.streamCamera.enabled = false;
         ApplyPreview();
     }
@@ -426,8 +487,14 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         if (data.channel.Label != "cctv") return;
         RemoveStatusChannel(data.connectionId);
         session.channel = data.channel;
-        session.onMessage = bytes => ReceiveCommand(data.connectionId, bytes);
-        session.onClose = () => RemoveStatusChannel(data.connectionId);
+        session.onMessage = bytes =>
+        {
+            if (session.channel == data.channel) ReceiveCommand(data.connectionId, bytes);
+        };
+        session.onClose = () =>
+        {
+            if (session.channel == data.channel) RemoveStatusChannel(data.connectionId);
+        };
         session.channel.OnMessage += session.onMessage;
         session.channel.OnClose += session.onClose;
     }
@@ -435,14 +502,39 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     private void ReceiveCommand(string connectionId, byte[] bytes)
     {
         if (!isActiveAndEnabled || state == null || bytes.Length > 1024 ||
-            !sessions.ContainsKey(connectionId) || !IsConnected(connectionId)) return;
+            !sessions.TryGetValue(connectionId, out var session) || session.channel == null ||
+            session.channel.ReadyState != RTCDataChannelState.Open) return;
         Command command;
         try { command = JsonUtility.FromJson<Command>(Encoding.UTF8.GetString(bytes)); }
         catch (ArgumentException) { return; }
         if (command == null) return;
-        if (command.type == "cctv-select") SwitchFor(connectionId, command.index, command.slot);
+        if (command.type == "cctv-ready")
+        {
+            // Data-channel open can precede the peer's Connected notification.
+            // The open, session-owned channel is sufficient for this handshake.
+            if (moneyManager != null && moneyManager.isActiveAndEnabled)
+            {
+                moneyManager.RegisterPlayer(connectionId);
+                moneyManager.StartIncome(connectionId);
+                SendMoneyStatus(connectionId);
+            }
+            if (shopManager != null && shopManager.IsConfiguredFor(moneyManager))
+            {
+                shopManager.RegisterPlayer(connectionId);
+                SendShopStatus(connectionId, session, session.channel);
+            }
+            if (itemUseManager != null && itemUseManager.IsConfiguredFor(shopManager))
+            {
+                itemUseManager.RegisterPlayer(connectionId);
+                SendItemStatus(connectionId, session, session.channel);
+            }
+        }
+        else if (!IsConnected(connectionId)) return;
+        else if (command.type == "cctv-select") SwitchFor(connectionId, command.index, command.slot);
         else if (command.type == "cctv-next") SwitchNextFor(connectionId, command.slot);
         else if (command.type == "cctv-fire") Fire(connectionId, command);
+        else if (command.type == "shop-buy") Purchase(connectionId, session, command);
+        else if (command.type == "item-use") UseItem(connectionId, session, command);
         SendStatus();
     }
 
@@ -451,6 +543,14 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         var session = sessions[connectionId];
         if (session.channel == null || session.channel.ReadyState != RTCDataChannelState.Open) return;
         var result = new FireResult { slot = command.slot, index = command.index, status = "unavailable" };
+        // An assigned item manager opts the scene in, including when its setup is invalid.
+        // Never restore free test ammunition as a fallback for a broken item configuration.
+        if (itemUseManager != null)
+        {
+            result.status = "item-required";
+            session.channel.Send(JsonUtility.ToJson(result));
+            return;
+        }
         if (projectilePrefab != null && command.slot >= 0 && command.slot < session.views.Length &&
             command.x >= 0 && command.x <= 1 && command.y >= 0 && command.y <= 1 &&
             state.Viewers[connectionId].IndexAt(command.slot) == command.index &&
@@ -475,6 +575,147 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
             result.status = "launched";
         }
         session.channel.Send(JsonUtility.ToJson(result));
+    }
+
+    private void OnMoneyChanged(string connectionId, int balance)
+    {
+        SendMoneyStatus(connectionId);
+    }
+
+    private void SendMoneyStatus(string connectionId)
+    {
+        if (!isActiveAndEnabled || moneyManager == null || !moneyManager.isActiveAndEnabled ||
+            !sessions.TryGetValue(connectionId, out var session) ||
+            session.channel == null || session.channel.ReadyState != RTCDataChannelState.Open ||
+            !moneyManager.TryGetBalance(connectionId, out int balance)) return;
+        session.channel.Send(JsonUtility.ToJson(new MoneyStatusMessage { balance = balance }));
+    }
+
+    private bool IsCurrentChannel(string connectionId, Session session, RTCDataChannel channel)
+    {
+        return isActiveAndEnabled && sessions.TryGetValue(connectionId, out var current) &&
+            current == session && channel != null && session.channel == channel &&
+            channel.ReadyState == RTCDataChannelState.Open;
+    }
+
+    private void SendShopStatus(string connectionId, Session session, RTCDataChannel channel)
+    {
+        if (!IsCurrentChannel(connectionId, session, channel) || shopManager == null ||
+            !shopManager.IsConfiguredFor(moneyManager) ||
+            !shopManager.TryGetLastRequestId(connectionId, out int lastRequestId)) return;
+        var message = new ShopStatusMessage {
+            lastRequestId = lastRequestId,
+            items = new ShopProductMessage[shopManager.ProductCount]
+        };
+        for (int i = 0; i < message.items.Length; i++)
+        {
+            var product = shopManager.GetProduct(i);
+            if (!shopManager.TryGetQuantity(connectionId, product.Id, out int quantity)) return;
+            message.items[i] = new ShopProductMessage {
+                id = product.Id, name = product.Name, price = product.Price, quantity = quantity
+            };
+        }
+        channel.Send(JsonUtility.ToJson(message));
+    }
+
+    private void SendItemStatus(string connectionId, Session session, RTCDataChannel channel)
+    {
+        if (!IsCurrentChannel(connectionId, session, channel) || itemUseManager == null ||
+            !itemUseManager.IsConfiguredFor(shopManager) ||
+            !itemUseManager.TryGetLastRequestId(connectionId, out int lastRequestId)) return;
+        channel.Send(JsonUtility.ToJson(new ItemStatusMessage { lastRequestId = lastRequestId }));
+    }
+
+    private void UseItem(string connectionId, Session session, Command command)
+    {
+        var channel = session.channel;
+        var status = LiveStock.Economy.ItemUseState.UseStatus.Unavailable;
+        if (itemUseManager != null && shopManager != null &&
+            shopManager.IsConfiguredFor(moneyManager) && itemUseManager.IsConfiguredFor(shopManager))
+        {
+            Ray ray = default;
+            bool allowed = command.slot >= 0 && command.slot < session.views.Length &&
+                command.index >= 0 && command.index < views.Length &&
+                command.x >= 0 && command.x <= 1 && command.y >= 0 && command.y <= 1 &&
+                state.Viewers.TryGetValue(connectionId, out var viewer) &&
+                viewer.IndexAt(command.slot) == command.index && !state.Monitors[command.index].Overheated;
+            if (allowed)
+            {
+                var output = session.views[command.slot];
+                allowed = output != null && output.camera != null;
+                if (allowed)
+                {
+                    ApplySessionView(output, command.index);
+                    ray = output.camera.ViewportPointToRay(new Vector3(command.x, command.y, 0));
+                }
+            }
+            status = itemUseManager.Use(connectionId, command.itemId, command.requestId,
+                ray, command.slot, command.index, allowed).Status;
+        }
+        SendShopStatus(connectionId, session, channel);
+        SendItemStatus(connectionId, session, channel);
+        if (!IsCurrentChannel(connectionId, session, channel)) return;
+        channel.Send(JsonUtility.ToJson(new ItemResultMessage {
+            requestId = command.requestId, itemId = command.itemId,
+            slot = command.slot, index = command.index,
+            status = ItemStatusName(status), objectName = "", kills = session.kills
+        }));
+    }
+
+    private void OnItemImpact(string connectionId, LiveStock.Items.ItemUseManager.ItemImpact impact)
+    {
+        if (!isActiveAndEnabled || !sessions.TryGetValue(connectionId, out var session) ||
+            !IsCurrentChannel(connectionId, session, session.channel)) return;
+        if (impact.Status == "kill") session.kills++;
+        session.channel.Send(JsonUtility.ToJson(new ItemResultMessage {
+            requestId = impact.RequestId, itemId = impact.ItemId,
+            slot = impact.Slot, index = impact.Index, status = impact.Status,
+            objectName = impact.ObjectName ?? "", kills = session.kills
+        }));
+    }
+
+    private static string ItemStatusName(LiveStock.Economy.ItemUseState.UseStatus status)
+    {
+        switch (status)
+        {
+            case LiveStock.Economy.ItemUseState.UseStatus.Launched: return "launched";
+            case LiveStock.Economy.ItemUseState.UseStatus.NoStock: return "no-stock";
+            case LiveStock.Economy.ItemUseState.UseStatus.InvalidItem: return "invalid-item";
+            case LiveStock.Economy.ItemUseState.UseStatus.InvalidRequest: return "invalid-request";
+            case LiveStock.Economy.ItemUseState.UseStatus.UnknownPlayer: return "unknown-player";
+            case LiveStock.Economy.ItemUseState.UseStatus.Cooldown: return "cooldown";
+            case LiveStock.Economy.ItemUseState.UseStatus.StaleRequest: return "stale-request";
+            default: return "unavailable";
+        }
+    }
+
+    private void Purchase(string connectionId, Session session, Command command)
+    {
+        var channel = session.channel;
+        var result = shopManager != null && shopManager.IsConfiguredFor(moneyManager)
+            ? shopManager.Purchase(connectionId, command.itemId, command.requestId)
+            : new LiveStock.Economy.ShopState.PurchaseResult(command.requestId, command.itemId,
+                LiveStock.Economy.ShopState.PurchaseStatus.Unavailable);
+        SendShopStatus(connectionId, session, channel);
+        if (!IsCurrentChannel(connectionId, session, channel)) return;
+        channel.Send(JsonUtility.ToJson(new ShopResultMessage {
+            requestId = result.RequestId, itemId = result.ItemId, status = ShopStatusName(result.Status)
+        }));
+    }
+
+    private static string ShopStatusName(LiveStock.Economy.ShopState.PurchaseStatus status)
+    {
+        switch (status)
+        {
+            case LiveStock.Economy.ShopState.PurchaseStatus.Success: return "success";
+            case LiveStock.Economy.ShopState.PurchaseStatus.InsufficientFunds: return "insufficient-funds";
+            case LiveStock.Economy.ShopState.PurchaseStatus.InvalidItem: return "invalid-item";
+            case LiveStock.Economy.ShopState.PurchaseStatus.InvalidRequest: return "invalid-request";
+            case LiveStock.Economy.ShopState.PurchaseStatus.UnknownPlayer: return "unknown-player";
+            case LiveStock.Economy.ShopState.PurchaseStatus.InventoryFull: return "inventory-full";
+            case LiveStock.Economy.ShopState.PurchaseStatus.StaleRequest: return "stale-request";
+            default: return "unavailable";
+        }
     }
 
     private void SendStatus()
@@ -514,6 +755,9 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
 
     private void RemoveStatusChannel(string connectionId)
     {
+        if (itemUseManager != null) itemUseManager.RemovePlayer(connectionId);
+        if (shopManager != null) shopManager.RemovePlayer(connectionId);
+        if (moneyManager != null) moneyManager.RemovePlayer(connectionId);
         if (!sessions.TryGetValue(connectionId, out var entry) || entry.channel == null) return;
         entry.channel.OnMessage -= entry.onMessage;
         entry.channel.OnClose -= entry.onClose;
@@ -522,8 +766,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
 
     private void RemoveSession(string connectionId, bool removeSender = true)
     {
-        if (!sessions.TryGetValue(connectionId, out var session)) return;
         RemoveStatusChannel(connectionId);
+        if (!sessions.TryGetValue(connectionId, out var session)) return;
         sessions.Remove(connectionId);
         state.RemoveViewer(connectionId);
         foreach (var view in session.views)
@@ -548,6 +792,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
 
     private void OnDestroy()
     {
+        if (moneyManager != null) moneyManager.BalanceChanged -= OnMoneyChanged;
+        if (itemUseManager != null) itemUseManager.Impact -= OnItemImpact;
         foreach (var connectionId in new List<string>(sessions.Keys)) RemoveSession(connectionId, false);
         if (registered && signalingManager != null) signalingManager.RemoveSignalingHandler(this);
         if (registered && sourceBroadcast != null)
