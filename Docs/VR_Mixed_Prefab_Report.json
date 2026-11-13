@@ -1,0 +1,10 @@
+{
+  "configuredSource": true,
+  "remoteCameras": 0,
+  "remoteAudio": 0,
+  "remoteXRManagers": 0,
+  "missingScripts": 0,
+  "fusionPrefab": true,
+  "visualOrigin": "(0.00, 0.00, 0.00)",
+  "rootNetworkObject": true
+}

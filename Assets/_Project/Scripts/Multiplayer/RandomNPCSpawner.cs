@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace LiveStock.Multiplayer
 {
@@ -21,8 +22,10 @@ namespace LiveStock.Multiplayer
         public Vector2 AreaSize = new(10, 10);
         [Min(0)] public float MinimumSpacing = 1.5f;
         [Min(1)] public int AttemptsPerNPC = 30;
-        [Tooltip("Alpha 安全上限：避免大量 NPC 同時消耗 Fusion、NavMesh 與 Rigging 資源。")]
+        [Tooltip("Maximum generated network NPCs for this spawner.")]
         [Min(1)] public int MaxNetworkedNPCs = 12;
+        [SerializeField, Min(1), Tooltip("Spread spawning across rendered frames to limit setup spikes.")]
+        private int spawnPerFrame = 4;
         [Tooltip("0 每次不同，其他值可重現相同隨機排列。")]
         public int Seed;
         public bool SnapToGround = true;
@@ -34,14 +37,18 @@ namespace LiveStock.Multiplayer
         readonly List<Vector3> positions = new();
         NetworkRunner owner;
         Coroutine pendingSpawn;
+        AnimalWaypoint[] waypoints;
 
         // 只計算仍存在的網路 NPC，方便 Inspector 與測試工具查詢。
         public int AliveCount => spawned.FindAll(npc => npc != null && npc.IsValid).Count;
+        public bool IsSpawning => pendingSpawn != null;
 
         [ContextMenu("NPC/Clear Generated (Server)")]
         public void ClearGenerated()
         {
             if (owner == null || !owner.IsRunning || !owner.IsServer) return;
+            if (pendingSpawn != null) StopCoroutine(pendingSpawn);
+            pendingSpawn = null;
             foreach (var npc in spawned)
                 if (npc != null && npc.IsValid) owner.Despawn(npc);
             spawned.Clear();
@@ -55,10 +62,10 @@ namespace LiveStock.Multiplayer
             var runner = owner;
             ClearGenerated();
             owner = null; // 解除「只生成一次」的保護，再依目前參數生成。
-            Spawn(runner);
+            RequestSpawn(runner);
         }
 
-        // 從 Launcher 的 OnSceneLoadDone 呼叫；只搜尋這個 Runner 自己的場景。
+        // NetworkWorld calls this after every connected player reaches MainGame.
         public static void SpawnFor(NetworkRunner runner)
         {
             if (!runner.IsServer || runner.SceneManager is not NetworkSceneManagerDefault manager) return;
@@ -71,46 +78,46 @@ namespace LiveStock.Multiplayer
         {
             if (owner != null || pendingSpawn != null)
                 return;
+            owner = runner;
+            var scene = ((NetworkSceneManagerDefault)runner.SceneManager).MainRunnerScene;
+            var scoped = new List<AnimalWaypoint>();
+            foreach (var root in scene.GetRootGameObjects()) scoped.AddRange(root.GetComponentsInChildren<AnimalWaypoint>(true));
+            waypoints = scoped.ToArray();
             pendingSpawn = StartCoroutine(SpawnAfterPhysicsReady(runner));
         }
 
         IEnumerator SpawnAfterPhysicsReady(NetworkRunner runner)
         {
-            // 新載入的 Multi-Peer 物理場景要先完成 FixedUpdate，地面 Collider 才能可靠 Raycast。
-            for (int attempt = 0; attempt < 5; attempt++)
-            {
-                yield return new WaitForFixedUpdate();
-                if (runner == null || !runner.IsRunning || !runner.IsServer)
-                    break;
-                if (Spawn(runner) > 0)
-                    break;
-            }
-            pendingSpawn = null;
-        }
-
-        int Spawn(NetworkRunner runner)
-        {
-            if (owner != null) return AliveCount; // 同一個場景載入通知不會重複生成。
-            owner = runner;
+            // Multi-Peer's new scene needs a physics update before ground queries.
+            yield return new WaitForFixedUpdate();
+            if (runner == null || !runner.IsRunning || !runner.IsServer) { pendingSpawn = null; yield break; }
             var random = Seed == 0 ? new System.Random() : new System.Random(Seed);
             int remaining = Mathf.Clamp(MaxNetworkedNPCs, 1, 200);
+            int batch = 0;
             foreach (var group in Groups)
             {
                 if (group == null || group.Prefab == null || remaining <= 0) continue;
                 int min = Mathf.Clamp(group.MinCount, 0, 200);
                 int max = Mathf.Clamp(group.MaxCount, min, 200);
                 int count = Mathf.Min(random.Next(min, max + 1), remaining);
+                var agent = group.Prefab.GetComponent<NavMeshAgent>();
                 int made = 0;
                 for (int i = 0; i < count; i++)
                 {
-                    if (!TryPosition(random, out var position)) continue;
+                    if (runner == null || !runner.IsRunning) { pendingSpawn = null; yield break; }
+                    if (!TryPosition(random, agent, out var position)) continue;
                     var rotation = Quaternion.Euler(0, (float)random.NextDouble() * 360, 0);
-                    var npc = runner.Spawn(group.Prefab, position, rotation);
+                    var npc = runner.Spawn(group.Prefab, position, rotation, onBeforeSpawned: (r, obj) =>
+                    {
+                        var animal = obj.GetComponent<AnimalNPC>();
+                        if (animal != null) animal.waypoints = waypoints;
+                    });
                     if (npc == null) continue;
                     spawned.Add(npc);
                     positions.Add(position);
                     made++;
                     remaining--;
+                    if (++batch >= spawnPerFrame) { batch = 0; yield return null; }
                 }
                 if (made < count) Debug.LogWarning($"{name}: {group.Prefab.name} 生成 {made}/{count}；請加大範圍或檢查地面 Layer。", this);
             }
@@ -119,11 +126,11 @@ namespace LiveStock.Multiplayer
             if (aliveCount > 0)
                 Debug.Log($"[RandomNPCSpawner] '{runner.name}' generated {aliveCount} network NPCs.", this);
             else
-                owner = null; // 物理場景尚未就緒時允許下一個 FixedUpdate 重試。
-            return aliveCount;
+                owner = null; // A later explicit spawn request may retry after navigation is corrected.
+            pendingSpawn = null;
         }
 
-        bool TryPosition(System.Random random, out Vector3 position)
+        bool TryPosition(System.Random random, NavMeshAgent agent, out Vector3 position)
         {
             for (int attempt = 0; attempt < Mathf.Clamp(AttemptsPerNPC, 1, 100); attempt++)
             {
@@ -137,6 +144,12 @@ namespace LiveStock.Multiplayer
                     if (!owner.GetPhysicsScene().Raycast(origin, Vector3.down, out var hit,
                         GroundRayHeight * 2, GroundLayers, QueryTriggerInteraction.Ignore)) continue;
                     position.y = hit.point.y;
+                }
+                if (agent != null)
+                {
+                    var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
+                    if (!NavMesh.SamplePosition(position, out var navHit, 2f, filter)) continue;
+                    position = navHit.position;
                 }
                 position.y += HeightOffset;
                 // 只比較本生成器產生的 NPC 中心距離，不代表完整碰撞檢查。
@@ -157,11 +170,6 @@ namespace LiveStock.Multiplayer
                 {
                     spawner.ClearGenerated();
                     spawner.owner = null;
-                    if (spawner.pendingSpawn != null)
-                    {
-                        spawner.StopCoroutine(spawner.pendingSpawn);
-                        spawner.pendingSpawn = null;
-                    }
                 }
         }
 

@@ -1,0 +1,27 @@
+{
+  "vrConnected": true,
+  "pcConnected": true,
+  "vrRole": true,
+  "preview": true,
+  "players": 2,
+  "loaded": 2,
+  "localServers": 0,
+  "clientAuthority": false,
+  "head": [
+    0.324000359,
+    1.31,
+    0.899
+  ],
+  "left": [
+    -0.1590004,
+    1.733,
+    0.908
+  ],
+  "right": [
+    -0.1409998,
+    1.793,
+    1.57499993
+  ],
+  "headError": 0.0,
+  "penguinError": 0.0005527138
+}

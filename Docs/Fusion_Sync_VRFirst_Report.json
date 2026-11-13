@@ -1,0 +1,85 @@
+[
+  {
+    "test": "VR entry loads the original Menu_VRClient scene",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR starts disconnected with the original world-space menu",
+    "pass": true,
+    "evidence": {
+      "scale": "(0.0030, 0.0030, 0.0030)",
+      "position": "(-12.00, 1.10, 14.50)"
+    }
+  },
+  {
+    "test": "VR has no desktop player or desktop input module",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Device-free camera looks toward the 3D VR menu",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Opening VR again selects the existing client",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "ContextMenu Connect fails clearly without a server",
+    "pass": true,
+    "evidence": "Connection failed: GameNotFound"
+  },
+  {
+    "test": "Opening Desktop leaves VR connected and PC disconnected",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR sheep spawns without any tracking packets",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "All three runners have one sheep and one penguin",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "F2 preserves deliberately disabled VR cameras",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Head and both hands still replicate through Fusion",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "PC penguin keeps syncing after VR joins",
+    "pass": true,
+    "evidence": 0.0005527138
+  },
+  {
+    "test": "Mixed clients stay connected across MainGame",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "VR returns to its original 3D menu and environment",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Returning restores the offline menu camera",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server shutdown cleans remaining client",
+    "pass": true,
+    "evidence": null
+  }
+]

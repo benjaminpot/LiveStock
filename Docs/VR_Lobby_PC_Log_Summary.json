@@ -1,0 +1,29 @@
+[
+  {
+    "role": "Server",
+    "navMeshErrors": 0,
+    "nullReferenceExceptions": 0,
+    "missingReferenceExceptions": 0,
+    "avatarMissingScriptWarnings": 2,
+    "openXRUnavailableDiagnostics": 4,
+    "graphicsRingBufferWarnings": 1
+  },
+  {
+    "role": "A",
+    "navMeshErrors": 0,
+    "nullReferenceExceptions": 0,
+    "missingReferenceExceptions": 0,
+    "avatarMissingScriptWarnings": 2,
+    "openXRUnavailableDiagnostics": 4,
+    "graphicsRingBufferWarnings": 2
+  },
+  {
+    "role": "B",
+    "navMeshErrors": 0,
+    "nullReferenceExceptions": 0,
+    "missingReferenceExceptions": 0,
+    "avatarMissingScriptWarnings": 2,
+    "openXRUnavailableDiagnostics": 4,
+    "graphicsRingBufferWarnings": 2
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "connected": true,
+  "room": "LIVESTOCK-DEV",
+  "mode": "Single",
+  "phase": "Lobby",
+  "players": 1,
+  "loaded": 1,
+  "localServerObjects": 0,
+  "clientHasStateAuthority": false,
+  "clientCanStart": false,
+  "stage": 1
+}

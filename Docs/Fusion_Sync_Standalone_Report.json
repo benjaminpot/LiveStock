@@ -1,0 +1,80 @@
+[
+  {
+    "test": "Three independent Players start with zero Lobby NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop joins the independent Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both roles replicate across three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-selected roots reach the other Client",
+    "pass": true,
+    "evidence": 0.00039064884185791016
+  },
+  {
+    "test": "All three VR targets reach Server and Desktop",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "All processes enter MainGame and receive 60 NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Independent processes remain connected with stable NPC count",
+    "pass": true,
+    "evidence": {
+      "seconds": 30.3981767,
+      "minimumNPCs": 60,
+      "observedServerTicksPerSecond": 64.30863407556626,
+      "peers": [
+        {
+          "role": "server",
+          "npcs": 60,
+          "frame": 2475,
+          "averageFrameIntervalMs": 17.202482223510742,
+          "allocatedBytes": 114855995
+        },
+        {
+          "role": "desktop",
+          "npcs": 60,
+          "frame": 2441,
+          "averageFrameIntervalMs": 17.062955856323242,
+          "allocatedBytes": 123191320
+        },
+        {
+          "role": "vr-preview",
+          "npcs": 60,
+          "frame": 2417,
+          "averageFrameIntervalMs": 17.008472442626953,
+          "allocatedBytes": 122321595
+        }
+      ],
+      "scope": "Three headless Development Players on one Windows computer. Frame intervals include the 60 FPS cap and startup. GPU and HMD are unmeasured."
+    }
+  },
+  {
+    "test": "Server continues accepting inputs during NPC simulation",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Stopping Server disconnects both Clients and removes NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Player logs contain no detected runtime exceptions or render-pass errors",
+    "pass": true,
+    "evidence": []
+  }
+]

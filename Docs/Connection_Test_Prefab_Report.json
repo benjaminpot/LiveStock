@@ -1,0 +1,25 @@
+{
+  "prefabs": [
+    {
+      "name": "DesktopTestPlayer",
+      "missing": 0
+    },
+    {
+      "name": "NetworkDesktopPenguin",
+      "missing": 0
+    },
+    {
+      "name": "DesktopPenguinVisual",
+      "missing": 0
+    },
+    {
+      "name": "ConnectionTestClient",
+      "missing": 0
+    }
+  ],
+  "mode": "Single",
+  "xrAuto": true,
+  "playing": false,
+  "diagnostics": false,
+  "runners": 0
+}

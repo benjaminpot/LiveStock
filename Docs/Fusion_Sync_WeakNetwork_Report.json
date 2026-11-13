@@ -1,0 +1,35 @@
+[
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 0.0,
+    "configuredLoss": 0.0,
+    "configuredJitterMs": 0.0,
+    "observedAverageClientRttMs": 76.541345000000064,
+    "convergenceSeconds": 0.2287671,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 60,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  },
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 50.0,
+    "configuredLoss": 0.02,
+    "configuredJitterMs": 10.0,
+    "observedAverageClientRttMs": 229.12633000000042,
+    "convergenceSeconds": 0.21741919999999998,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 60,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  },
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 100.0,
+    "configuredLoss": 0.05,
+    "configuredJitterMs": 20.0,
+    "observedAverageClientRttMs": 230.43049750000009,
+    "convergenceSeconds": 0.468273,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 60,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  }
+]

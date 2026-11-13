@@ -1,0 +1,13 @@
+{
+  "playing": false,
+  "scene": "Assets/_Project/Scenes/_flow test/Menu_VRClient.unity",
+  "sceneDirty": false,
+  "mode": "Single",
+  "xrAuto": true,
+  "preview": false,
+  "runners": 0,
+  "menuMode": "WorldSpace",
+  "missingScripts": 0,
+  "sourceConfigured": true,
+  "diagnostics": false
+}

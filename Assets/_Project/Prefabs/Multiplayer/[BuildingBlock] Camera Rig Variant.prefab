@@ -13,6 +13,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 478840069603302655, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
+      propertyPath: usePositionTracking
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 478840069603302655, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: fastMotionModeHandPosesEnabled
       value: 1
       objectReference: {fileID: 0}

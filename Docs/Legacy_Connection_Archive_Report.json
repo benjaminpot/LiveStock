@@ -1,0 +1,245 @@
+{
+  "archive": "Assets/_Project/Recycle Bin/LegacyMultiplayer",
+  "menuObjectsGrouped": 3,
+  "prefabObjectsGrouped": 3,
+  "assets": [
+    {
+      "from": "Assets/_Project/Scripts/Multiplayer/SessionLauncher.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/SessionLauncher.cs",
+      "guid": "294aea115cd246a4db6f1b15eb019cd9"
+    },
+    {
+      "from": "Assets/_Project/Scripts/Multiplayer/SessionPanel.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/SessionPanel.cs",
+      "guid": "d8bbe0a5500b23b4180522315788e07a"
+    },
+    {
+      "from": "Assets/_Project/Scripts/Multiplayer/NetworkPlayer.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/NetworkPlayer.cs",
+      "guid": "9f6ad50c8cba3584d9c08e4d17efffa6"
+    },
+    {
+      "from": "Assets/_Project/Scripts/Multiplayer/ObserverCamera.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/ObserverCamera.cs",
+      "guid": "39bdf4c118f21e44c8a217fe5bc00229"
+    },
+    {
+      "from": "Assets/_Project/Scripts/Multiplayer/Editor/SessionLauncherEditor.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/SessionLauncherEditor.cs",
+      "guid": "551e1a8a44db0314ab4dfec680d1df22"
+    },
+    {
+      "from": "Assets/_Project/Editor/MultiplayerSetup.cs",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Scripts/Editor/MultiplayerSetup.cs",
+      "guid": "64b73e8710792ba40a33a46ca0bc00f8"
+    },
+    {
+      "from": "Assets/_Project/Prefabs/Multiplayer/NetworkPlayer.prefab",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/NetworkPlayer.prefab",
+      "guid": "06cb007a0ffcdd1488a63956b817f849"
+    },
+    {
+      "from": "Assets/_Project/Prefabs/Multiplayer/MultiplayerDemo.prefab",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/MultiplayerDemo.prefab",
+      "guid": "5405e8223ac64ad429cb3087c5e55ef8"
+    },
+    {
+      "from": "Assets/_Project/Prefabs/Multiplayer/RemoteSheepVisual.prefab",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual.prefab",
+      "guid": "952e7b97930dec9478ac452c028bf366"
+    },
+    {
+      "from": "Assets/_Project/Prefabs/Multiplayer/RemoteSheepVisual_old.prefab",
+      "to": "Assets/_Project/Recycle Bin/LegacyMultiplayer/Prefabs/RemoteSheepVisual_old.prefab",
+      "guid": "b0033e501934ac242ae36f425d2ff33d"
+    }
+  ],
+  "note": "No assets deleted. Scripts remain compiled under Assets; GUID references remain valid.",
+  "date": "2026-11-09",
+  "verification": {
+    "assetsChecked": 10,
+    "prefabsChecked": 9,
+    "missingScripts": 0,
+    "menuObjectsGrouped": 3,
+    "prefabObjectsGrouped": 3,
+    "guidsPreserved": true,
+    "compilationFailed": false
+  },
+  "regression": {
+    "mode": "Unity Editor Multi-Peer, device-free VR preview",
+    "vrFirst": {
+      "passed": 16,
+      "checks": [
+        {
+          "test": "VR entry loads the original Menu_VRClient scene",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR starts disconnected with the original world-space menu",
+          "pass": true,
+          "evidence": {
+            "scale": "(0.0030, 0.0030, 0.0030)",
+            "position": "(-12.00, 1.10, 14.50)"
+          }
+        },
+        {
+          "test": "VR has no desktop player or desktop input module",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Device-free camera looks toward the 3D VR menu",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Opening VR again selects the existing client",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "ContextMenu Connect fails clearly without a server",
+          "pass": true,
+          "evidence": "Connection failed: GameNotFound"
+        },
+        {
+          "test": "Opening Desktop leaves VR connected and PC disconnected",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR sheep spawns without any tracking packets",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "All three runners have one sheep and one penguin",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "F2 preserves deliberately disabled VR cameras",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Head and both hands still replicate through Fusion",
+          "pass": true,
+          "evidence": 0.0
+        },
+        {
+          "test": "PC penguin keeps syncing after VR joins",
+          "pass": true,
+          "evidence": 0.0005527138
+        },
+        {
+          "test": "Mixed clients stay connected across MainGame",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR returns to its original 3D menu and environment",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Returning restores the offline menu camera",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Server shutdown cleans remaining client",
+          "pass": true,
+          "evidence": null
+        }
+      ]
+    },
+    "desktopFirst": {
+      "passed": 15,
+      "checks": [
+        {
+          "test": "VR entry loads the original Menu_VRClient scene",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR starts disconnected with the original world-space menu",
+          "pass": true,
+          "evidence": {
+            "scale": "(0.0030, 0.0030, 0.0030)",
+            "position": "(-12.00, 1.10, 14.50)"
+          }
+        },
+        {
+          "test": "VR has no desktop player or desktop input module",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Device-free camera looks toward the 3D VR menu",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Opening VR again selects the existing client",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Creating VR preserves the already connected PC",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR sheep spawns without any tracking packets",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "All three runners have one sheep and one penguin",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "F2 preserves deliberately disabled VR cameras",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Head and both hands still replicate through Fusion",
+          "pass": true,
+          "evidence": 0.0
+        },
+        {
+          "test": "PC penguin keeps syncing after VR joins",
+          "pass": true,
+          "evidence": 0.0005527138
+        },
+        {
+          "test": "Mixed clients stay connected across MainGame",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "VR returns to its original 3D menu and environment",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Returning restores the offline menu camera",
+          "pass": true,
+          "evidence": null
+        },
+        {
+          "test": "Server shutdown cleans remaining client",
+          "pass": true,
+          "evidence": null
+        }
+      ]
+    },
+    "totalPassed": 31,
+    "scriptDiagnostics": "Temporary run_script compilation produced CS1701 assembly-reference warnings; both suites completed successfully.",
+    "hardwareValidation": "Physical headset and 60/100 NPC performance validation are scheduled in the plan."
+  }
+}
