@@ -1,0 +1,58 @@
+using Fusion;
+using UnityEngine;
+
+/// <summary>One tick input for the owning Client's root and root-relative sheep targets.</summary>
+[System.Serializable]
+public struct PlayerNetworkInput : INetworkInput
+{
+    public NetworkBool IsVR, HasPose;
+    public int Stage;
+    public VRTrackedPose Pose;
+}
+
+/// <summary>Caches one Client's completed render-frame pose for its Runner's OnInput callback.</summary>
+[DefaultExecutionOrder(2000)]
+public sealed class NetworkInputSource : MonoBehaviour
+{
+    ConnectionManager owner;
+    VRClientPoseSource vr;
+    DesktopTestPlayer desktop;
+    [SerializeField, Tooltip("Latest complete local sample submitted by this Runner's OnInput callback.")]
+    PlayerNetworkInput cached;
+    public PlayerNetworkInput Current => cached;
+
+    /// <summary>Binds explicit local sources so Multi-Peer never samples another Client's rig.</summary>
+    public void Initialize(ConnectionManager client)
+    {
+        owner = client;
+        vr = client.GetComponent<VRClientPoseSource>();
+        desktop = client.GetComponentInChildren<DesktopTestPlayer>(true);
+    }
+
+    public void Clear() => cached = default;
+
+    void LateUpdate()
+    {
+        Clear();
+        if (owner == null || !owner.IsConnected || owner.Runner.IsSceneManagerBusy || owner.State == null
+            || owner.State.Phase == LobbySessionState.SessionPhase.LoadingMainGame) return;
+        var marker = FlowSceneMarker.For(owner.Runner);
+        if (marker == null) return;
+        cached.Stage = marker.Stage;
+        cached.IsVR = !owner.IsDesktop;
+        if (owner.IsDesktop && desktop != null && desktop.isActiveAndEnabled)
+        {
+            cached.Pose = new VRTrackedPose
+            {
+                RootPosition = desktop.transform.position, RootRotation = desktop.transform.rotation,
+                HeadRotation = Quaternion.identity, LeftRotation = Quaternion.identity, RightRotation = Quaternion.identity
+            };
+            cached.HasPose = true;
+        }
+        else if (!owner.IsDesktop && vr != null && vr.isActiveAndEnabled && vr.IsConfigured && vr.TrackingAvailable)
+        {
+            cached.Pose = vr.ReadPose();
+            cached.HasPose = true;
+        }
+    }
+}

@@ -119,3 +119,5 @@ InitTestScene*.unity*
 # WebApp client dependencies and generated test coverage
 /WebApp/client/node_modules/
 /WebApp/client/coverage/
+
+AGENTS.md

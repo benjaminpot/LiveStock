@@ -1,0 +1,9 @@
+{
+  "phase": "InMainGame",
+  "players": 2,
+  "loaded": 2,
+  "vrConnected": true,
+  "pcConnected": true,
+  "sheepReplicas": 2,
+  "rootError": 0.000468730927
+}

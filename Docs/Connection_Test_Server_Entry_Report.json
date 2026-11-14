@@ -1,0 +1,5 @@
+{
+  "serverOnly": true,
+  "newMenuDisconnected": true,
+  "closeSelectedRemovedClient": true
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "test": "Desktop-first VR role has calibrated source and explicit device-free mode",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop-first ContextMenu Connect reports missing Server",
+    "pass": true,
+    "evidence": "Connection failed: GameNotFound"
+  },
+  {
+    "test": "Desktop-first Real Server and both Clients stay connected",
+    "pass": true,
+    "evidence": {
+      "players": 2,
+      "loaded": 2
+    }
+  },
+  {
+    "test": "Desktop-first One sheep and one penguin per Runner",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop-first Remote sheep is free of cameras and XR managers",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop-first Tracked head and both hands reach all network replicas",
+    "pass": true,
+    "evidence": {
+      "head": 0.0,
+      "left": 0.0,
+      "right": 0.0
+    }
+  },
+  {
+    "test": "Desktop-first Replicated poses drive existing sheep IK targets",
+    "pass": true,
+    "evidence": 8.940697E-07
+  },
+  {
+    "test": "Desktop-first Sheep skeleton responds after target movement",
+    "pass": true,
+    "evidence": 18.76753
+  },
+  {
+    "test": "Desktop-first Desktop penguin keeps syncing while VR view is selected",
+    "pass": true,
+    "evidence": 0.0004368387
+  },
+  {
+    "test": "Desktop-first Same sheep and mixed players survive shared scene change",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop-first VR root follows the loaded scene spawn",
+    "pass": true,
+    "evidence": 0.000468730927
+  },
+  {
+    "test": "Desktop-first VR exit removes only its sheep and preserves Desktop",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop-first VR ContextMenu rejects closed game",
+    "pass": true,
+    "evidence": "Connection failed: GameClosed"
+  },
+  {
+    "test": "Desktop-first Actual disconnect clears Desktop connection state",
+    "pass": true,
+    "evidence": null
+  }
+]

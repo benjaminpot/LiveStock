@@ -3934,6 +3934,7 @@ GameObject:
   - component: {fileID: 4142035368805499102}
   - component: {fileID: 1347534841123466024}
   - component: {fileID: 7588439718428319273}
+  - component: {fileID: 990763997813038764}
   m_Layer: 0
   m_Name: NPC_sheep
   m_TagString: Untagged
@@ -4679,6 +4680,7 @@ MonoBehaviour:
   NetworkedBehaviours:
   - {fileID: 3002717782604067036}
   - {fileID: 4142035368805499102}
+  - {fileID: 990763997813038764}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4142035368805499102
 MonoBehaviour:
@@ -4824,6 +4826,24 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &990763997813038764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8113692632351386186}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0595e145c0ec8cd439c4e1d759bc4cc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkTargetPose
+  headTarget: {fileID: 4241087402444577079}
+  leftTarget: {fileID: 2557271885952440509}
+  rightTarget: {fileID: 1968561551747625061}
+  captureOnServer: 1
+  _HasPose:
+    RawValue: 0
 --- !u!1 &8165934259391935834
 GameObject:
   m_ObjectHideFlags: 0
