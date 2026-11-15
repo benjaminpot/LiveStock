@@ -93,3 +93,9 @@
 驗證：三組弱網全部通過（基線、50 ms／2% loss／10 ms jitter、100 ms／5% loss／20 ms jitter），每組每端 30 隻 NPC、過期輸入拒絕、恢復後三端共享 1/3。最高設定的觀察平均 RTT 約 225 ms。報告為 `Fusion_Map_WeakNetwork_Report.json`。60／100 隻持續測試接續執行；實體頭盔與正常可視圖形環境中的串流仍未驗收。
 
 下一步：先各執行 60／100 隻的 10 分鐘持續測試。另已發現本機輸入元件停用時缺少快取清理，後續補負向重現並修正；不在持續測試中途修改會觸發 domain reload 的正式程式。
+
+### 60 隻持續測試結果
+
+通過 600.7 秒，三個 Runner 的最低副本數皆為 60，0 error，觀察伺服器速率約 64.01 tick/s。共享 Editor 平均畫面間隔 75.62 ms、P95 93.62 ms，配置記憶體差約 +15.7 MB；不能解讀成 Quest／單獨伺服器效能。報告為 `Fusion_Map_Soak_60_Report.json`。
+
+頻寬欄位是每個觀察到的 render frame 讀取 SDK 最後一次 Fusion update 位元組統計後加總的估計，可能漏取 update，不是封包擷取。SDK 的單位與取樣時機依本機 `FusionStatisticsNetworkPage.cs`、`FusionStatistics.AfterUpdate` 與 [Photon Statistics 文件](https://doc.photonengine.com/fusion/v2/manual/testing-and-tooling/fusion-statistics-2.1) 核對；本輪只補充報告限制，未改寫原始測量數字。

@@ -1,0 +1,33 @@
+{
+  "pass": true,
+  "failure": null,
+  "npcCount": 60,
+  "seconds": 600.6716084,
+  "frames": 7944,
+  "averageFrameMs": 75.62439,
+  "p95FrameMs": 93.616394,
+  "observedServerTicksPerSecond": 64.009455807305685,
+  "minNpcs": 60,
+  "minReplicaNpcs": 60,
+  "peerCount": 3,
+  "allocatedMemoryDeltaBytes": 15732509,
+  "sampledTraffic": [
+    {
+      "runner": "Lobby Server Runner",
+      "inBytesPerSecond": 4798.9150893525621,
+      "outBytesPerSecond": 56848.4740759705
+    },
+    {
+      "runner": "Desktop Client 1 Runner",
+      "inBytesPerSecond": 28424.294688612517,
+      "outBytesPerSecond": 2069.2352892387189
+    },
+    {
+      "runner": "ConnectionManager Runner",
+      "inBytesPerSecond": 28424.294608169854,
+      "outBytesPerSecond": 2730.2557504018628
+    }
+  ],
+  "errors": [],
+  "scope": "All peers share one Editor; frame and memory include every scene copy. Traffic is an SDK last-update byte-count estimate sampled once per observed rendered frame, not a wire packet capture."
+}

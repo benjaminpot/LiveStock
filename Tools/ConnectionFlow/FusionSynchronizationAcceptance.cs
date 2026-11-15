@@ -186,7 +186,7 @@ public static class FusionSynchronizationAcceptance
             observedServerTicksPerSecond=runner!=null&&runner.IsRunning?(runner.Tick.Raw-startTick)/timer.Elapsed.TotalSeconds:0,minNpcs,minReplicaNpcs,peerCount=runners.Length,
             allocatedMemoryDeltaBytes=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong()-startMemory,
             sampledTraffic=runners.Select((r,i)=>new{runner=r!=null?r.name:"Stopped Runner",inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
-            errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."};
+            errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory include every scene copy. Traffic is an SDK last-update byte-count estimate sampled once per observed rendered frame, not a wire packet capture."};
         System.IO.File.WriteAllText("Docs/Fusion_Map_Soak_"+count+"_Report.json",Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
         if(!result.pass)throw new InvalidOperationException("Soak failed. Read the report.",failure);
         return result;
