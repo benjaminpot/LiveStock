@@ -43,6 +43,8 @@ function Open-Menu([string]$Role = 'Desktop') {
     $menu = if ($Role -eq 'VR') { 'Open VR Client Menu (no headset)' } else { 'Open Desktop Client Menu' }
     Invoke-Unity @('menu','--','--path',('LiveStock/Connection Test/'+$menu)) | Out-Null
     Wait-Mode 'playing'
+    $frames = Invoke-Unity @('wait_for','--','--condition','{"member":"UnityEngine.Time.frameCount","op":"changed"}','--timeout_s','10')
+    if (!$frames.met) { throw 'Play Mode entered but the player loop did not advance.' }
     # Let scene Start callbacks create the offline client before loading a test assembly.
     Start-Sleep -Seconds 2
 }
@@ -52,7 +54,11 @@ function Run-Test([string]$File, [string]$Entry, [string]$TestArguments = '[]') 
         --file ('Tools/ConnectionFlow/'+$File+'.cs') --entry $Entry --args $TestArguments --timeout_ms 3800000
     $response | Set-Content -LiteralPath (Join-Path $logRoot ($Entry+'.json')) -Encoding utf8
     $parsed = $response | ConvertFrom-Json
-    if (!$parsed.success -or $parsed.data.result.success -ne $true) { throw $response }
+    if (!$parsed.success -or $parsed.data.result.success -ne $true) {
+        $failure = $parsed.data.result.errorDetails
+        if (!$failure) { $failure = $parsed.errors | ConvertTo-Json -Compress }
+        throw ("$Entry failed. Details: $failure`nFull response: " + (Join-Path $logRoot ($Entry+'.json')))
+    }
     Write-Output ('PASS '+$Entry)
 }
 
