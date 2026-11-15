@@ -96,14 +96,14 @@ public static class FruitGameplayAcceptance
         UnityEngine.Object.Destroy(wall);
         await Task.Delay(200);
         var source = first.Runner.GetComponent<NetworkInputSource>();
+        Check("Input cache is valid before disabling the source", source.Current.HasPose && source.Current.Body.IsValid);
         source.enabled = false;
-        source.Clear();
         try
         {
             await Task.Delay(500);
             first.State.World.RequestCollect(Replica(first.Runner, apples[0]), ray);
             await Task.Delay(500);
-            Check("Server rejects collection after explicit pose loss", world.CollectedFruitCount == 0 && !apples[0].IsCollected);
+            Check("Server rejects collection while the input source is disabled", world.CollectedFruitCount == 0 && !apples[0].IsCollected);
         }
         finally { source.enabled = true; }
         await Task.Delay(500);
@@ -111,6 +111,9 @@ public static class FruitGameplayAcceptance
         var validInput = source.Current;
         var invalidInputs = new Dictionary<string, PlayerNetworkInput>();
         var invalid = validInput;
+        invalid.HasPose = false;
+        invalidInputs.Add("missing pose", invalid);
+        invalid = validInput;
         invalid.Stage = 0;
         invalidInputs.Add("wrong scene stage", invalid);
         invalid = validInput;

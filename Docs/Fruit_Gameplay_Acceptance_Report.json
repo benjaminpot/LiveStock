@@ -60,7 +60,17 @@
     "evidence": null
   },
   {
-    "test": "Server rejects collection after explicit pose loss",
+    "test": "Input cache is valid before disabling the source",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection while the input source is disabled",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with missing pose",
     "pass": true,
     "evidence": null
   },

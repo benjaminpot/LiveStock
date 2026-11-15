@@ -30,7 +30,10 @@ public sealed class NetworkInputSource : MonoBehaviour
         desktop = client.GetComponentInChildren<DesktopTestPlayer>(true);
     }
 
+    /// <summary>Revokes cached pose and body input during scene changes or when this source is disabled.</summary>
     public void Clear() => cached = default;
+
+    void OnDisable() => Clear();
 
     void LateUpdate()
     {
