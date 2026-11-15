@@ -75,7 +75,11 @@ try {
                         Run-Test $test[1] ($test[1]+'.'+$test[2])
                     }
                 }
-                'Assets' { Stop-Test; Run-Test 'ValidateFusionAssets' 'ValidateFusionAssets.Run' }
+                'Assets' {
+                    Stop-Test
+                    Run-Test 'ValidateFusionAssets' 'ValidateFusionAssets.RunContractChecks'
+                    Run-Test 'ValidateFusionAssets' 'ValidateFusionAssets.Run'
+                }
                 'Fruit' { Open-Menu; Run-Test 'FruitGameplayAcceptance' 'FruitGameplayAcceptance.Run' }
                 'WeakNetwork' { Open-Menu; Run-Test 'FusionWeakNetworkAcceptance' 'FusionWeakNetworkAcceptance.Run' }
                 'MapSwap' {
