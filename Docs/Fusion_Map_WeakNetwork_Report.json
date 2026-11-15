@@ -1,0 +1,41 @@
+[
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 0.0,
+    "configuredLoss": 0.0,
+    "configuredJitterMs": 0.0,
+    "observedAverageClientRttMs": 39.211457499999725,
+    "convergenceSeconds": 0.23620059999999998,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 30,
+    "expiredInputRejected": true,
+    "sharedFruitCount": 1,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  },
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 50.0,
+    "configuredLoss": 0.02,
+    "configuredJitterMs": 10.0,
+    "observedAverageClientRttMs": 122.9189375000002,
+    "convergenceSeconds": 0.3318241,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 30,
+    "expiredInputRejected": true,
+    "sharedFruitCount": 1,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  },
+  {
+    "pass": true,
+    "configuredPacketDelayMs": 100.0,
+    "configuredLoss": 0.05,
+    "configuredJitterMs": 20.0,
+    "observedAverageClientRttMs": 225.20207500000021,
+    "convergenceSeconds": 0.3482376,
+    "maximumStaticPositionErrorMetres": 0.000586172042,
+    "npcCountPerRunner": 30,
+    "expiredInputRejected": true,
+    "sharedFruitCount": 1,
+    "scope": "SDK simulation on all three Editor Runners. Static convergence and lifecycle checked. Visual smoothness requires observation."
+  }
+]

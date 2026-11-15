@@ -157,8 +157,9 @@ public static class FusionSynchronizationAcceptance
         await Wait(()=>spawner.AliveCount==count&&!spawner.IsSpawning,"Stress generation");
         var frames=new List<float>();var incoming=new double[3];var outgoing=new double[3];
         var runners=new[]{runner}.Concat(ConnectionManager.Clients.Where(c=>c.IsConnected).Select(c=>c.Runner)).ToArray();
+        await Wait(()=>runners.All(r=>Npcs().Count(n=>n.Runner==r)==count),"Capacity replicas reach every Runner");
         int lastFrame=-1;int startTick=runner.Tick.Raw;long startMemory=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong();
-        var errors=new List<string>();int minNpcs=count;
+        var errors=new List<string>();int minNpcs=count;int minReplicaNpcs=count;Exception failure=null;
         Application.LogCallback log=(message,stack,type)=>{if(type==UnityEngine.LogType.Exception||type==UnityEngine.LogType.Error)errors.Add(message);};
         EditorApplication.CallbackFunction sample=()=>{
             if(Time.frameCount==lastFrame)return;lastFrame=Time.frameCount;frames.Add(Time.unscaledDeltaTime*1000f);
@@ -171,19 +172,23 @@ public static class FusionSynchronizationAcceptance
             while(timer.Elapsed.TotalSeconds<seconds)
             {
                 await Task.Delay(1000);minNpcs=Math.Min(minNpcs,spawner.AliveCount);
-                System.IO.File.WriteAllText(".tmp/FusionSoakProgress.json",Newtonsoft.Json.JsonConvert.SerializeObject(new{count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,minNpcs,errors=errors.Count}));
+                minReplicaNpcs=Math.Min(minReplicaNpcs,runners.Min(r=>Npcs().Count(n=>n.Runner==r)));
+                System.IO.File.WriteAllText(".tmp/FusionSoakProgress.json",Newtonsoft.Json.JsonConvert.SerializeObject(new{count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,minNpcs,minReplicaNpcs,errors=errors.Count}));
                 if(!runners.All(r=>r!=null&&r.IsRunning))throw new InvalidOperationException("Peer disconnected during soak.");
             }
         }
+        catch(Exception exception){failure=exception;}
         finally{EditorApplication.update-=sample;Application.logMessageReceived-=log;}
         var ordered=frames.OrderBy(f=>f).ToArray();
-        var result=new{npcCount=count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,averageFrameMs=frames.Average(),p95FrameMs=ordered[(int)(ordered.Length*.95f)],
-            observedServerTicksPerSecond=(runner.Tick.Raw-startTick)/timer.Elapsed.TotalSeconds,minNpcs,peerCount=runners.Length,
+        var result=new{pass=failure==null&&minNpcs==count&&minReplicaNpcs==count&&errors.Count==0&&frames.Count>0,
+            failure=failure?.ToString(),npcCount=count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,
+            averageFrameMs=frames.Count>0?frames.Average():0,p95FrameMs=ordered.Length>0?ordered[(int)(ordered.Length*.95f)]:0,
+            observedServerTicksPerSecond=runner!=null&&runner.IsRunning?(runner.Tick.Raw-startTick)/timer.Elapsed.TotalSeconds:0,minNpcs,minReplicaNpcs,peerCount=runners.Length,
             allocatedMemoryDeltaBytes=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong()-startMemory,
-            sampledTraffic=runners.Select((r,i)=>new{runner=r.name,inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
+            sampledTraffic=runners.Select((r,i)=>new{runner=r!=null?r.name:"Stopped Runner",inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
             errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."};
         System.IO.File.WriteAllText("Docs/Fusion_Map_Soak_"+count+"_Report.json",Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
-        if(minNpcs!=count||errors.Count>0)throw new InvalidOperationException("Soak failed. Read the report.");
+        if(!result.pass)throw new InvalidOperationException("Soak failed. Read the report.",failure);
         return result;
     }
 }
