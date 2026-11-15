@@ -2,6 +2,8 @@
 
 日期：2026-11-15。檢查分支：`single-to-multi`。
 
+2026-11-16 更新：VR 已加上 Locomotor；新增 [Player_cap → VR 與 Ray 互動細部規劃](PlayerCap_to_VR_Ray_Implementation_Plan.md)。蘋果改以手把 Ray 指定目標、扳機 Select 觸發，按下仍須符合原 Trigger 接近條件。新 MainGame 已啟用於 Build Settings，Player_cap 已停用，且目前已安排生成三個 NetworkApple；下列初次排查記錄應連同這些更新閱讀。
+
 ## 本階段目標與已確認規則
 
 - 正式角色為 VR 羊與網頁 CCTV 獵人；桌面玩家僅供開發測試。
@@ -34,7 +36,7 @@
 
 ## 已確認的缺口
 
-### 1. 新 MainGame 不在啟用的建置場景清單：最先修正
+### 1. 新 MainGame 不在啟用的建置場景清單：11/16 已修正
 
 `Assets/Resources/NetworkSceneSettings.asset:16` 指向 `_flow test/MainGame.unity`，但 `ProjectSettings/EditorBuildSettings.asset` 啟用的是 `MainGame_old.unity`，沒有啟用新 MainGame。
 
@@ -42,15 +44,15 @@
 
 `ServerConnectionManager.LoadMainGame()`（第 83–92 行）按設定中的路徑找 build index；目前預期取得 -1 並顯示 `Enable MainGame in the build scene list.`，不是自動改載 MainGame_old。
 
-待做：啟用正確的新 MainGame，核對所有端使用相同的場景清單與建置版本，再測試實際載圖。備份場景可以保留，不必刪除。
+11/16 檔案核對：新 MainGame 已啟用，MainGame_old 已停用。後續核對所有端使用相同的場景清單與建置版本，再測試實際載圖。備份場景可以保留，不必刪除。
 
-### 2. 單機玩家仍會在各端自行啟動
+### 2. 單機玩家重複啟動：11/16 已停用 Player_cap
 
 新場
 
 現有連線流程已另外保留本機 VR rig，桌面測試又會生成 `DesktopTestPlayer`；把新場景直接載入各端，會有重複控制器、相機、AudioListener 或輸入處理的風險。
 
-待做：多人場景停用單機 Player_cap，保留現有連線流程管理的本機 rig。單機移動程式可留在原測試用途，不需要把整套跳躍／蹲下功能搬進桌面測試玩家。
+11/16 檔案核對：多人場景的 Player_cap 已停用。保留現有連線流程管理的本機 rig，沿用使用者已加的 Locomotor。單機移動程式可留在原測試用途；正式 VR 功能移植見細部規劃。
 
 ### 3. 吃蘋果完全是本機狀態，且只認單機玩家
 
@@ -99,23 +101,23 @@
 
 ### 共享任務資料
 
-在 MainGame 的地圖入口配置一個場景所屬的 Fusion 任務物件，保存「三顆蘋果的收集遮罩」。每顆固定 index 0／1／2，完成數與 completed 可從遮罩推導，避免再維護一份容易不一致的計數。
+11/16 依目前已建立的 NetworkApple 更新：沿用其 NetworkObject，讓 FruitPickup 保存由伺服器寫入的 Networked IsCollected；共享任務進度由本輪三顆的狀態推導並同步，不再另外保存收集遮罩。
 
-三顆固定場景水果不需要各自新增完整網路物件。`FruitPickup` 可保留水果位置、index 與本機外觀更新；`FruitManager` 收斂為讀取共享狀態的 UI。狀態更新只切換水果的顯示／可互動元件，不直接停用任務 NetworkObject。
+三個 NetworkApple 已在 MapNetworkSetup 設定生成，不再新增第二組。`FruitManager` 收斂為讀取共享狀態的 UI。狀態更新只切換水果的顯示／可互動元件，不直接停用仍需同步的 NetworkObject。
 
 任務物件跟 MainGame 場景生命週期走；離開地圖後清除，再次進地圖從 0/3 開始。尋找資料時使用所屬 Runner／場景的明確綁定，取代全域 FruitManager.Instance。
 
 ### 收集請求
 
-VR 的本機互動入口，以及桌面測試入口，都呼叫同一個收集請求。VR 先採「靠近後按一個指定互動鍵」即可；確切控制器按鍵需依現有輸入設定與頭盔測試選定。
+VR 的本機 Controller Ray 先指定目標，再由食指扳機 Select 發出收集請求；按下時仍須符合該顆蘋果原 Trigger 的玩家接近條件。射線與接近獨立。桌面測試入口呼叫相同收集請求，避免兩份任務邏輯。
 
 伺服器收到請求時檢查：
 
 1. 來源是本房間已登記的玩家，位於 MainGame，遊戲 Phase 為 Running。
 2. 正式遊戲來源為 VR 羊；桌面測試角色只在測試設定允許。
 3. 該羊有有效追蹤資料，水果 index 有效且尚未收集。
-4. 以伺服器已接收的羊／頭部世界位置，檢查與該水果的互動距離。不得接受客戶端自報「已碰到」就直接加分。
-5. 同一個伺服器處理步驟內檢查並設定收集 bit，讓兩位玩家同時請求同一顆時只成功一次。
+4. 以伺服器已接收的玩家姿態確認身體與蘋果 Trigger 的接近條件，並檢查射線目標／遮擋。不得接受客戶端自報「已碰到」就直接加分。
+5. 同一個伺服器處理步驟內檢查並設定該顆已收集狀態，讓兩位玩家同時請求同一顆時只成功一次。
 
 RPC 用於發送收集請求；共享結果使用 `[Networked]` 狀態，讓 UI／水果能從當前狀態重建。只廣播一次性 RPC 無法保存任務結果，Photon 官方也要求需要保留的 RPC 結果寫進網路狀態。[Photon RPC 文件](https://doc.photonengine.com/fusion/v2/manual/data-transfer/rpcs)
 
