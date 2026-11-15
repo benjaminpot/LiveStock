@@ -65,6 +65,8 @@
 - `1fe99a0b`：第 3 輪地圖 NPC 與容量驗收分離。
 - `f5132fae`：第 4 輪網頁非法任務旗標。
 - `eae662af`：第 5 輪獨立程序與嚴格影片驗收保存點；影片內容仍失敗。
+- `67eef490`：第 6 輪三組弱網互動與每端容量驗收。
+- `027188ee`：60 隻／10 分鐘通過報告與統計限制。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -99,3 +101,21 @@
 通過 600.7 秒，三個 Runner 的最低副本數皆為 60，0 error，觀察伺服器速率約 64.01 tick/s。共享 Editor 平均畫面間隔 75.62 ms、P95 93.62 ms，配置記憶體差約 +15.7 MB；不能解讀成 Quest／單獨伺服器效能。報告為 `Fusion_Map_Soak_60_Report.json`。
 
 頻寬欄位是每個觀察到的 render frame 讀取 SDK 最後一次 Fusion update 位元組統計後加總的估計，可能漏取 update，不是封包擷取。SDK 的單位與取樣時機依本機 `FusionStatisticsNetworkPage.cs`、`FusionStatistics.AfterUpdate` 與 [Photon Statistics 文件](https://doc.photonengine.com/fusion/v2/manual/testing-and-tooling/fusion-statistics-2.1) 核對；本輪只補充報告限制，未改寫原始測量數字。
+
+### 100 隻持續測試結果
+
+通過 600.0 秒，三個 Runner 的最低副本數皆為 100，測量區間 0 error，觀察伺服器速率約 64.04 tick/s。共享 Editor 平均畫面間隔 117.96 ms、P95 148.68 ms，配置記憶體差約 +15.4 MB。報告為 `Fusion_Map_Soak_100_Report.json`。本機依序測試，沒有控制所有系統／溫度變因，不能只用兩組畫面時間判定唯一效能瓶頸或裝置容量上限。
+
+## 第 7 輪：停用本機輸入來源的快取生命週期
+
+發現：`NetworkInputSource` 的 OnInput 讀取的是最後快取；元件停用後仍可能持續送出舊的有效姿態，讓伺服器持續更新有效期限。
+
+計畫：先在真實雙 Client 收集測試中重現「停用來源卻仍可收集」，再讓停用事件清理快取。保留錯誤角色／場景／有限值等獨立負向注入案例，不用整體停用取代每項輸入驗證。
+
+代做決定：沿用目前輸入格式，不新增 sequence、時間戳或另一套同步協定；這是本機來源的生命週期清理。待重現及修正後再驗證。
+
+## 第 8 輪：Editor 渲染與兩位獨立觀看者（已準備，待執行）
+
+計畫：使用現有 Game view，將伺服器世界選為可見；讓兩個隔離 Chrome context 分別選擇不同相機，檢查實際影片內容、進度與重連。以不同報告檔記錄 Editor 結果，不覆蓋 hidden Standalone 的失敗。
+
+代做決定：不改組員的 CCTV 位置、過熱參數或渲染架構；先用既有可繪圖環境建立對照，避免為測試注入假的畫面。
