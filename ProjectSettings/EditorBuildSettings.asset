@@ -16,6 +16,9 @@ EditorBuildSettings:
     guid: c436931981d910843b3df94f66403caf
   - enabled: 1
     path: Assets/_Project/Scenes/_flow test/MainGame.unity
+    guid: 042e801a001155e4ba368a62eb507221
+  - enabled: 0
+    path: Assets/_Project/Scenes/_flow test/MainGame_old.unity
     guid: 57876576fd74d5047857e5731c264978
   - enabled: 0
     path: Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity
