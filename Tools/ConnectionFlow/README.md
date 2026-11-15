@@ -31,7 +31,7 @@
 & ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -UseGraphics -SampleSeconds 30
 ```
 
-獨立程序驗收會檢查 probe 版本，並以實際桌面相機及共用收集請求驗證三顆蘋果、共享進度與重送 RPC 去重。NPC 數量依目前地圖配置；60／100 隻另由容量套件指定，不能把兩者混為同一測試。
+獨立程序驗收會檢查 probe 版本，並以實際桌面相機及共用收集請求驗證停用輸入來源後拒絕舊姿態、同一連線恢復、三顆蘋果、共享進度與重送 RPC 去重。NPC 數量依目前地圖配置；60／100 隻另由容量套件指定，不能把兩者混為同一測試。
 
 可選兩個隔離瀏覽器 context 的本機 WebRTC 驗收，使用本機已安裝的 Chrome 與 port 80；執行前確認該 port 未被其他服務占用：
 

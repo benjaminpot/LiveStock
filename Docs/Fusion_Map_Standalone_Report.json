@@ -40,6 +40,16 @@
     "evidence": 30
   },
   {
+    "test": "Disabled input source cannot collect with its old cached pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Input source resumes without reconnecting",
+    "pass": true,
+    "evidence": null
+  },
+  {
     "test": "Apple 1 collection reaches all three processes",
     "pass": true,
     "evidence": null
@@ -78,33 +88,33 @@
     "test": "Independent processes remain connected with stable NPC count",
     "pass": true,
     "evidence": {
-      "observedServerTicksPerSecond": 63.30186654994431,
-      "scope": "Three Development Players on one Windows computer. Graphics enabled = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.",
+      "seconds": 30.3603095,
       "minimumNPCs": 30,
-      "seconds": 30.345936,
       "peers": [
         {
           "role": "server",
           "npcs": 30,
-          "frame": 3346,
-          "averageFrameIntervalMs": 18.143341064453125,
-          "allocatedBytes": 177234528
+          "frame": 3588,
+          "averageFrameIntervalMs": 17.76493263244629,
+          "allocatedBytes": 176908070
         },
         {
           "role": "desktop",
           "npcs": 30,
-          "frame": 3390,
-          "averageFrameIntervalMs": 17.815515518188477,
-          "allocatedBytes": 180578718
+          "frame": 3627,
+          "averageFrameIntervalMs": 17.752225875854492,
+          "allocatedBytes": 180643085
         },
         {
           "role": "vr-preview",
           "npcs": 30,
-          "frame": 3390,
-          "averageFrameIntervalMs": 17.906688690185547,
-          "allocatedBytes": 186905006
+          "frame": 3584,
+          "averageFrameIntervalMs": 17.829965591430664,
+          "allocatedBytes": 186897874
         }
-      ]
+      ],
+      "observedServerTicksPerSecond": 63.23886148982872,
+      "scope": "Three Development Players on one Windows computer. Graphics enabled = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured."
     }
   },
   {

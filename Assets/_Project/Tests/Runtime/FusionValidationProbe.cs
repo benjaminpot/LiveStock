@@ -20,9 +20,9 @@ public sealed class FusionValidationProbe : MonoBehaviour
     [Serializable]
     public sealed class Snapshot
     {
-        public int probeVersion = 2;
+        public int probeVersion = 3;
         public string role, phase;
-        public bool connected, canStart;
+        public bool connected, canStart, inputActive;
         public int frame, tick, players, loaded, npcs, acceptedInputs;
         public int npcMinimum, npcMaximum, apples, collected, required, targetFruit;
         public bool missionComplete;
@@ -73,6 +73,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
             role = server != null ? "server" : client != null && client.IsDesktop ? "desktop" : "vr-preview",
             phase = state != null ? state.Phase.ToString() : "",
             connected = runner != null && runner.IsRunning,
+            inputActive = client != null && client.IsConnected && client.Runner.GetComponent<NetworkInputSource>().isActiveAndEnabled,
             canStart = state != null && state.CanStart,
             frame = Time.frameCount, tick = runner != null && runner.IsRunning ? runner.Tick.Raw : 0,
             players = state != null ? state.PlayerCount : 0,
@@ -127,6 +128,8 @@ public sealed class FusionValidationProbe : MonoBehaviour
         else if (command == "start" && server != null) server.StartGame();
         else if (command == "stop" && server != null) server.StopServer();
         else if (command == "capture-cctv" && server != null) CaptureCctv();
+        else if ((command == "input-off" || command == "input-on") && client != null && client.IsConnected)
+            client.Runner.GetComponent<NetworkInputSource>().enabled = command == "input-on";
         else if (command.StartsWith("approach-fruit ") && client != null && client.IsDesktop
             && int.TryParse(command.Substring("approach-fruit ".Length), out int fruitIndex)) ApproachFruit(client, fruitIndex);
         else if (command == "collect-fruit" && client != null && selectedFruit != null)

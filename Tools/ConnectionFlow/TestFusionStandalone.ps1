@@ -49,6 +49,7 @@ function Distance($A, $B) {
 }
 
 try {
+    '[]' | Set-Content -LiteralPath $reportPath
     if ($WithBrowser) {
         if (!$UseGraphics) { throw 'Browser video acceptance requires -UseGraphics.' }
         $browserProcess = Start-Process -FilePath 'node' -ArgumentList @(
@@ -64,7 +65,7 @@ try {
         $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
     }
     Wait-For { (Read-Peer 'server').connected -and (Read-Peer 'desktop') -and (Read-Peer 'vr-preview') } 'process startup'
-    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 2}).Count -eq 0)
+    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 3}).Count -eq 0)
     Check 'Three independent Players start with zero Lobby NPCs' ((Read-Peer 'server').npcs -eq 0 -and $processes.Count -eq 3)
     Send-Command 'desktop' 'connect'
     Wait-For { (Read-Peer 'server').loaded -eq 1 -and (Read-Peer 'desktop').connected } 'Desktop connection'
@@ -118,6 +119,18 @@ try {
         Send-Command 'desktop' ('approach-fruit '+$index)
         Wait-For { (Read-Peer 'desktop').targetFruit -ne 0 -and (Read-Peer 'desktop').targetFruit -ne $oldTarget } 'desktop camera aims at nearby apple'
         Start-Sleep -Seconds 2 # Let the body input reach the Server before the interaction RPC.
+        if ($index -eq 0) {
+            Send-Command 'desktop' 'input-off'
+            Wait-For { !(Read-Peer 'desktop').inputActive } 'disabled input source'
+            Start-Sleep -Seconds 1
+            Send-Command 'desktop' 'collect-fruit'
+            Wait-For { (Read-Peer 'desktop').feedback -eq '等待玩家追蹤資料' } 'Server rejection after input source is disabled'
+            Check 'Disabled input source cannot collect with its old cached pose' ((Read-Peer 'server').collected -eq 0)
+            Send-Command 'desktop' 'input-on'
+            Wait-For { (Read-Peer 'desktop').inputActive } 'input source resumes'
+            Start-Sleep -Seconds 1
+            Check 'Input source resumes without reconnecting' ((Read-Peer 'desktop').connected)
+        }
         Send-Command 'desktop' 'collect-fruit'
         $expected = $index + 1
         Wait-For { (Read-Peer 'server').collected -eq $expected -and (Read-Peer 'desktop').collected -eq $expected -and (Read-Peer 'vr-preview').collected -eq $expected } 'shared fruit progress'
@@ -160,6 +173,11 @@ try {
     $errors = @(Get-ChildItem -LiteralPath $runRoot -Filter '*.log' | Select-String -Pattern '^(\w+Exception:|Can.t remove RunnerEnableVisibility|EndRenderPass:|BeginRenderPass:)')
     Check 'Player logs contain no detected runtime exceptions or render-pass errors' ($errors.Count -eq 0) @($errors | ForEach-Object {$_.Line})
     Write-Output "Report $reportPath"
+}
+catch {
+    $checks.Add([pscustomobject]@{test='Standalone acceptance exception'; pass=$false; evidence=$_.Exception.Message})
+    $checks | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath $reportPath
+    throw
 }
 finally {
     foreach ($role in $processes.Keys) {
