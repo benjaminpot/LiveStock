@@ -63,7 +63,9 @@ public sealed class ServerConnectionManager : MonoBehaviour
             if (!result.Ok) throw new InvalidOperationException(result.ShutdownReason.ToString());
             // Fusion's persistence flag applies on all replicas, not just the server instance.
             await Runner.SpawnAsync(sessionStatePrefab, flags: NetworkSpawnFlags.DontDestroyOnLoad);
-            if (Runner.Config.PeerMode == NetworkProjectConfig.PeerModes.Multiple) Runner.SetVisible(false);
+            // Only the local peer selector may hide this world; standalone CCTV needs its renderers enabled.
+            if (Runner.Config.PeerMode == NetworkProjectConfig.PeerModes.Multiple)
+                Runner.SetVisible(ConnectionTestViews.Instance == null);
             Status = "Lobby open. Waiting for players.";
             return true;
         }

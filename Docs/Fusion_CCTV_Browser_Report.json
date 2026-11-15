@@ -14,8 +14,8 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 124,
-      "droppedFrames": 1,
+      "frames": 123,
+      "droppedFrames": 2,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
@@ -47,12 +47,12 @@
       "connection": "CONNECTED",
       "width": 1920,
       "frames": 14,
-      "droppedFrames": 1,
+      "droppedFrames": 2,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
       ],
-      "pixelRange": 1,
+      "pixelRange": 0,
       "nonBlackPixels": 0
     },
     {
@@ -61,13 +61,13 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 13,
+      "frames": 14,
       "droppedFrames": 2,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
       ],
-      "pixelRange": 1,
+      "pixelRange": 0,
       "nonBlackPixels": 0
     }
   ]

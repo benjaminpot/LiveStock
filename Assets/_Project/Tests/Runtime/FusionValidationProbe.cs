@@ -20,9 +20,9 @@ public sealed class FusionValidationProbe : MonoBehaviour
     [Serializable]
     public sealed class Snapshot
     {
-        public int probeVersion = 3;
+        public int probeVersion = 4;
         public string role, phase;
-        public bool connected, canStart, inputActive;
+        public bool connected, canStart, inputActive, runnerVisible;
         public int frame, tick, players, loaded, npcs, acceptedInputs;
         public int npcMinimum, npcMaximum, apples, collected, required, targetFruit;
         public bool missionComplete;
@@ -73,6 +73,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
             role = server != null ? "server" : client != null && client.IsDesktop ? "desktop" : "vr-preview",
             phase = state != null ? state.Phase.ToString() : "",
             connected = runner != null && runner.IsRunning,
+            runnerVisible = runner != null && runner.IsRunning && runner.GetVisible(),
             inputActive = client != null && client.IsConnected && client.Runner.GetComponent<NetworkInputSource>().isActiveAndEnabled,
             canStart = state != null && state.CanStart,
             frame = Time.frameCount, tick = runner != null && runner.IsRunning ? runner.Tick.Raw : 0,

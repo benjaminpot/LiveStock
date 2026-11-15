@@ -1,4 +1,4 @@
-param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser)
+param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser, [switch]$BatchGraphics)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $executable = Join-Path $projectRoot 'Builds/FusionValidation/LiveStockFusion.exe'
@@ -52,20 +52,21 @@ try {
     '[]' | Set-Content -LiteralPath $reportPath
     if ($WithBrowser) {
         if (!$UseGraphics) { throw 'Browser video acceptance requires -UseGraphics.' }
+        $browserHost = if ($BatchGraphics) { 'StandaloneBatchGraphics' } else { 'StandaloneHidden' }
         $browserProcess = Start-Process -FilePath 'node' -ArgumentList @(
-            ('"'+(Join-Path $PSScriptRoot 'TestCctvBrowser.mjs')+'"'), ('"'+$browserEvidence+'"')
+            ('"'+(Join-Path $PSScriptRoot 'TestCctvBrowser.mjs')+'"'), ('"'+$browserEvidence+'"'), $browserHost
         ) -WindowStyle Hidden -PassThru
     }
     foreach ($role in @('server','desktop','vr-preview')) {
         $graphicsOption = if ($UseGraphics) { '-force-d3d11' } else { '-nographics' }
-        # WebRTC.Update waits for end-of-frame rendering; a graphics device alone does not make batch mode a video test.
-        $modeArguments = if ($UseGraphics) { @('-screen-fullscreen','0','-screen-width','640','-screen-height','360') } else { @('-batchmode') }
+        # Keep batch graphics explicit: a graphics device alone does not prove that cameras produce video.
+        $modeArguments = if ($UseGraphics -and !$BatchGraphics) { @('-screen-fullscreen','0','-screen-width','640','-screen-height','360') } else { @('-batchmode') }
         $arguments = @($modeArguments) + @($graphicsOption,('-flow-'+$role),'-logFile',
             (Join-Path $runRoot ($role+'.log')),'-fusion-probe-output',(Join-Path $runRoot ($role+'.json')))
         $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
     }
     Wait-For { (Read-Peer 'server').connected -and (Read-Peer 'desktop') -and (Read-Peer 'vr-preview') } 'process startup'
-    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 3}).Count -eq 0)
+    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 4}).Count -eq 0)
     Check 'Three independent Players start with zero Lobby NPCs' ((Read-Peer 'server').npcs -eq 0 -and $processes.Count -eq 3)
     Send-Command 'desktop' 'connect'
     Wait-For { (Read-Peer 'server').loaded -eq 1 -and (Read-Peer 'desktop').connected } 'Desktop connection'
@@ -107,6 +108,7 @@ try {
     $npcCount = (Read-Peer 'server').npcs
     Check 'All processes receive the authored map NPC count' $true $npcCount
     Wait-For { (Read-Peer 'server').apples -eq 3 -and (Read-Peer 'desktop').apples -eq 3 -and (Read-Peer 'vr-preview').apples -eq 3 } 'three replicated apples'
+    Check 'Standalone Server keeps its world visible for CCTV rendering' ((Read-Peer 'server').runnerVisible)
     if ($WithBrowser) {
         Set-Content -LiteralPath ($browserEvidence+'.connect') -Value 'connect'
         Wait-For { (Read-Browser).ready -or (Read-Browser).errors.Count -gt 0 } 'two browser video streams' 150
@@ -163,7 +165,7 @@ try {
     Check 'Independent processes remain connected with stable NPC count' ($minimumNPCs -eq $npcCount) @{
         seconds=$timer.Elapsed.TotalSeconds; minimumNPCs=$minimumNPCs
         observedServerTicksPerSecond=($end.tick-$start.tick)/$timer.Elapsed.TotalSeconds
-        peers=$measurements; scope=('Three Development Players on one Windows computer. Graphics enabled = '+[bool]$UseGraphics+'. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.')
+        peers=$measurements; scope=('Three Development Players on one Windows computer. Graphics enabled = '+[bool]$UseGraphics+', batch graphics = '+[bool]$BatchGraphics+'. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.')
     }
     Check 'Server continues accepting inputs during NPC simulation' ($end.acceptedInputs -gt $start.acceptedInputs)
     Send-Command 'server' 'stop'

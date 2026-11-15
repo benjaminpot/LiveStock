@@ -70,6 +70,7 @@
 - `e1f783f6`：100 隻／10 分鐘通過報告。
 - `7f5153f9`：第 7 輪停用輸入來源時清理快取。
 - `a57adcca`：第 8 輪載入完成啟動 ServerOnly，兩位瀏覽器影像／逐顆進度／重連通過。
+- `cf338aa1`：第 9 輪最新 Player 的 21 項獨立程序回歸；影片失敗另存。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -142,3 +143,15 @@
 驗證：最新 Player 建置通過，0 error／3 warning；三個獨立圖形 Player 的 21 項 RPC／來源停用恢復／30 隻 NPC／30 秒持續／離線清理檢查全數通過。嚴格雙瀏覽器測試仍記錄 `pass: false`，兩個不同相機皆在未過熱時解碼黑影像，證據位於 `.tmp/FusionStandalone-20261116-062738`。這個失敗與獨立 RPC 報告分開保存。
 
 下一步：已找到新伺服器啟動時無條件 SetVisible(false)；驗證它對串流渲染的影響，再做主要 Editor 回歸。
+
+## 第 10 輪：獨立伺服器的世界可見性（進行中）
+
+發現：ServerConnectionManager 在 Multi-Peer 下無條件 SetVisible(false)。本機 Fusion 原始碼確認此 API 直接停用所屬 Renderer／Behaviour，會影響串流相機；Editor 測試因選取伺服器又將它設為 true，才出現兩種環境不同結果。
+
+修改：只有存在既有本機 peer selector 時才在啟動時隱藏伺服器世界；獨立 Server 保持可見。驗收 probe 升至版本 4 並回報 Runner 可見性，獨立程序在影片驗收前明確檢查。未更改相機位置、圖層、URP 或串流編碼。
+
+代做決定：保留 Editor 的單一選取視角行為，避免多個世界同時顯示；獨立伺服器沒有該測試選取器，應繪製自身世界供 CCTV 使用。
+
+驗證：重建 0 error／3 warning，獨立 Server 的可見性檢查通過。然而兩個瀏覽器仍在未過熱時解碼全黑，不能宣告影片問題已修好。再以同一建置對照 D3D11 圖形 batch 模式，仍失敗；證據分別在 `.tmp/FusionStandalone-20261116-063329`、`.tmp/FusionStandalone-20261116-063541`。batch 模式保留為明確選項，不作為影像成功的替代判準。
+
+下一步：在 Development probe 補實際相機渲染回呼與 Renderer 狀態診斷，區分未排程繪製、場景內容與編碼問題。保留可見性修正，因原本無條件隱藏也會阻止獨立 Server 正常繪製世界；不將它描述成唯一根因。

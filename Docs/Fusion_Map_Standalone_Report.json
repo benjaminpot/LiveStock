@@ -40,96 +40,93 @@
     "evidence": 30
   },
   {
-    "test": "Disabled input source cannot collect with its old cached pose",
+    "test": "Standalone Server keeps its world visible for CCTV rendering",
     "pass": true,
     "evidence": null
   },
   {
-    "test": "Input source resumes without reconnecting",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Apple 1 collection reaches all three processes",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Duplicate RPC does not increase progress",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Apple 2 collection reaches all three processes",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Duplicate RPC does not increase progress",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Apple 3 collection reaches all three processes",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Duplicate RPC does not increase progress",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Both clients show completion from shared state",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Independent processes remain connected with stable NPC count",
-    "pass": true,
+    "test": "Two browsers decode advancing video and receive 0/3",
+    "pass": false,
     "evidence": {
-      "seconds": 30.3603095,
-      "minimumNPCs": 30,
-      "peers": [
+      "pass": false,
+      "host": "StandaloneHidden",
+      "ready": false,
+      "completed": false,
+      "reconnected": false,
+      "errors": [
+        "Error: Both browsers decode black video while cameras are not overheated.\n    at file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:122:13\n    at async waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:32:11)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:113:3"
+      ],
+      "samples": [],
+      "browserVersion": "157.0.8103.52",
+      "latest": [
         {
-          "role": "server",
-          "npcs": 30,
-          "frame": 3588,
-          "averageFrameIntervalMs": 17.76493263244629,
-          "allocatedBytes": 176908070
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 124,
+          "droppedFrames": 2,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
         },
         {
-          "role": "desktop",
-          "npcs": 30,
-          "frame": 3627,
-          "averageFrameIntervalMs": 17.752225875854492,
-          "allocatedBytes": 180643085
-        },
-        {
-          "role": "vr-preview",
-          "npcs": 30,
-          "frame": 3584,
-          "averageFrameIntervalMs": 17.829965591430664,
-          "allocatedBytes": 186897874
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 124,
+          "droppedFrames": 2,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
         }
       ],
-      "observedServerTicksPerSecond": 63.23886148982872,
-      "scope": "Three Development Players on one Windows computer. Graphics enabled = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured."
+      "firstDecoded": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 14,
+          "droppedFrames": 2,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 14,
+          "droppedFrames": 2,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        }
+      ]
     }
   },
   {
-    "test": "Server continues accepting inputs during NPC simulation",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Stopping Server disconnects both Clients and removes NPCs",
-    "pass": true,
-    "evidence": null
-  },
-  {
-    "test": "Player logs contain no detected runtime exceptions or render-pass errors",
-    "pass": true,
-    "evidence": []
+    "test": "Standalone acceptance exception",
+    "pass": false,
+    "evidence": "Two browsers decode advancing video and receive 0/3"
   }
 ]
