@@ -7,6 +7,8 @@ import path from 'node:path';
 // Optional local integration companion for TestFusionStandalone.ps1 -WithBrowser.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const output = path.resolve(process.argv[2] ?? '.tmp/FusionBrowser/browser-evidence.json');
+const host = process.argv[3] ?? 'StandaloneHidden';
+const reportName = host === 'EditorMultiPeer' ? 'Fusion_CCTV_Editor_Browser_Report.json' : 'Fusion_CCTV_Browser_Report.json';
 mkdirSync(path.dirname(output), { recursive: true });
 const log = createWriteStream(path.join(path.dirname(output), 'signaling.log'));
 const server = spawn(process.execPath, ['build/index.js', '-p', '80', '-l', 'none'], {
@@ -14,14 +16,15 @@ const server = spawn(process.execPath, ['build/index.js', '-p', '80', '-l', 'non
 });
 server.stdout.pipe(log);
 server.stderr.pipe(log);
-const evidence = { pass: false, ready: false, completed: false, reconnected: false, errors: [], samples: [] };
+const evidence = { pass: false, host, ready: false, completed: false, reconnected: false, errors: [], samples: [] };
 const save = () => {
   evidence.pass = evidence.ready && evidence.completed && evidence.reconnected && evidence.errors.length === 0;
   const json = JSON.stringify(evidence, null, 2);
   writeFileSync(output, json);
-  writeFileSync(path.join(root, 'Docs/Fusion_CCTV_Browser_Report.json'), json);
+  writeFileSync(path.join(root, 'Docs', reportName), json);
 };
 let browser;
+const pages = [];
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 async function waitFor(check, label, seconds = 120) {
@@ -35,6 +38,7 @@ async function waitFor(check, label, seconds = 120) {
 async function snapshot(page) {
   return page.evaluate(() => {
     const video = document.querySelector('#player video');
+    const quality = video?.getVideoPlaybackQuality?.();
     let pixelRange = 0, nonBlackPixels = 0;
     if (video?.videoWidth) {
       const canvas = document.createElement('canvas');
@@ -54,18 +58,26 @@ async function snapshot(page) {
     }
     return {
       mission: document.querySelector('[data-mission-status]')?.textContent,
+      camera: document.querySelector('[data-current]')?.textContent,
       blackout: !document.getElementById('cctvBlackout').hidden,
       connection: document.querySelector('[data-connection]')?.textContent,
       width: video?.videoWidth ?? 0,
-      frames: video?.getVideoPlaybackQuality?.().totalVideoFrames ?? 0,
+      frames: (quality?.totalVideoFrames ?? 0) - (quality?.droppedVideoFrames ?? 0),
+      droppedFrames: quality?.droppedVideoFrames ?? 0,
+      missionHistory: window.__fusionMissionHistory ?? [],
       pixelRange, nonBlackPixels
     };
   });
 }
 
-async function connect(page) {
+async function connect(page, cameraIndex = 0) {
   await page.goto('http://127.0.0.1/receiver/live.html');
   await page.locator('#playButton').click();
+  if (cameraIndex === 1) {
+    await page.waitForFunction(() => document.querySelectorAll('.cctv-monitor button')[1]?.getAttribute('aria-disabled') === 'false', null, { timeout: 30000 });
+    await page.locator('.cctv-monitor button').nth(1).click();
+    await page.evaluate(() => window.scrollTo(0, 0));
+  }
 }
 
 try {
@@ -78,13 +90,23 @@ try {
     executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
     headless: true, args: ['--autoplay-policy=no-user-gesture-required']
   });
+  evidence.browserVersion = browser.version();
   // Keep signaling available during map load, but do not consume camera heat before the video check starts.
   await waitFor(() => existsSync(output + '.connect'), 'map ready for browser viewers', 150);
-  const pages = await Promise.all([0, 1].map(async () => {
+  await Promise.all([0, 1].map(async (_, index) => {
     const context = await browser.newContext();
     const page = await context.newPage();
+    pages[index] = page;
+    await page.addInitScript(() => document.addEventListener('DOMContentLoaded', () => {
+      const status = document.querySelector('[data-mission-status]');
+      window.__fusionMissionHistory = [status.textContent];
+      new MutationObserver(() => {
+        if (window.__fusionMissionHistory.at(-1) !== status.textContent)
+          window.__fusionMissionHistory.push(status.textContent);
+      }).observe(status, { childList: true, subtree: true, characterData: true });
+    }));
     page.on('pageerror', error => { evidence.errors.push(error.message); save(); });
-    await connect(page);
+    await connect(page, index);
     return page;
   }));
   let samples;
@@ -98,7 +120,8 @@ try {
     save();
     if (samples.every(s => s.frames > 120 && !s.blackout && s.pixelRange === 0))
       throw new Error('Both browsers decode black video while cameras are not overheated.');
-    return samples.every(s => s.width > 0 && s.frames > 0 && s.pixelRange > 20 && s.nonBlackPixels > 30 && s.mission?.includes('0/3'));
+    return samples.every(s => s.width > 0 && s.frames > 0 && s.pixelRange > 20 && s.nonBlackPixels > 30 && s.mission?.includes('0/3'))
+      && samples[0].camera !== samples[1].camera;
   }, 'two independent browser video streams and 0/3 snapshot');
   const initial = samples;
   await delay(1500);
@@ -113,9 +136,11 @@ try {
     return samples.every(s => s.mission === '蘋果已收集完成！');
   }, 'completion on both browser channels');
   evidence.samples.push({ stage: 'completed', browsers: samples });
+  if (!samples.every(s => s.missionHistory.some(text => text.includes('1/3')) && s.missionHistory.some(text => text.includes('2/3'))))
+    throw new Error('A browser missed intermediate shared mission progress.');
   evidence.completed = true;
   save();
-  await connect(pages[1]);
+  await connect(pages[1], 1);
   await waitFor(async () => {
     const s = await snapshot(pages[1]);
     return s.mission === '蘋果已收集完成！' && s.width > 0 && s.frames > 0 && s.pixelRange > 20 && s.nonBlackPixels > 30;
@@ -130,6 +155,11 @@ try {
   await waitFor(() => existsSync(output + '.stop'), 'standalone process cleanup', 180);
 } catch (error) {
   evidence.errors.push(error.stack ?? error.message);
+  const states = await Promise.race([Promise.allSettled(pages.map(snapshot)), delay(5000).then(() => [])]);
+  evidence.latest = states.map(s => s.status === 'fulfilled' ? s.value : { error: String(s.reason) });
+  if (pages[0] && !pages[0].isClosed()) {
+    try { await pages[0].screenshot({ path: path.join(path.dirname(output), 'browser-failure.png'), timeout: 5000 }); } catch {}
+  }
   save();
   process.exitCode = 1;
 } finally {

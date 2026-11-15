@@ -1,0 +1,69 @@
+[
+  {
+    "test": "First desktop connects for rendered CCTV test",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Second desktop connects for rendered CCTV test",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server world is selected and player loop advances",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server CCTV hierarchy and signaling are active",
+    "pass": true,
+    "evidence": {
+      "switcherActive": true,
+      "signalingActive": true,
+      "running": true,
+      "serverOnly": true,
+      "owner": "Lobby Server Runner",
+      "peerMode": "Multiple"
+    }
+  },
+  {
+    "test": "Two real browsers receive non-black CCTV and initial mission snapshot",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Shared gameplay request for apple 1",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both sheep-side clients share 1/3",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Shared gameplay request for apple 2",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both sheep-side clients share 2/3",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Shared gameplay request for apple 3",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both sheep-side clients share 3/3",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both browsers complete and a reconnect retains completion and video",
+    "pass": true,
+    "evidence": null
+  }
+]

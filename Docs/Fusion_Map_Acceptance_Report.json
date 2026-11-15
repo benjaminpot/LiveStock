@@ -68,7 +68,7 @@
     "pass": true,
     "evidence": [
       {
-        "runner": "ConnectionManager Runner",
+        "runner": "Desktop Client 1 Runner",
         "count": 30
       },
       {
@@ -76,7 +76,7 @@
         "count": 30
       },
       {
-        "runner": "Desktop Client 1 Runner",
+        "runner": "ConnectionManager Runner",
         "count": 30
       }
     ]
@@ -114,12 +114,12 @@
   {
     "test": "Remote IK receives the transmitted head target",
     "pass": true,
-    "evidence": 5.96046448E-08
+    "evidence": 7.359886E-07
   },
   {
     "test": "The complete skinned pose agrees after targets settle",
     "pass": true,
-    "evidence": 2.58508317E-06
+    "evidence": 4.30042473E-06
   },
   {
     "test": "Only authority accepts damage",

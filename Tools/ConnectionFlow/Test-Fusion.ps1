@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Editor','Assets','Standalone','WeakNetwork','MapSwap','Soak','Fruit')]
+    [ValidateSet('Editor','Assets','Standalone','WeakNetwork','MapSwap','Soak','Fruit','Cctv')]
     [string]$Suite = 'Editor',
     [ValidateRange(1,3600)][int]$SoakSeconds = 600,
     [ValidateSet(60,100)][int]$NpcCount = 60
@@ -87,6 +87,24 @@ try {
                     Run-Test 'ValidateFusionAssets' 'ValidateFusionAssets.Run'
                 }
                 'Fruit' { Open-Menu; Run-Test 'FruitGameplayAcceptance' 'FruitGameplayAcceptance.Run' }
+                'Cctv' {
+                    Open-Menu
+                    $browserOutput = Join-Path $logRoot ('Cctv-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'/browser-evidence.json')
+                    $browser = $null
+                    try {
+                        $browser = Start-Process -FilePath 'node' -ArgumentList @(
+                            ('"'+(Join-Path $PSScriptRoot 'TestCctvBrowser.mjs')+'"'),('"'+$browserOutput+'"'),'EditorMultiPeer'
+                        ) -WindowStyle Hidden -PassThru
+                        $testArguments = ConvertTo-Json -InputObject @($browserOutput) -Compress
+                        Run-Test 'CctvGameplayAcceptance' 'CctvGameplayAcceptance.Run' $testArguments
+                    }
+                    finally {
+                        if ($browser -and !$browser.HasExited) {
+                            if (Test-Path -LiteralPath (Split-Path $browserOutput)) { Set-Content -LiteralPath ($browserOutput+'.stop') -Value 'stop' }
+                            if (!$browser.WaitForExit(10000)) { $browser.Kill($true) }
+                        }
+                    }
+                }
                 'WeakNetwork' { Open-Menu; Run-Test 'FusionWeakNetworkAcceptance' 'FusionWeakNetworkAcceptance.Run' }
                 'MapSwap' {
                     Stop-Test

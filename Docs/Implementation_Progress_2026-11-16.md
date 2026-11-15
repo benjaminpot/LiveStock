@@ -68,6 +68,7 @@
 - `67eef490`：第 6 輪三組弱網互動與每端容量驗收。
 - `027188ee`：60 隻／10 分鐘通過報告與統計限制。
 - `e1f783f6`：100 隻／10 分鐘通過報告。
+- `7f5153f9`：第 7 輪停用輸入來源時清理快取。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -119,8 +120,14 @@
 
 驗證：Unity 編譯 0 error；擴充後 33 項真實雙 Client 收集／來源失效／重新開局測試全數通過。此修正發生在前述容量與獨立 Player 測試之後，稍後的最終 Player 須重建，不能用舊執行檔宣告這個保存點的 Standalone 驗收已完成。
 
-## 第 8 輪：Editor 渲染與兩位獨立觀看者（已準備，待執行）
+## 第 8 輪：場景載入完成後啟動伺服器專屬物件
 
-計畫：使用現有 Game view，將伺服器世界選為可見；讓兩個隔離 Chrome context 分別選擇不同相機，檢查實際影片內容、進度與重連。以不同報告檔記錄 Editor 結果，不覆蓋 hidden Standalone 的失敗。
+重現：實際 Server 世界的 CCTV 元件存在，但 ServerOnly.IsActiveFor 為 false、SignalingManager.Running 為 false。新流程只有載入開始事件，漏接 ServerOnly 註解所依賴的載入完成啟動；Multi-Peer 合併場景後，Start 的備援判斷不能保證正確啟動。失敗證據在 `.tmp/FusionAcceptance/Cctv-before-scene-completion-fix.json`。
 
-代做決定：不改組員的 CCTV 位置、過熱參數或渲染架構；先用既有可繪圖環境建立對照，避免為測試注入假的畫面。
+修改：NetworkSessionController 在 Fusion OnSceneLoadDone 後，對該 Runner 已載入場景套用既有 ServerOnly.ActivateFor。新增 `-Suite Cctv`，使用現有 Game view 將伺服器世界選為可見，讓兩個隔離 Chrome context 分別選擇不同相機，檢查實際影片、每次進度與重連。Editor 使用獨立報告檔，不覆蓋 hidden Standalone 的失敗。
+
+代做決定：沿用 ServerOnly 的權限判斷，Client 不啟動串流；不改 NPC 的 Running 門檻，也不改組員的 CCTV 位置、過熱參數或渲染架構。沒有注入假的畫面。
+
+驗證：Unity 編譯 0 error；12 項 Editor／真實瀏覽器整合檢查全部通過。兩端分別顯示 CCTV 01／02 的非黑農場影像，1920 寬影片解碼持續前進，兩端都觀察到 0/3、1/3、2/3、完成；重連保留完成狀態與正常影片。已目視確認重連截圖，農場與完成文字清楚。報告為 `Fusion_CCTV_Editor_Acceptance_Report.json`、`Fusion_CCTV_Editor_Browser_Report.json`；截圖位於 `.tmp/FusionAcceptance/Cctv-20261116-061932`。hidden Standalone 黑影像與實體 HMD 仍未通過。
+
+下一步：重建最新 Player，補輸入來源停用／恢復的獨立程序檢查，並回歸場景生命週期。

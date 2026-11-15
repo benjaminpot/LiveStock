@@ -60,7 +60,18 @@ public sealed class NetworkSessionController : MonoBehaviour
             if (inputSource != null) inputSource.Clear();
             if (runner.IsServer) NetworkWorld.For(runner)?.BeginSceneLoad();
         });
+        events.OnSceneLoadDone ??= new NetworkEvents.RunnerEvent();
+        events.OnSceneLoadDone.AddListener(ActivateSceneAuthority);
         Runner.AddCallbacks(events);
+    }
+
+    /// <summary>Applies server-only ownership after Fusion finishes assigning this Runner's loaded scene.</summary>
+    void ActivateSceneAuthority(NetworkRunner runner)
+    {
+        var scene = GetComponent<NetworkSceneManagerDefault>().MainRunnerScene;
+        foreach (var root in scene.GetRootGameObjects())
+            foreach (var serverOnly in root.GetComponentsInChildren<LiveStock.Multiplayer.ServerOnly>(true))
+                serverOnly.ActivateFor(runner);
     }
 
     /// <summary>Starts Fusion with the same room, region and scene contract for both entry points.</summary>

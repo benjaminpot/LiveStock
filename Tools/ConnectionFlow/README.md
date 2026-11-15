@@ -15,6 +15,7 @@
 | `-Suite Editor` | 五輪主要 Editor 功能回歸，預設選項 |
 | `-Suite Assets` | 收納 GUID、Prefab 與場景腳本引用 |
 | `-Suite Fruit` | 不需頭盔的雙 Client 蘋果收集、範圍／遮擋、去重、Player_UI 與新一輪重設驗收 |
+| `-Suite Cctv` | Editor 伺服器世界與兩個隔離 Chrome context 的影片內容、逐顆進度與重連驗收 |
 | `-Suite Standalone` | 既有同版本建置的 Server、Desktop、VR 預覽，D3D11 模式採樣 30 秒 |
 | `-Suite WeakNetwork` | 三組代表性模擬網路條件 |
 | `-Suite MapSwap` | 暫時複製地圖並修改場景設定，完成後還原與移除測試場景 |
@@ -41,6 +42,8 @@ npm --prefix WebApp run build
 ```
 
 此模式以非批次的圖形程序執行，要求兩個瀏覽器都有解碼前進、非黑且非單色的影片內容，以及任務完成／重連快照。圖形裝置初始化、連線成功或解碼幀數增加，均不足以代替影像內容檢查。詳細證據與截圖留在各次 `.tmp/FusionStandalone-*`；失敗也會保留報告。這仍不包含實體頭盔操作。
+
+同樣的瀏覽器準備完成後，可執行 `& ./Tools/ConnectionFlow/Test-Fusion.ps1 -Suite Cctv`。它選取 Editor 的伺服器世界供實際相機渲染，並交替由兩個桌面 Client 收集。Editor 的報告為 `Docs/Fusion_CCTV_Editor_*_Report.json`，獨立 Player 的影片報告為 `Docs/Fusion_CCTV_Browser_Report.json`；兩種環境分別判定，不能相互替代。
 
 MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前次中斷的地圖測試。手動復原可在 Edit Mode 執行 `MapSwapAcceptance.Restore`。準備及復原的詳細日誌也放在 `.tmp/FusionAcceptance/`。
 
