@@ -1,0 +1,50 @@
+{
+  "pass": false,
+  "ready": false,
+  "completed": false,
+  "reconnected": false,
+  "errors": [
+    "Error: Timed out: two independent browser video streams and 0/3 snapshot\n    at waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:30:38)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:91:3"
+  ],
+  "samples": [],
+  "latest": [
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "blackout": true,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 3590,
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    },
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "blackout": true,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 3591,
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    }
+  ],
+  "firstDecoded": [
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 6,
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    },
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 6,
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    }
+  ]
+}

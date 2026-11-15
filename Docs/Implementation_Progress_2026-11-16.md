@@ -5,7 +5,7 @@
 ## 原則與待驗收邊界
 
 - 保留既有 VR rig、Locomotor、UI 階層、Fusion 連線與兩階段開始流程。
-- 每輪記錄實際修改、代做決定、驗證結果與下一步；通過檢查後才提交該輪。
+- 每輪記錄實際修改、代做決定、驗證結果與下一步；保存點若仍有驗收缺口，明確標示 WIP 與失敗項目，不宣告整體完成。
 - 實體頭盔與手把、頭盔內可讀性、裝置效能均不能由桌面／預覽代替。
 - 本輪範圍為既有收集功能與其驗收鏈路，不新增出口、勝負規則或全面重寫移動。
 
@@ -63,3 +63,30 @@
 - `a0034359`：第 1 輪資產驗收修正。
 - `e3f6e738`：第 2 輪無效／過期輸入與追蹤檢查。
 - `1fe99a0b`：第 3 輪地圖 NPC 與容量驗收分離。
+- `f5132fae`：第 4 輪網頁非法任務旗標。
+
+## 第 5 輪：獨立 Player 與瀏覽器整合驗收
+
+修改：驗收專用 probe 增加版本、三顆蘋果／共享進度／完成快照，使用原桌面 actor、相機與 PlayerGameplay 請求完成靠近與收集；追加重送 RPC 去重測試。獨立程序測試改依地圖配置核對 NPC 數量，並可選兩個獨立瀏覽器 context 驗證實際影像解碼前進、完成廣播與重新連線。
+
+代做決定：新增控制入口只存在 `FUSION_ACCEPTANCE && DEVELOPMENT_BUILD && !UNITY_EDITOR` 的驗收建置。一般正式 Player 不提供檔案控制。瀏覽器／原生工具均逾時，改用隔離安裝於 `.tmp/FusionBrowser` 的 Playwright 與既有 Chrome；未修改正式 npm 依賴。沿用可渲染的 D3D11 Server，未切換會移除渲染的專用無頭建置。
+
+驗證：TypeScript 服務建置、JS／PowerShell 語法與 Windows Player 建置通過。初次完整編譯為 0 error／190 warning，最新增量建置為 0 error／3 warning；不代表全部 warning 已修正。新版三個獨立程序的 19 項收集／同步／30 隻 NPC／30 秒持續檢查全部通過；報告為 `Fusion_Map_Standalone_Report.json`。影片內容另行記錄失敗，沒有納入這 19 項的通過宣告。
+
+實測後加嚴：第一次程序／瀏覽器資料驗收 21 項通過，但截圖發現解碼中的影片仍全黑。已保留該輪證據於 `.tmp/FusionAcceptance/Standalone-before-video-content-check.json`，不能把那 21 項當成影片內容通過。新增影片像素範圍／非黑像素檢查，`Docs/Fusion_CCTV_Browser_Report.json` 明確記錄 `pass: false`。
+
+影像排查：原始 CCTV 相機在唯讀 preview scene 可正常渲染農場，未修改其位置。實際 hidden Player 的兩個瀏覽器在尚未過熱時就持續解碼黑影像；非 batch 圖形程序也仍會重現。實際 sender 貼圖與相機診斷留在 `.tmp/FusionStandalone-20261116-052824`，原始來源預覽在 `.tmp/FusionAcceptance/CctvSourcePreview.png`。遮罩診斷未證明應修改正式相機；根因仍待定位，不能宣告完整 WebRTC 影像驗收完成。
+
+修正：深色 live 頁面的任務文字原本受通用段落樣式影響而對比不足，已在既有 control-deck 範圍內指定亮色文字。未更動頁面階層。
+
+建置排查：確認 `PipelineEval_*`／`PipelineRunScript_*` 暫時組件的 `Assembly.GetName()` 會拋出字串轉換例外。新增 `Build-Fusion.ps1`，等待編譯／domain 穩定、排程真正的 reload，再呼叫已編譯選單；已成功建置，並還原已知建置快取與暫存檔。曾發現 Camera 的內部 sceneCullingMask 不可用於 Player，診斷已改用公開的 overrideSceneCullingMask，後續 Player 編譯通過。
+
+下一步：依實測排查整合問題，再進行 60／100 隻的容量與弱網測試。
+
+## 第 6 輪：弱網互動與每端容量驗收（進行中）
+
+修改：弱網套件依現有地圖 NPC 配置驗收，並在每種延遲／丟包／抖動條件下，實際確認輸入停止後不能收集、恢復後三端共享 1/3。容量測試除了伺服器 AliveCount，還會等待與持續核對每個 Runner 的副本數；出現例外仍輸出失敗報告，避免留下前次成功結果。
+
+代做決定：保持地圖 30 隻不變；60／100 隻只在測試執行期設定。共享 Editor 的 frame time／記憶體包含三端與 Editor，不能當成 Quest 效能或獨立伺服器成本。
+
+驗證：待執行三組弱網與兩組容量持續測試。實體頭盔與正常可視圖形環境中的串流仍未驗收。

@@ -23,6 +23,25 @@
 
 本機需已安裝 Unity CLI，且本專案 Editor 已開啟。Standalone 使用 `Builds/FusionValidation/LiveStockFusion.exe`，先透過 `LiveStock > Connection Test > Build Fusion Validation Player` 建置。專案保留這個驗收建置選單。
 
+建議使用可重複的建置入口；它先確認沒有未儲存場景、等待編譯及 domain reload，再呼叫已編譯的建置選單，避開暫時 Pipeline 組件造成的 SDK 反射例外。建置回呼產生的已知設定快取與暫存檔會還原成建置前內容。
+
+```powershell
+& ./Tools/ConnectionFlow/Build-Fusion.ps1
+& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -UseGraphics -SampleSeconds 30
+```
+
+獨立程序驗收會檢查 probe 版本，並以實際桌面相機及共用收集請求驗證三顆蘋果、共享進度與重送 RPC 去重。NPC 數量依目前地圖配置；60／100 隻另由容量套件指定，不能把兩者混為同一測試。
+
+可選兩個隔離瀏覽器 context 的本機 WebRTC 驗收，使用本機已安裝的 Chrome 與 port 80；執行前確認該 port 未被其他服務占用：
+
+```powershell
+npm install --prefix .tmp/FusionBrowser --no-save --no-package-lock --ignore-scripts playwright
+npm --prefix WebApp run build
+& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -UseGraphics -WithBrowser -SampleSeconds 30
+```
+
+此模式以非批次的圖形程序執行，要求兩個瀏覽器都有解碼前進、非黑且非單色的影片內容，以及任務完成／重連快照。圖形裝置初始化、連線成功或解碼幀數增加，均不足以代替影像內容檢查。詳細證據與截圖留在各次 `.tmp/FusionStandalone-*`；失敗也會保留報告。這仍不包含實體頭盔操作。
+
 MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前次中斷的地圖測試。手動復原可在 Edit Mode 執行 `MapSwapAcceptance.Restore`。準備及復原的詳細日誌也放在 `.tmp/FusionAcceptance/`。
 
 ## 手動與實體頭盔驗收
