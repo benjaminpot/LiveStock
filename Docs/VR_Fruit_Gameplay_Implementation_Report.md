@@ -70,4 +70,6 @@
 
 開始配置前，已將 Editor 中 MainGame 的未儲存內容保存副本並儲存；副本與當時儲存後的場景 SHA256 一致。保存位置為 `.tmp/FruitGameplay/MainGame_user_edits.unity`；原磁碟場景副本為 `.tmp/FruitGameplay/MainGame_on_disk_before.unity`。這包含使用者對場景 UI 的移動／停用，不能把整份 MainGame 差異當成這次程式實作的修改。
 
-本次沒有建立 Git commit。
+## 後續保存與測試狀態
+
+已於 `1c1ff4b6` 保存本功能，commit 明確標註測試尚未完成。後續階段的修改、代做決定、commit 與最新驗證結果見 [階段實作紀錄](Implementation_Progress_2026-11-16.md)。上方為初次實作紀錄；通用 Assets 阻擋已在後續修正，收集回歸已擴充為 31 項並通過。實體頭盔與完整串流尚未完成驗收。

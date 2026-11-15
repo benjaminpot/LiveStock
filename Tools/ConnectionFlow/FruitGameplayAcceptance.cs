@@ -95,6 +95,57 @@ public static class FruitGameplayAcceptance
         Check("Server rejects an occluded RPC", world.CollectedFruitCount == 0);
         UnityEngine.Object.Destroy(wall);
         await Task.Delay(200);
+        var source = first.Runner.GetComponent<NetworkInputSource>();
+        source.enabled = false;
+        source.Clear();
+        try
+        {
+            await Task.Delay(500);
+            first.State.World.RequestCollect(Replica(first.Runner, apples[0]), ray);
+            await Task.Delay(500);
+            Check("Server rejects collection after explicit pose loss", world.CollectedFruitCount == 0 && !apples[0].IsCollected);
+        }
+        finally { source.enabled = true; }
+        await Task.Delay(500);
+        var cachedField = typeof(NetworkInputSource).GetField("cached", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        var validInput = source.Current;
+        var invalidInputs = new Dictionary<string, PlayerNetworkInput>();
+        var invalid = validInput;
+        invalid.Stage = 0;
+        invalidInputs.Add("wrong scene stage", invalid);
+        invalid = validInput;
+        invalid.IsVR = true;
+        invalidInputs.Add("wrong player role", invalid);
+        invalid = validInput;
+        invalid.Pose.RootPosition.x = float.NaN;
+        invalidInputs.Add("non-finite pose", invalid);
+        invalid = validInput;
+        invalid.Body.Radius = float.NaN;
+        invalidInputs.Add("invalid body capsule", invalid);
+        foreach (var sample in invalidInputs)
+        {
+            source.enabled = false;
+            try
+            {
+                cachedField.SetValue(source, sample.Value);
+                await Task.Delay(400);
+                first.State.World.RequestCollect(Replica(first.Runner, apples[0]), ray);
+                await Task.Delay(400);
+                Check("Server rejects collection with " + sample.Key, world.CollectedFruitCount == 0 && !apples[0].IsCollected);
+            }
+            finally { source.enabled = true; }
+            await Task.Delay(400);
+        }
+        first.Runner.ProvideInput = false;
+        try
+        {
+            await Task.Delay(1200);
+            first.State.World.RequestCollect(Replica(first.Runner, apples[0]), ray);
+            await Task.Delay(500);
+            Check("Server expires body when client input stops", world.CollectedFruitCount == 0 && !apples[0].IsCollected);
+        }
+        finally { first.Runner.ProvideInput = true; }
+        await Task.Delay(500);
         var camera = first.GetComponentInChildren<DesktopTestPlayer>(true).ViewCamera;
         camera.transform.LookAt(apples[0].RayCollider.bounds.center);
         var cameraRay = camera.ViewportPointToRay(new Vector3(.5f, .5f));

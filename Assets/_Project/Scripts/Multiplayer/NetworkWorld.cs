@@ -28,6 +28,7 @@ public sealed class NetworkWorld : NetworkBehaviour
         public bool Spawning;
         public NetworkObject Avatar;
         public PlayerBodyPose Body;
+        public TickTimer InputExpiry;
     }
 
     readonly Dictionary<PlayerRef, PlayerEntry> players = new();
@@ -96,7 +97,7 @@ public sealed class NetworkWorld : NetworkBehaviour
         npcsStarted = false;
         CollectedFruitCount = 0;
         RequiredFruitCount = 3;
-        foreach (var entry in players.Values) { entry.Stage = 0; entry.Body = default; }
+        foreach (var entry in players.Values) { entry.Stage = 0; InvalidateInput(entry); }
     }
 
     /// <summary>Removes a departed player's avatar and its registration on the server.</summary>
@@ -122,6 +123,7 @@ public sealed class NetworkWorld : NetworkBehaviour
             {
                 EnsureAvatar(pair.Key, pair.Value);
                 if (Runner.TryGetInputForPlayer(pair.Key, out PlayerNetworkInput input)) ApplyInput(pair.Value, input);
+                else if (pair.Value.InputExpiry.ExpiredOrNotRunning(Runner)) InvalidateInput(pair.Value);
             }
         }
         foreach (var player in departed) RemovePlayer(player);
@@ -164,14 +166,29 @@ public sealed class NetworkWorld : NetworkBehaviour
     {
         if (input.IsVR != entry.IsVR || entry.Stage == 0
             || input.Stage != entry.Stage || Runner.IsSceneManagerBusy || entry.Avatar == null
-            || state.Phase == LobbySessionState.SessionPhase.LoadingMainGame) return;
-        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(input.HasPose && input.Pose.IsFinite);
-        if (!input.HasPose || !input.Pose.IsFinite) return;
+            || state.Phase == LobbySessionState.SessionPhase.LoadingMainGame
+            || !input.HasPose || !input.Pose.IsFinite)
+        {
+            InvalidateInput(entry);
+            return;
+        }
+        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(true);
+        // Tolerate brief packet loss, but never keep an interactive body indefinitely without input.
+        entry.InputExpiry = TickTimer.CreateFromSeconds(Runner, .5f);
         entry.Body = input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
             ? input.Body : default;
         if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetPose(input.Pose);
         else entry.Avatar.transform.SetPositionAndRotation(input.Pose.RootPosition, input.Pose.RootRotation.normalized);
         acceptedInputCount++;
+    }
+
+    /// <summary>Revokes interaction and VR tracking when a sample is invalid or its grace period expires.</summary>
+    void InvalidateInput(PlayerEntry entry)
+    {
+        entry.Body = default;
+        entry.InputExpiry = default;
+        if (entry.IsVR && entry.Avatar != null && entry.Avatar.IsValid)
+            entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(false);
     }
 
     /// <summary>Creates a registered Fusion prefab on this Server and tracks its scene lifetime.</summary>
@@ -215,7 +232,7 @@ public sealed class NetworkWorld : NetworkBehaviour
             && target.TryGetComponent<FruitPickup>(out var fruit))
         {
             bool tracking = !player.IsVR || player.Avatar.GetComponent<VRNetworkAvatar>().TrackingValid;
-            if (!tracking || !player.Body.IsValid) feedback = "等待玩家追蹤資料";
+            if (!tracking || player.InputExpiry.ExpiredOrNotRunning(Runner) || !player.Body.IsValid) feedback = "等待玩家追蹤資料";
             else if (fruit.IsCollected) feedback = "這顆蘋果已被收集";
             else if (!fruit.IsNearby(player.Body)) feedback = "請靠近蘋果";
             else if (!PlayerBodyPose.Finite(origin) || Vector3.Distance(origin, player.Body.Center) > (player.IsVR ? 3f : 5f)

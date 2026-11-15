@@ -36,7 +36,14 @@ public sealed class VRClientPoseSource : MonoBehaviour
     public bool IsConfigured => rigRoot != null && trackingRig != null && headTarget != null
         && leftHandTarget != null && rightHandTarget != null && headAnchor != null
         && leftHandAnchor != null && rightHandAnchor != null;
-    public bool TrackingAvailable => owner != null && (owner.IsVRPreview || OVRManager.isHmdPresent);
+    /// <summary>Requires a tracked head and both controllers for a complete pose; explicit preview stays device-free.</summary>
+    public bool TrackingAvailable => owner != null && (owner.IsVRPreview || (OVRManager.isHmdPresent
+        && OVRPlugin.GetNodePositionTracked(OVRPlugin.Node.EyeCenter)
+        && OVRPlugin.GetNodeOrientationTracked(OVRPlugin.Node.EyeCenter)
+        && ControllerTracked(OVRInput.Controller.LTouch) && ControllerTracked(OVRInput.Controller.RTouch)));
+
+    static bool ControllerTracked(OVRInput.Controller controller) => OVRInput.GetControllerPositionTracked(controller)
+        && OVRInput.GetControllerOrientationTracked(controller);
 
     /// <summary>Binds this source to one Client and seeds anchors for device-free preview.</summary>
     public void Initialize(ConnectionManager client)

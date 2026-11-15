@@ -60,6 +60,36 @@
     "evidence": null
   },
   {
+    "test": "Server rejects collection after explicit pose loss",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with wrong scene stage",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with wrong player role",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with non-finite pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with invalid body capsule",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server expires body when client input stops",
+    "pass": true,
+    "evidence": null
+  },
+  {
     "test": "Authored third-person camera sends valid collection",
     "pass": true,
     "evidence": null
