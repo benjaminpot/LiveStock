@@ -2,7 +2,10 @@ import { sfx } from './sfx.js';
 
 export function formatMissionStatus(state) {
   if (!Number.isInteger(state?.collected) || !Number.isInteger(state?.required) ||
-      state.required < 1 || state.collected < 0 || state.collected > state.required) return null;
+      state.required < 1 || state.collected < 0 || state.collected > state.required ||
+      (state.completed !== undefined && typeof state.completed !== 'boolean') ||
+      (state.running !== undefined && typeof state.running !== 'boolean') ||
+      (state.completed === true && state.collected !== state.required)) return null;
   return state.completed && state.collected === state.required ? '蘋果已收集完成！'
     : state.running ? `羊方已收集 ${state.collected}/${state.required} 顆蘋果` : '等待羊方開始收集';
 }
