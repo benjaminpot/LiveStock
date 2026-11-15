@@ -1,0 +1,23 @@
+{
+  "pass": true,
+  "prefabs": [
+    {
+      "path": "Assets/_Project/Prefabs/Game Objects/NetworkApple.prefab",
+      "missing": 0
+    },
+    {
+      "path": "Assets/_Project/Prefabs/Multiplayer/ConnectionTestClient.prefab",
+      "missing": 0
+    },
+    {
+      "path": "Assets/_Project/Prefabs/Multiplayer/[BuildingBlock] Camera Rig Variant.prefab",
+      "missing": 0
+    }
+  ],
+  "controllerRays": 2,
+  "appleIcons": 3,
+  "separateTrigger": true,
+  "baked": true,
+  "chineseGlyphs": true,
+  "staticFont": true
+}

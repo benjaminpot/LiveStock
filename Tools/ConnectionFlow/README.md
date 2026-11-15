@@ -14,6 +14,7 @@
 | --- | --- |
 | `-Suite Editor` | 五輪主要 Editor 功能回歸，預設選項 |
 | `-Suite Assets` | 收納 GUID、Prefab 與場景腳本引用 |
+| `-Suite Fruit` | 不需頭盔的雙 Client 蘋果收集、範圍／遮擋、去重、Player_UI 與新一輪重設驗收 |
 | `-Suite Standalone` | 既有同版本建置的 Server、Desktop、VR 預覽，D3D11 模式採樣 30 秒 |
 | `-Suite WeakNetwork` | 三組代表性模擬網路條件 |
 | `-Suite MapSwap` | 暫時複製地圖並修改場景設定，完成後還原與移除測試場景 |
@@ -35,5 +36,7 @@ MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前�
 `Test-Fusion.ps1` 是測試指令入口。它呼叫同目錄的 C# 驗收腳本與 TestFusionStandalone.ps1，這些檔案是目前實作的一部分。
 
 ConfigureFusionSynchronization.cs 與 ConfigureMapNetworkSetup.cs 是會修改資產的配置工具，平常驗收透過 Test-Fusion.ps1 執行。資產配置有變更需求時再使用對應工具。
+
+蘋果功能的配置工具為 `ConfigureFruitGameplay.cs`，會修改既有 Prefab 和 Menu 引用，不屬於純驗收。專用資產檢查使用 `ValidateFruitGameplay.Run`，細節及未驗證範圍見 [實作記錄](../../Docs/VR_Fruit_Gameplay_Implementation_Report.md)。
 
 歷史工具與舊版說明收納於 `Recycle Bin/ConnectionFlow/`。搬移檔案及 SHA256 保存在 `Docs/Fusion_Acceptance_Tool_Archive_Report.json`。舊版程式包含過期的房間階段、建置路徑和操作語意，恢復使用前需配合目前 API 更新。

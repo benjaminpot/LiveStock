@@ -3034,6 +3034,55 @@ Transform:
   - {fileID: 2029996733}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &971118370 stripped
+CapsuleCollider:
+  m_CorrespondingSourceObject: {fileID: 7925266614709369178, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 1189709678}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &971118371 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4266792929431718872, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 1189709678}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &971118372 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 908056144557356191, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 1189709678}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &971118373 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 633314134374506861, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 1189709678}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &971118374 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 139557535219902031, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 1189709678}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &972423096
 GameObject:
   m_ObjectHideFlags: 0
@@ -3461,6 +3510,7 @@ GameObject:
   - component: {fileID: 1053384242}
   - component: {fileID: 1053384241}
   - component: {fileID: 1053384243}
+  - component: {fileID: 1053384244}
   m_Layer: 0
   m_Name: ConnectionManager
   m_TagString: Untagged
@@ -3486,7 +3536,6 @@ MonoBehaviour:
   statusText: {fileID: 1238918427}
   defaultRoomName: LIVESTOCK-DEV
   defaultRegion: asia
-  networkScenePath: Assets/_Project/Scenes/_flow test/Lobby.unity
   localVRRig: {fileID: 1189709679}
   vrEventSystem: {fileID: 1979351980}
   menuCanvas: {fileID: 1131528221}
@@ -3539,6 +3588,24 @@ MonoBehaviour:
   headTarget: {fileID: 1189709682}
   leftHandTarget: {fileID: 1189709681}
   rightHandTarget: {fileID: 1189709680}
+--- !u!114 &1053384244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053384240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48f62069f4a80fb42b074422a2b281a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerGameplay
+  stateText: {fileID: 971118374}
+  appleIcons:
+  - {fileID: 971118373}
+  - {fileID: 971118372}
+  - {fileID: 971118371}
+  body: {fileID: 971118370}
 --- !u!1 &1077651261
 GameObject:
   m_ObjectHideFlags: 0
@@ -4108,6 +4175,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 139557535219902031, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+      propertyPath: m_text
+      value: "\u7B49\u5F85\u904A\u6232\u958B\u59CB"
+      objectReference: {fileID: 0}
     - target: {fileID: 3682905815955127737, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: m_LocalPosition.x
       value: -11.97
@@ -5315,8 +5386,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Waiting for connection...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
+  m_sharedMaterial: {fileID: -8304962148266268796, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

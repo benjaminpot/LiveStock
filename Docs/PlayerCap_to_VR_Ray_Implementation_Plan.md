@@ -2,6 +2,8 @@
 
 日期：2026-11-16。分支：`single-to-multi`。本文件只規劃，沒有實作遊戲功能或修改使用者的 Prefab／場景。
 
+後續實作已完成並接到使用者新增的 `Player_UI/state`，詳見 [實作與驗證記錄](VR_Fruit_Gameplay_Implementation_Report.md)。下列內容保留原規劃；實際通過範圍與待裝置驗收項目以實作記錄為準。
+
 ## 已確認需求
 
 - VR 玩家已加上 Locomotor，本階段沿用它，檢查設定與網路接合，不重建移動系統。

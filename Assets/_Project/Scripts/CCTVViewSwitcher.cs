@@ -83,6 +83,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         public DelegateOnMessage onMessage;
         public DelegateOnClose onClose;
         public int kills;
+        public int missionCollected = -1;
+        public bool missionRunning;
     }
 
     private sealed class ViewOutput
@@ -117,6 +119,14 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     {
         public string type = "money-state";
         public int balance;
+    }
+
+    [Serializable]
+    private sealed class MissionStatusMessage
+    {
+        public string type = "mission-status";
+        public int collected, required;
+        public bool completed, running;
     }
 
     [Serializable]
@@ -510,6 +520,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         if (command == null) return;
         if (command.type == "cctv-ready")
         {
+            session.missionCollected = -1;
             // Data-channel open can precede the peer's Connected notification.
             // The open, session-owned channel is sufficient for this handshake.
             if (moneyManager != null && moneyManager.isActiveAndEnabled)
@@ -747,7 +758,24 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
                     message.videoMids[slot] = transceiver.Mid;
             message.cooldownRemaining = viewer.CooldownRemaining;
             entry.Value.channel.Send(JsonUtility.ToJson(message));
+            SendMissionStatus(entry.Value);
         }
+    }
+
+    /// <summary>Sends shared progress on changes and on every new browser's ready handshake.</summary>
+    private void SendMissionStatus(Session session)
+    {
+        var runner = Fusion.NetworkRunner.GetRunnerForGameObject(gameObject);
+        var world = runner != null && runner.IsRunning && runner.IsServer ? NetworkWorld.For(runner) : null;
+        if (world == null || world.Object == null || !world.Object.IsValid) return;
+        bool running = LobbySessionState.For(runner).Phase == LobbySessionState.SessionPhase.Running;
+        if (session.missionCollected == world.CollectedFruitCount && session.missionRunning == running) return;
+        session.missionCollected = world.CollectedFruitCount;
+        session.missionRunning = running;
+        session.channel.Send(JsonUtility.ToJson(new MissionStatusMessage {
+            collected = world.CollectedFruitCount, required = world.RequiredFruitCount,
+            completed = world.MissionComplete, running = running
+        }));
     }
 
     public void OnDisconnect(SignalingEventData data) => RemoveSession(data.connectionId);

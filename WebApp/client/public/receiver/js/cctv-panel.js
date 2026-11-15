@@ -1,5 +1,12 @@
 import { sfx } from './sfx.js';
 
+export function formatMissionStatus(state) {
+  if (!Number.isInteger(state?.collected) || !Number.isInteger(state?.required) ||
+      state.required < 1 || state.collected < 0 || state.collected > state.required) return null;
+  return state.completed && state.collected === state.required ? '蘋果已收集完成！'
+    : state.running ? `羊方已收集 ${state.collected}/${state.required} 顆蘋果` : '等待羊方開始收集';
+}
+
 // Layout is kept separate from VideoPlayer so the page can be redesigned later.
 export class CCTVPanel {
   constructor(root, blackout) {
@@ -9,6 +16,7 @@ export class CCTVPanel {
     this.state = null;
     this.rows = [];
     this.connection = document.querySelector('[data-connection]');
+    this.mission = document.querySelector('[data-mission-status]');
     this.current = document.querySelector('[data-current]');
     this.cooldown = root.querySelector('[data-cooldown]');
     this.cooldownCard = root.querySelector('[data-cooldown-card]');
@@ -44,6 +52,11 @@ export class CCTVPanel {
       if (this.channel !== channel) return;
       let state;
       try { state = JSON.parse(event.data); } catch { return; }
+      if (state?.type === 'mission-status') {
+        const text = formatMissionStatus(state);
+        if (text !== null && this.mission) this.mission.textContent = text;
+        return;
+      }
       if (state?.type === 'money-state') {
         this.onMoneyState?.(state);
         return;
@@ -103,6 +116,7 @@ export class CCTVPanel {
     this.channel = null;
     this.state = null;
     this.setConnection('OFFLINE');
+    if (this.mission) this.mission.textContent = '等待任務資料';
     this.current.textContent = 'Waiting for signal';
     this.cooldown.textContent = '—';
     this.cooldownCard?.classList.remove('is-cooling');

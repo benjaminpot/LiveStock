@@ -13,6 +13,8 @@ GameObject:
   - component: {fileID: 4786636318492015602}
   - component: {fileID: 680863722375322058}
   - component: {fileID: 1621575128780187765}
+  - component: {fileID: 2572325495014545763}
+  - component: {fileID: 7954996446702008835}
   m_Layer: 0
   m_Name: NetworkApple
   m_TagString: Untagged
@@ -48,6 +50,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706e6688429d74d8390263e17bc62566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FruitPickup
+  proximityTrigger: {fileID: 1280283737562744608}
+  rayCollider: {fileID: 5223193520604314922}
+  rayInteractable: {fileID: 2572325495014545763}
+  _IsCollected:
+    RawValue: 0
 --- !u!54 &4786636318492015602
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -94,6 +101,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 1621575128780187765}
+  - {fileID: 2925973527632685973}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1621575128780187765
 MonoBehaviour:
@@ -136,6 +144,61 @@ MonoBehaviour:
     MinImpactfulCollisionAlignment: 0.3
     ImpactStartCorrectionTime: 0.1
     ImpactCorrectionTimeComplete: 0.3
+--- !u!114 &2572325495014545763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850183782698683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb86ba9d4c5126e48bfef9b0c9550e9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.RayInteractable
+  _interactorFilters: []
+  _maxInteractors: -1
+  _maxSelectingInteractors: -1
+  _data: {fileID: 0}
+  _pointableElement: {fileID: 0}
+  _surface: {fileID: 5029757666241302249}
+  _selectSurface: {fileID: 0}
+  _movementProvider: {fileID: 0}
+  _tiebreakerScore: 0
+--- !u!114 &7954996446702008835
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850183782698683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2f8f6e9e6f3e114b9bf9a57c2160615, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.PointableUnityEventWrapper
+  _pointable: {fileID: 2572325495014545763}
+  _whenRelease:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenHover:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenUnhover:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenSelect:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenUnselect:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenMove:
+    m_PersistentCalls:
+      m_Calls: []
+  _whenCancel:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &7615149430248163641
 GameObject:
   m_ObjectHideFlags: 0
@@ -149,6 +212,7 @@ GameObject:
   - component: {fileID: 3038226034392003419}
   - component: {fileID: 1280283737562744608}
   - component: {fileID: 5223193520604314922}
+  - component: {fileID: 5029757666241302249}
   m_Layer: 0
   m_Name: apple
   m_TagString: Untagged
@@ -270,3 +334,16 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.20504954
   m_Center: {x: -0.0014693737, y: 0.029461317, z: -0.006102182}
+--- !u!114 &5029757666241302249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7615149430248163641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2140d2b457bea84881488302059889b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.Surfaces.ColliderSurface
+  _collider: {fileID: 5223193520604314922}

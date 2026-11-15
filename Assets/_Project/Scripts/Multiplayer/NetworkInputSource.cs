@@ -8,6 +8,7 @@ public struct PlayerNetworkInput : INetworkInput
     public NetworkBool IsVR, HasPose;
     public int Stage;
     public VRTrackedPose Pose;
+    public PlayerBodyPose Body;
 }
 
 /// <summary>Caches one Client's completed render-frame pose for its Runner's OnInput callback.</summary>
@@ -40,6 +41,8 @@ public sealed class NetworkInputSource : MonoBehaviour
         if (marker == null) return;
         cached.Stage = marker.Stage;
         cached.IsVR = !owner.IsDesktop;
+        var gameplay = owner.GetComponent<PlayerGameplay>();
+        if (gameplay != null) cached.Body = gameplay.ReadBody();
         if (owner.IsDesktop && desktop != null && desktop.isActiveAndEnabled)
         {
             cached.Pose = new VRTrackedPose

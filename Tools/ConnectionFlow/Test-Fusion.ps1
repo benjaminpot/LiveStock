@@ -1,5 +1,5 @@
 param(
-    [ValidateSet('Editor','Assets','Standalone','WeakNetwork','MapSwap','Soak')]
+    [ValidateSet('Editor','Assets','Standalone','WeakNetwork','MapSwap','Soak','Fruit')]
     [string]$Suite = 'Editor',
     [ValidateRange(1,3600)][int]$SoakSeconds = 600,
     [ValidateSet(60,100)][int]$NpcCount = 60
@@ -76,6 +76,7 @@ try {
                     }
                 }
                 'Assets' { Stop-Test; Run-Test 'ValidateFusionAssets' 'ValidateFusionAssets.Run' }
+                'Fruit' { Open-Menu; Run-Test 'FruitGameplayAcceptance' 'FruitGameplayAcceptance.Run' }
                 'WeakNetwork' { Open-Menu; Run-Test 'FusionWeakNetworkAcceptance' 'FusionWeakNetworkAcceptance.Run' }
                 'MapSwap' {
                     Stop-Test

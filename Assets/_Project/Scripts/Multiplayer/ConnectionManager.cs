@@ -45,6 +45,8 @@ public class ConnectionManager : MonoBehaviour
     Vector3 menuRigPosition;
     Quaternion menuRigRotation;
     int shownStage;
+    string gameplayFeedback;
+    public void SetGameplayFeedback(string message) => gameplayFeedback = message;
     bool returning;
     int desktopWorldMask;
     readonly Dictionary<UnityEngine.Behaviour, bool> viewStates = new();
@@ -321,6 +323,7 @@ public class ConnectionManager : MonoBehaviour
         string viewLabel = ConnectionTestViews.Instance != null ? name + " | F2 next view\n" : "";
         if (statusText != null) statusText.text = viewLabel + Status;
         if (sessionStatusText != null) sessionStatusText.text = viewLabel + Status
+            + (IsDesktop && IsConnected ? "\n" + gameplayFeedback : "")
             + (IsDesktop && IsConnected ? "\nPC: WASD move | RMB look | Q/E down/up | Shift fast" : "");
         bool canEdit = !IsBusy && !IsConnected;
         if (connectButton != null) connectButton.interactable = canEdit;
