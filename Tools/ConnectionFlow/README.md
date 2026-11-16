@@ -14,6 +14,8 @@
 | --- | --- |
 | `-Suite Editor` | 五輪主要 Editor 功能回歸，預設選項 |
 | `-Suite Assets` | 收納 GUID、Prefab 與場景腳本引用 |
+| `-Suite Fruit` | 不需頭盔的雙 Client 蘋果收集、範圍／遮擋、去重、Player_UI 與新一輪重設驗收 |
+| `-Suite Cctv` | Editor 伺服器世界與兩個隔離 Chrome context 的影片內容、逐顆進度與重連驗收 |
 | `-Suite Standalone` | 既有同版本建置的 Server、Desktop、VR 預覽，D3D11 模式採樣 30 秒 |
 | `-Suite WeakNetwork` | 三組代表性模擬網路條件 |
 | `-Suite MapSwap` | 暫時複製地圖並修改場景設定，完成後還原與移除測試場景 |
@@ -21,6 +23,31 @@
 | `-Suite Soak -SoakSeconds 600 -NpcCount 100` | 100 隻容量持續測試 |
 
 本機需已安裝 Unity CLI，且本專案 Editor 已開啟。Standalone 使用 `Builds/FusionValidation/LiveStockFusion.exe`，先透過 `LiveStock > Connection Test > Build Fusion Validation Player` 建置。專案保留這個驗收建置選單。
+
+建議使用可重複的建置入口；它透過已編譯的準備選單檢查未儲存場景並要求 domain reload，等待初始化完成標記與 Editor 穩定後才建置，避開暫時 Pipeline 組件造成的 SDK 反射例外。建置回呼產生的已知設定快取與暫存檔會還原成建置前內容。
+
+```powershell
+& ./Tools/ConnectionFlow/Build-Fusion.ps1
+& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -UseGraphics -SampleSeconds 30
+```
+
+獨立程序驗收會檢查 probe 版本，並以實際桌面相機及共用收集請求驗證停用輸入來源後拒絕舊姿態、同一連線恢復、三顆蘋果、共享進度與重送 RPC 去重。NPC 數量依目前地圖配置；60／100 隻另由容量套件指定，不能把兩者混為同一測試。
+
+可選兩個隔離瀏覽器 context 的本機 WebRTC 驗收，使用本機已安裝的 Chrome 與 port 80；執行前確認該 port 未被其他服務占用：
+
+```powershell
+npm install --prefix .tmp/FusionBrowser --no-save --no-package-lock --ignore-scripts playwright
+npm --prefix WebApp run build
+& ./Tools/ConnectionFlow/TestFusionStandalone.ps1 -UseGraphics -WithBrowser -SampleSeconds 30
+```
+
+此模式以非批次的圖形程序執行，要求兩個瀏覽器都有解碼前進、非黑且非單色的影片內容，以及任務完成／重連快照。圖形裝置初始化、連線成功或解碼幀數增加，均不足以代替影像內容檢查。詳細證據與截圖留在各次 `.tmp/FusionStandalone-*`；失敗也會保留報告。這仍不包含實體頭盔操作。
+
+同樣的瀏覽器準備完成後，可執行 `& ./Tools/ConnectionFlow/Test-Fusion.ps1 -Suite Cctv`。它選取 Editor 的伺服器世界供實際相機渲染，並交替由兩個桌面 Client 收集。Editor 的報告為 `Docs/Fusion_CCTV_Editor_*_Report.json`，獨立 Player 的影片報告為 `Docs/Fusion_CCTV_Browser_Report.json`；兩種環境分別判定，不能相互替代。
+
+獨立腳本另支援 `-BatchGraphics` 做圖形 batch 對照，仍須通過相同影片內容檢查。`-DiagnoseCctv` 只在影片失敗後額外記錄相機實際繪製次數、Renderer 狀態與一張手動來源圖；這張診斷圖不會讓影片驗收通過。兩者都不改寫正式場景或相機資產。
+
+解鎖桌面後的互動圖形對照使用 `-UseGraphics -WithBrowser -InteractiveServer`：只顯示原 Server 控制視窗，其餘背景測試角色仍隱藏。它要求非 batch 圖形模式，使用 `Fusion_Map_Interactive_Standalone_Report.json` 與 `Fusion_CCTV_Interactive_Browser_Report.json`。一般帶瀏覽器的整合結果使用 `Fusion_Map_Standalone_Browser_Report.json`，不覆蓋純功能的 `Fusion_Map_Standalone_Report.json`；影片判準保持相同。
 
 MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前次中斷的地圖測試。手動復原可在 Edit Mode 執行 `MapSwapAcceptance.Restore`。準備及復原的詳細日誌也放在 `.tmp/FusionAcceptance/`。
 
@@ -35,5 +62,7 @@ MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前�
 `Test-Fusion.ps1` 是測試指令入口。它呼叫同目錄的 C# 驗收腳本與 TestFusionStandalone.ps1，這些檔案是目前實作的一部分。
 
 ConfigureFusionSynchronization.cs 與 ConfigureMapNetworkSetup.cs 是會修改資產的配置工具，平常驗收透過 Test-Fusion.ps1 執行。資產配置有變更需求時再使用對應工具。
+
+蘋果功能的配置工具為 `ConfigureFruitGameplay.cs`，會修改既有 Prefab 和 Menu 引用，不屬於純驗收。專用資產檢查使用 `ValidateFruitGameplay.Run`，細節及未驗證範圍見 [實作記錄](../../Docs/VR_Fruit_Gameplay_Implementation_Report.md)。
 
 歷史工具與舊版說明收納於 `Recycle Bin/ConnectionFlow/`。搬移檔案及 SHA256 保存在 `Docs/Fusion_Acceptance_Tool_Archive_Report.json`。舊版程式包含過期的房間階段、建置路徑和操作語意，恢復使用前需配合目前 API 更新。

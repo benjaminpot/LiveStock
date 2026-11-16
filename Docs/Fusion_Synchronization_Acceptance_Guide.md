@@ -2,7 +2,7 @@
 
 本版使用集中 Network Input 傳送玩家姿態，共用 NetworkTargetPose 同步 VR 羊與 NPC 的頭、左前肢、右前肢，root 由 NetworkTransform 同步。玩家 Client 決定移動，NPC 的 AI、導航、動作來源和生命狀態由 Server 控制。
 
-本輪地圖接入與兩階段開始結果彙整於 [實作測試摘要](Fusion_Map_Implementation_Report.json)。先前同步與壓測結果保留於 Fusion_Sync_Implementation_Report.json。
+最初地圖接入與兩階段開始結果保留於 [歷史實作測試摘要](Fusion_Map_Implementation_Report.json)。2026-11-16 的修改、代做決定與最新證據見 [階段實作紀錄](Implementation_Progress_2026-11-16.md)。下方歷史數字不代表最新版本或實體頭盔結果。
 
 ## 先確認資產
 
@@ -11,9 +11,9 @@
 | `Assets/_Project/Prefabs/Multiplayer/LobbySessionState.prefab` | LobbySessionState 與 NetworkWorld。NetworkWorld 保存企鵝與 VR 羊的 Player Prefabs，地圖物件清單由 MapNetworkSetup 保存 |
 | `NetworkVRSheep.prefab` | NetworkObject、NetworkTransform、VRNetworkAvatar、NetworkTargetPose。Capture On Server 關閉，三 target 都有引用 |
 | `NPC_sheep.prefab` | NetworkObject、NetworkTransform、NetworkNpcAuthorityGate、NetworkTargetPose。Capture On Server 開啟，三 target 都有引用 |
-| `_flow test/MainGame.unity` | Navigation 已綁定烘焙資料，Network NPCs 的數量與上限皆為 60 |
+| `_flow test/MainGame.unity` | Navigation 已綁定烘焙資料；一般地圖回歸依 authored 配置驗收，目前實測 30 隻。60／100 隻另由容量套件指定 |
 | `Prefabs/Multiplayer/Examples/` | NetworkMovingBox 與 NetworkSwitch |
-| `Assets/_Project/Recycle Bin/` | 舊連線資產。MainGame 的停用 Recycle Bin 收納兩個原本的本機 NPC Preview |
+| `Assets/_Project/Recycle Bin/` | 舊連線資產。地圖的 Recycle Bin 根節點可省略；存在時必須唯一且停用 |
 
 `NetworkTargetPose` 中的位置相對於同一個網路 root。Inspector 的三個引用指向 IK 的控制 target。骨架和伸縮由各端既有 IK 計算。
 
@@ -110,6 +110,8 @@ world.SpawnObject(prefab, position, rotation);
 5. 由 Desktop 觀察 VR 玩家轉頭、抬手、蹲下與移動，檢查身高、左右前肢與模型伸縮。
 6. 先 Load MainGame，確認等待狀態，再 Start Game，靠近 NPC，觀察姿態平順程度與實際 CPU／GPU frame time。
 7. 測試追蹤暫失、恢復、返回選單與關服。
+8. 用原食指扳機與雙手 Ray 交替選取蘋果，確認只有身體靠近時能收集、按住扳機不連續收取另一顆；檢查共享三顆進度與 Player_UI。
+9. 驗證 Run／Crouch 按住及鬆開、蹲下優先、原本 Jump／搖桿操作；頭或任一控制器失去位置／方向追蹤時停止有效輸入，恢復後可繼續收集。
 
 VR 預覽測試提供模擬追蹤資料。實體 HMD、控制器、XR UI 與實際刷新率需以這一輪裝置操作驗收。
 
@@ -122,14 +124,21 @@ VR 預覽測試提供模擬追蹤資料。實體 HMD、控制器、XR UI 與實�
 | `Fusion_Map_VRFirst_Report.json`、`Fusion_Map_DesktopFirst_Report.json` | 兩種加入順序、姿態與換場 |
 | `Fusion_Map_World_Report.json` | 角色、重連、重複關閉與清理 |
 | `Fusion_Map_LoadingEdge_Report.json` | 載入期間離線、開始門檻與零 NPC |
-| `Fusion_Map_Acceptance_Report.json` | 兩階段開始、三 target、骨架、60 NPC、生命狀態及晚加入 |
+| `Fusion_Map_Acceptance_Report.json` | 兩階段開始、三 target、骨架、地圖配置的 NPC、生命狀態及晚加入 |
 | `Fusion_Map_Standalone_Report.json` | D3D11 跨程序功能測試 |
+| `Fusion_CCTV_Editor_Acceptance_Report.json`、`Fusion_CCTV_Editor_Browser_Report.json` | Editor 與兩個真實瀏覽器的不同相機影片、逐顆進度與重連 |
+| `Fusion_CCTV_Browser_Report.json` | 獨立 Player 的嚴格影片內容驗收；不能用 Editor 結果代替 |
 | `Fusion_Map_Asset_Report.json` | 收納 GUID、17 個 Prefab 與兩個場景的腳本引用 |
-| `Fusion_Map_Build_Report.json`、`Fusion_Map_Build_Warnings.json` | 最近驗收建置與警告 |
+| `Fusion_Sync_Build_Report.json` | 目前驗收建置選單產生的結果；同名報告也可能是最近一次失敗，須檢查 result |
+| `Fusion_Map_Build_Report.json`、`Fusion_Map_Build_Warnings.json` | 先前地圖驗收建置與警告 |
+| `Fusion_Map_Soak_60_Report.json`、`Fusion_Map_Soak_100_Report.json` | 本輪每端副本數的 60／100 隻各 10 分鐘 Editor 持續測試 |
+| `Fusion_Map_WeakNetwork_Report.json` | 本輪三組弱網、輸入到期拒絕與恢復收集 |
 | `Fusion_Sync_Soak_60_Report.json`、`Fusion_Sync_Soak_100_Report.json` | 上一輪 Editor 長測／短壓測 |
 | `Fusion_Sync_WeakNetwork_Report.json` | 上一輪三組代表性弱網 |
 
 Editor 多開時，影格間隔和記憶體包含整個 Editor、所有 Runner 與場景複本。獨立程式的 Server、PC Client 和 VR Client 應分別量測。頭盔效能以實體設備的 CPU／GPU frame time 和刷新率判斷。
+
+`Fusion_Map_Acceptance_Report.json` 是最近一次完整配置地圖的結果，MapSwap 也會寫入同一份報告；請核對 `All Runners use configured gameplay scene` 的 evidence 判斷是原圖或臨時副本。副本報告保留不表示正式場景設定仍未還原。
 
 Server 與 Client 每次都使用同版本建置，本輪已變更輸入和 Prefab 的網路資料結構。
 
@@ -163,7 +172,7 @@ Editor 套件會自行為每輪建立 Menu、執行測試並 End Test。Standalo
 2. 在場景拖入 `Assets/_Project/Prefabs/Multiplayer/MapNetworkSetup.prefab`，每張玩法地圖一份。這是一般場景 Prefab，Runner 與房間狀態由既有連線流程建立。
 3. 調整子物件 VRSpawnPoint 的位置與朝向。根物件 FlowSceneMarker 保持 Stage 2，VR Spawn Point 指向該子物件。
 4. 調整子物件 Network NPCs 的種類、數量、生成範圍與上限。新地圖建立 AnimalWaypoint 和符合 NPC Agent Type 的 NavMeshSurface，烘焙自己的導航資料。生成器會取得所屬 Runner 地圖內的 waypoint。
-5. MapNetworkSetup 的 Scene Objects 設定正式開始時生成的物件。共用 Prefab 的預設清單為空，目前 MainGame 的兩個 Cube 是該場景的 Prefab override。可清空清單停用示範。
+5. MapNetworkSetup 的 Scene Objects 設定正式開始時生成的物件。共用 Prefab 的預設清單為空，目前 MainGame 的三顆 NetworkApple 是該場景的 Prefab override；依地圖玩法配置，不把示範 Cube 當成必要物件。
 6. 在 `Assets/Resources/NetworkSceneSettings.asset` 修改 Main Game Scene 路徑。Lobby、Menu 與 Server 入口也集中在這份資產。保留單一 Resources 設定資產，名稱為 NetworkSceneSettings。
 7. 重跑兩種加入順序、Load MainGame、等待零 NPC、Start Game、生成數量、姿態與離線清理驗收。
 
@@ -173,6 +182,6 @@ Editor 套件會自行為每輪建立 Menu、執行測試並 End Test。Standalo
 
 本輪新報告使用 `Fusion_Map_` 前綴。先前 `Fusion_Sync_` 報告保留為上一輪歷史結果。
 
-本輪驗證包含替代地圖完整 28 項、生命週期 15 項、兩種加入順序 15／16 項、載入邊界 6 項與跨程序 11 項。新版 Windows 建置成功，0 errors、193 warnings，去重警告保存在 Fusion_Map_Build_Warnings.json。
+先前地圖接入驗證包含替代地圖完整 28 項、生命週期 15 項、兩種加入順序 15／16 項、載入邊界 6 項與跨程序 11 項。當時 Windows 建置成功，0 errors、193 warnings，去重警告保存在 Fusion_Map_Build_Warnings.json。2026-11-16 的擴充驗收以階段紀錄與新報告為準。
 
 跨程序預設無顯示卡模式曾在 Server 的 CCTV/WebRTC 收到影像串流 offer 時出現 Graphics device type Null not supported。該輪 Fusion 功能檢查已通過，日誌檢查判失敗，保存在 Fusion_Map_Headless_Report.json。以 -UseGraphics 使用 D3D11 圖形裝置重跑後 11 項全部通過，結果在 Fusion_Map_Standalone_Report.json。這輪測試沒有量測 GPU frame time 或實體頭盔。

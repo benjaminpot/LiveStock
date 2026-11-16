@@ -1,0 +1,167 @@
+[
+  {
+    "test": "First test Client connects",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Second test Client connects",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "No apples before Start Game",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "AwaitingStart blocks local collect",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Three apples have SDK ray surfaces",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client cannot mutate collection state",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Far body's original trigger rule rejects proximity",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects an out-of-range RPC",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Nearby body overlaps original trigger",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Small apple surface is ray-visible",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Solid obstacle blocks the apple",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects an occluded RPC",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Input cache is valid before disabling the source",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection while the input source is disabled",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with missing pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with wrong scene stage",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with wrong player role",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with non-finite pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server rejects collection with invalid body capsule",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server expires body when client input stops",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Authored third-person camera sends valid collection",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Collected apple hides on both clients",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate collect does not increment",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Different players contribute to the same progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Competing requests stop at exactly 3/3",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Every sheep-side UI receives completion",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Existing Player_UI/state is wired",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Status font contains the Chinese feedback",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "One player leaving retains shared progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Server can start a fresh round",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Existing client can reconnect",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "New room has no old fruit progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "New map resets all apples and progress",
+    "pass": true,
+    "evidence": null
+  }
+]

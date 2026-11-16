@@ -78,10 +78,17 @@ public static class LocalConnectionTestTools
         if (ConnectionTestViews.Instance == null) new GameObject("Connection Test Views").AddComponent<ConnectionTestViews>();
         if (action == "Server")
         {
+            // Starting the server must not turn off the headset client's cameras and HUD.
+            bool keepVRView = ConnectionTestViews.Instance.Selected is ConnectionManager client && !client.IsDesktop;
             var existing = UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>();
-            if (existing != null) { await existing.StartServerAsync(); ConnectionTestViews.Instance.Select(existing); return; }
+            if (existing != null)
+            {
+                await existing.StartServerAsync();
+                if (!keepVRView) ConnectionTestViews.Instance.Select(existing);
+                return;
+            }
             await SceneManager.LoadSceneAsync(ServerConnectionManager.SceneFolder + "ServerBootstrap.unity", LoadSceneMode.Additive);
-            ConnectionTestViews.Instance.Select(UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>());
+            if (!keepVRView) ConnectionTestViews.Instance.Select(UnityEngine.Object.FindFirstObjectByType<ServerConnectionManager>());
             return;
         }
         bool desktop = action == "Desktop";

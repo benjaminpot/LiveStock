@@ -139,12 +139,14 @@
   "scenes": [
     {
       "name": "MainGame",
-      "archivedChildren": 2,
+      "archiveRoots": 0,
+      "archivedChildren": 0,
       "inactive": true,
       "missing": 0
     },
     {
       "name": "Menu_VRClient",
+      "archiveRoots": 1,
       "archivedChildren": 3,
       "inactive": true,
       "missing": 0

@@ -1,5 +1,10 @@
 [
   {
+    "test": "All processes expose the current acceptance probe",
+    "pass": true,
+    "evidence": null
+  },
+  {
     "test": "Three independent Players start with zero Lobby NPCs",
     "pass": true,
     "evidence": null
@@ -30,7 +35,57 @@
     "evidence": null
   },
   {
-    "test": "All processes enter MainGame and receive 60 NPCs",
+    "test": "All processes receive the authored map NPC count",
+    "pass": true,
+    "evidence": 30
+  },
+  {
+    "test": "Standalone Server keeps its world visible for CCTV rendering",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Disabled input source cannot collect with its old cached pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Input source resumes without reconnecting",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 1 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 2 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 3 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both clients show completion from shared state",
     "pass": true,
     "evidence": null
   },
@@ -38,33 +93,33 @@
     "test": "Independent processes remain connected with stable NPC count",
     "pass": true,
     "evidence": {
+      "seconds": 30.2956452,
+      "minimumNPCs": 30,
+      "scope": "Three Development Players on one Windows computer. Graphics enabled = True, batch graphics = False. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.",
+      "observedServerTicksPerSecond": 63.406560120606734,
       "peers": [
         {
           "role": "server",
-          "npcs": 60,
-          "frame": 2518,
-          "averageFrameIntervalMs": 17.097354888916016,
-          "allocatedBytes": 155113950
+          "npcs": 30,
+          "frame": 3622,
+          "averageFrameIntervalMs": 17.740570068359375,
+          "allocatedBytes": 176939353
         },
         {
           "role": "desktop",
-          "npcs": 60,
-          "frame": 2524,
-          "averageFrameIntervalMs": 17.048114776611328,
-          "allocatedBytes": 165831745
+          "npcs": 30,
+          "frame": 3589,
+          "averageFrameIntervalMs": 17.742338180541992,
+          "allocatedBytes": 180565120
         },
         {
           "role": "vr-preview",
-          "npcs": 60,
-          "frame": 2495,
-          "averageFrameIntervalMs": 17.27305793762207,
-          "allocatedBytes": 165823476
+          "npcs": 30,
+          "frame": 3608,
+          "averageFrameIntervalMs": 17.77689552307129,
+          "allocatedBytes": 186625865
         }
-      ],
-      "observedServerTicksPerSecond": 64.29472861537255,
-      "seconds": 30.390463,
-      "minimumNPCs": 60,
-      "scope": "Three Development Players on one Windows computer. Graphics enabled = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured."
+      ]
     }
   },
   {

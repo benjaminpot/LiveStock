@@ -55,20 +55,29 @@
     "evidence": null
   },
   {
-    "test": "Every Runner receives exactly 60 NPC identities",
+    "test": "Server generation respects authored map count",
+    "pass": true,
+    "evidence": {
+      "minimumNpcs": 30,
+      "maximumNpcs": 30,
+      "generated": 30
+    }
+  },
+  {
+    "test": "Every Runner receives the configured NPC identities",
     "pass": true,
     "evidence": [
       {
+        "runner": "Lobby Server Runner",
+        "count": 30
+      },
+      {
         "runner": "ConnectionManager Runner",
-        "count": 60
+        "count": 30
       },
       {
         "runner": "Desktop Client 1 Runner",
-        "count": 60
-      },
-      {
-        "runner": "Lobby Server Runner",
-        "count": 60
+        "count": 30
       }
     ]
   },
@@ -105,12 +114,12 @@
   {
     "test": "Remote IK receives the transmitted head target",
     "pass": true,
-    "evidence": 3.81946734E-07
+    "evidence": 4.57604557E-07
   },
   {
     "test": "The complete skinned pose agrees after targets settle",
     "pass": true,
-    "evidence": 1.541172E-06
+    "evidence": 2.23701431E-06
   },
   {
     "test": "Only authority accepts damage",
@@ -138,12 +147,12 @@
     "evidence": null
   },
   {
-    "test": "Late join receives the current switch and 60 NPCs",
+    "test": "Late join receives the current switch and map NPCs",
     "pass": true,
     "evidence": null
   },
   {
-    "test": "Repeated spawn requests keep 60 NPCs",
+    "test": "Repeated spawn requests keep the configured NPC count",
     "pass": true,
     "evidence": null
   },

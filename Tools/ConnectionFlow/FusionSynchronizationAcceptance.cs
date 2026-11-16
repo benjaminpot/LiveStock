@@ -70,12 +70,20 @@ public static class FusionSynchronizationAcceptance
         server.State.World.TryGetPlayer(pc.Runner.LocalPlayer,out var beforeAvatar);
         Check("Client movement already synchronizes while awaiting start",Vector3.Distance(beforeAvatar.transform.position,actorBeforeStart.transform.position)<.01f);
         Check("Load is disabled and Start is enabled after readiness",!load.interactable&&start.interactable&&!pc.State.CanStart);
+        var mapScene=((NetworkSceneManagerDefault)server.Runner.SceneManager).MainRunnerScene;
+        var spawner=mapScene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RandomNPCSpawner>()).Single();
+        int minimumNpcs=Math.Min(spawner.MaxNetworkedNPCs,spawner.Groups.Where(g=>g.Prefab!=null).Sum(g=>g.MinCount));
+        int maximumNpcs=Math.Min(spawner.MaxNetworkedNPCs,spawner.Groups.Where(g=>g.Prefab!=null).Sum(g=>g.MaxCount));
         start.onClick.Invoke();
         start.onClick.Invoke();
-        await Wait(() => server.State.Phase==LobbySessionState.SessionPhase.Running &&Npcs().Length==180,"60 NPCs on three Runners");
+        await Wait(() => server.State.Phase==LobbySessionState.SessionPhase.Running && !spawner.IsSpawning
+            && spawner.AliveCount>=minimumNpcs && Npcs().Length==spawner.AliveCount*3,"Configured NPCs on three Runners");
+        int npcCount=spawner.AliveCount;
+        Check("Server generation respects authored map count",npcCount>0&&npcCount>=minimumNpcs&&npcCount<=maximumNpcs,
+            new{minimumNpcs,maximumNpcs,generated=npcCount});
         await Wait(() => Npcs().All(n=>n.GetComponent<NetworkTargetPose>().HasPose),"NPC target snapshots");
         var npcs=Npcs();
-        Check("Every Runner receives exactly 60 NPC identities",npcs.GroupBy(n=>n.Runner).Count()==3&&npcs.GroupBy(n=>n.Runner).All(g=>g.Count()==60),
+        Check("Every Runner receives the configured NPC identities",npcs.GroupBy(n=>n.Runner).Count()==3&&npcs.GroupBy(n=>n.Runner).All(g=>g.Count()==npcCount),
             npcs.GroupBy(n=>n.Runner).Select(g=>new{runner=g.Key.name,count=g.Count()}).ToArray());
         Check("AI and navigation run only on the Server",npcs.All(n=>n.GetComponent<AnimalNPC>().enabled==n.Object.HasStateAuthority
             &&n.GetComponent<NavMeshAgent>().enabled==n.Object.HasStateAuthority));
@@ -124,17 +132,15 @@ public static class FusionSynchronizationAcceptance
         Check("The root-only example moves on all peers",boxes.Length==3&&Mathf.Abs(boxes.First().transform.position.y-before)>.001f);
         server.Runner.SessionInfo.IsOpen=true;
         var late=await LocalConnectionTestTools.AddClientAsync(0);
-        await Wait(()=>late.State!=null&&late.State.Phase==LobbySessionState.SessionPhase.Running&&Npcs().Length==240,"Late join state");
+        await Wait(()=>late.State!=null&&late.State.Phase==LobbySessionState.SessionPhase.Running&&Npcs().Length==npcCount*4,"Late join state");
         await Wait(()=>UnityEngine.Object.FindObjectsByType<NetworkSwitch>(FindObjectsSortMode.None).All(s=>s.IsOn),"Late join switch");
-        Check("Late join receives the current switch and 60 NPCs",Npcs().Count(n=>n.Runner==late.Runner)==60);
+        Check("Late join receives the current switch and map NPCs",Npcs().Count(n=>n.Runner==late.Runner)==npcCount);
         await late.DisconnectAsync();UnityEngine.Object.Destroy(late.gameObject);server.Runner.SessionInfo.IsOpen=false;
-        await Wait(()=>Npcs().Length==180,"Late peer removed");
-        var spawner=server.Runner.SceneManager is NetworkSceneManagerDefault sm
-            ?sm.MainRunnerScene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RandomNPCSpawner>()).Single():null;
+        await Wait(()=>Npcs().Length==npcCount*3,"Late peer removed");
         RandomNPCSpawner.SpawnFor(server.Runner);await Task.Delay(500);
-        Check("Repeated spawn requests keep 60 NPCs",spawner.AliveCount==60&&Npcs().Length==180);
+        Check("Repeated spawn requests keep the configured NPC count",spawner.AliveCount==npcCount&&Npcs().Length==npcCount*3);
         Check("Input remains active during NPC simulation",vr.IsConnected&&pc.IsConnected&&server.State.World.AcceptedInputCount>100);
-        return new {passed=checks.Count,server=server.Runner.name,npcs=60,readyForSoak=true};
+        return new {passed=checks.Count,server=server.Runner.name,npcs=npcCount,readyForSoak=true};
     }
 
     /// <summary>Measures the shared Editor process while existing connected peers simulate NPCs.</summary>
@@ -144,15 +150,16 @@ public static class FusionSynchronizationAcceptance
         var runner=server.Runner;
         var scene=((NetworkSceneManagerDefault)runner.SceneManager).MainRunnerScene;
         var spawner=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RandomNPCSpawner>()).Single();
-        if(spawner.MaxNetworkedNPCs!=count)
+        if(spawner.AliveCount!=count)
         {
             spawner.MaxNetworkedNPCs=count;spawner.Groups[0].MinCount=count;spawner.Groups[0].MaxCount=count;spawner.RespawnGenerated();
         }
         await Wait(()=>spawner.AliveCount==count&&!spawner.IsSpawning,"Stress generation");
         var frames=new List<float>();var incoming=new double[3];var outgoing=new double[3];
         var runners=new[]{runner}.Concat(ConnectionManager.Clients.Where(c=>c.IsConnected).Select(c=>c.Runner)).ToArray();
+        await Wait(()=>runners.All(r=>Npcs().Count(n=>n.Runner==r)==count),"Capacity replicas reach every Runner");
         int lastFrame=-1;int startTick=runner.Tick.Raw;long startMemory=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong();
-        var errors=new List<string>();int minNpcs=count;
+        var errors=new List<string>();int minNpcs=count;int minReplicaNpcs=count;Exception failure=null;
         Application.LogCallback log=(message,stack,type)=>{if(type==UnityEngine.LogType.Exception||type==UnityEngine.LogType.Error)errors.Add(message);};
         EditorApplication.CallbackFunction sample=()=>{
             if(Time.frameCount==lastFrame)return;lastFrame=Time.frameCount;frames.Add(Time.unscaledDeltaTime*1000f);
@@ -165,19 +172,23 @@ public static class FusionSynchronizationAcceptance
             while(timer.Elapsed.TotalSeconds<seconds)
             {
                 await Task.Delay(1000);minNpcs=Math.Min(minNpcs,spawner.AliveCount);
-                System.IO.File.WriteAllText(".tmp/FusionSoakProgress.json",Newtonsoft.Json.JsonConvert.SerializeObject(new{count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,minNpcs,errors=errors.Count}));
+                minReplicaNpcs=Math.Min(minReplicaNpcs,runners.Min(r=>Npcs().Count(n=>n.Runner==r)));
+                System.IO.File.WriteAllText(".tmp/FusionSoakProgress.json",Newtonsoft.Json.JsonConvert.SerializeObject(new{count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,minNpcs,minReplicaNpcs,errors=errors.Count}));
                 if(!runners.All(r=>r!=null&&r.IsRunning))throw new InvalidOperationException("Peer disconnected during soak.");
             }
         }
+        catch(Exception exception){failure=exception;}
         finally{EditorApplication.update-=sample;Application.logMessageReceived-=log;}
         var ordered=frames.OrderBy(f=>f).ToArray();
-        var result=new{npcCount=count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,averageFrameMs=frames.Average(),p95FrameMs=ordered[(int)(ordered.Length*.95f)],
-            observedServerTicksPerSecond=(runner.Tick.Raw-startTick)/timer.Elapsed.TotalSeconds,minNpcs,peerCount=runners.Length,
+        var result=new{pass=failure==null&&minNpcs==count&&minReplicaNpcs==count&&errors.Count==0&&frames.Count>0,
+            failure=failure?.ToString(),npcCount=count,seconds=timer.Elapsed.TotalSeconds,frames=frames.Count,
+            averageFrameMs=frames.Count>0?frames.Average():0,p95FrameMs=ordered.Length>0?ordered[(int)(ordered.Length*.95f)]:0,
+            observedServerTicksPerSecond=runner!=null&&runner.IsRunning?(runner.Tick.Raw-startTick)/timer.Elapsed.TotalSeconds:0,minNpcs,minReplicaNpcs,peerCount=runners.Length,
             allocatedMemoryDeltaBytes=UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong()-startMemory,
-            sampledTraffic=runners.Select((r,i)=>new{runner=r.name,inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
-            errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory values include the Editor and all visible/hidden scene copies."};
+            sampledTraffic=runners.Select((r,i)=>new{runner=r!=null?r.name:"Stopped Runner",inBytesPerSecond=incoming[i]/timer.Elapsed.TotalSeconds,outBytesPerSecond=outgoing[i]/timer.Elapsed.TotalSeconds}).ToArray(),
+            errors=errors.Distinct().ToArray(),scope="All peers share one Editor; frame and memory include every scene copy. Traffic is an SDK last-update byte-count estimate sampled once per observed rendered frame, not a wire packet capture."};
         System.IO.File.WriteAllText("Docs/Fusion_Map_Soak_"+count+"_Report.json",Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
-        if(minNpcs!=count||errors.Count>0)throw new InvalidOperationException("Soak failed. Read the report.");
+        if(!result.pass)throw new InvalidOperationException("Soak failed. Read the report.",failure);
         return result;
     }
 }

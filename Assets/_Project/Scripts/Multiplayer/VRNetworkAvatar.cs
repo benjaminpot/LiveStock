@@ -28,8 +28,9 @@ public sealed class VRNetworkAvatar : NetworkBehaviour
         targets = GetComponent<NetworkTargetPose>();
         foreach (var animator in GetComponentsInChildren<Animator>(true))
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-        if (Object.InputAuthority == Runner.LocalPlayer)
-            foreach (var visual in GetComponentsInChildren<Renderer>(true)) visual.enabled = false;
+        // Runner visibility may re-enable Renderers when switching views; keep the owner's duplicate hidden.
+        foreach (var visual in GetComponentsInChildren<Renderer>(true))
+            visual.forceRenderingOff = Object.InputAuthority == Runner.LocalPlayer;
     }
 
     /// <summary>Called only by the session's state authority after validating the sender.</summary>

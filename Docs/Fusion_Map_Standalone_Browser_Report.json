@@ -1,0 +1,132 @@
+[
+  {
+    "test": "All processes expose the current acceptance probe",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Three independent Players start with zero Lobby NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop joins the independent Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both roles replicate across three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-selected roots reach the other Client",
+    "pass": true,
+    "evidence": 0.00039064884185791016
+  },
+  {
+    "test": "All three VR targets reach Server and Desktop",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "Loaded map waits with zero NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "All processes receive the authored map NPC count",
+    "pass": true,
+    "evidence": 30
+  },
+  {
+    "test": "Standalone Server keeps its world visible for CCTV rendering",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Two browsers decode advancing video and receive 0/3",
+    "pass": false,
+    "evidence": {
+      "pass": false,
+      "host": "StandaloneHidden",
+      "ready": false,
+      "completed": false,
+      "reconnected": false,
+      "errors": [
+        "Error: Both browsers decode black video while cameras are not overheated.\n    at file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:133:13\n    at async waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:43:11)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:124:3"
+      ],
+      "samples": [],
+      "browserVersion": "157.0.8103.52",
+      "latest": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 155,
+          "droppedFrames": 7,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 154,
+          "droppedFrames": 8,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        }
+      ],
+      "firstDecoded": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 1,
+          "droppedFrames": 1,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 2,
+          "droppedFrames": 1,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 0,
+          "nonBlackPixels": 0
+        }
+      ]
+    }
+  },
+  {
+    "test": "Standalone acceptance exception",
+    "pass": false,
+    "evidence": "Two browsers decode advancing video and receive 0/3"
+  }
+]

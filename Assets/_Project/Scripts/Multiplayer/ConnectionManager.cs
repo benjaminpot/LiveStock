@@ -45,6 +45,8 @@ public class ConnectionManager : MonoBehaviour
     Vector3 menuRigPosition;
     Quaternion menuRigRotation;
     int shownStage;
+    string gameplayFeedback;
+    public void SetGameplayFeedback(string message) => gameplayFeedback = message;
     bool returning;
     int desktopWorldMask;
     readonly Dictionary<UnityEngine.Behaviour, bool> viewStates = new();
@@ -165,15 +167,23 @@ public class ConnectionManager : MonoBehaviour
     {
         if (ViewSelected == selected) return;
         ViewSelected = selected;
-        foreach (var root in menuWorldRoots) if (root != null) root.SetActive(selected && shownStage == 0);
+        // The unselected VR rig still simulates locomotion, so its menu floor must keep colliding.
+        foreach (var root in menuWorldRoots) if (root != null)
+        {
+            root.SetActive(shownStage == 0);
+            foreach (var visual in root.GetComponentsInChildren<Renderer>(true)) visual.forceRenderingOff = !selected;
+        }
         if (desktopPlayer != null)
             foreach (var visual in desktopPlayer.GetComponentsInChildren<Renderer>(true)) visual.enabled = selected;
+        // Keep the local rig tracking while preventing its model from appearing in another peer's camera.
+        if (localVRRig != null)
+            foreach (var visual in localVRRig.GetComponentsInChildren<Renderer>(true)) visual.forceRenderingOff = !selected;
         // Preserve each camera's SDK/authored state. Enabling every eye and fallback camera breaks VR rendering.
         if (!selected)
         {
             viewStates.Clear();
             foreach (var component in GetComponentsInChildren<UnityEngine.Behaviour>(true))
-                if (component is Canvas || component is Camera || component is AudioListener
+                if (component is Canvas || component is Camera || component is AudioListener || component is Light
                     || component is UnityEngine.EventSystems.EventSystem)
                 {
                     viewStates[component] = component.enabled;
@@ -205,6 +215,7 @@ public class ConnectionManager : MonoBehaviour
         { SetStatus("Set App Id Fusion in Fusion > Realtime Settings first."); return false; }
         int index = SceneUtility.GetBuildIndexByScenePath(NetworkSceneSettings.Current.LobbyScene);
         if (index < 0) { SetStatus("Enable the Lobby scene in the build Scene List."); return false; }
+        if (!IsDesktop && ConnectionTestViews.Instance != null) ConnectionTestViews.Instance.Select(this);
         IsBusy = true;
         NetworkSessionController connecting = null;
         try
@@ -274,7 +285,6 @@ public class ConnectionManager : MonoBehaviour
                 desktopCamera.cullingMask = IsDesktop ? 0 : desktopWorldMask;
                 desktopCamera.transform.SetPositionAndRotation(menuCameraPosition, menuCameraRotation);
             }
-            foreach (var root in menuWorldRoots) if (root != null) root.SetActive(ViewSelected);
             returning = false;
             SetStatus("Ready to connect.");
         }
@@ -321,6 +331,7 @@ public class ConnectionManager : MonoBehaviour
         string viewLabel = ConnectionTestViews.Instance != null ? name + " | F2 next view\n" : "";
         if (statusText != null) statusText.text = viewLabel + Status;
         if (sessionStatusText != null) sessionStatusText.text = viewLabel + Status
+            + (IsDesktop && IsConnected ? "\n" + gameplayFeedback : "")
             + (IsDesktop && IsConnected ? "\nPC: WASD move | RMB look | Q/E down/up | Shift fast" : "");
         bool canEdit = !IsBusy && !IsConnected;
         if (connectButton != null) connectButton.interactable = canEdit;

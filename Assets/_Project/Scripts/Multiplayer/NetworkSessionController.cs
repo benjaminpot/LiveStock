@@ -18,6 +18,8 @@ public sealed class NetworkSessionController : MonoBehaviour
     /// <summary>Attaches this Client's local input cache before starting its Runner.</summary>
     public void BindClient(ConnectionManager client)
     {
+        // Meta locomotion uses static Physics queries, so only the local VR peer shares the default 3D scene.
+        GetComponent<NetworkSceneManagerDefault>().UseDefaultPhysicsScene = !client.IsDesktop;
         inputSource = gameObject.AddComponent<NetworkInputSource>();
         inputSource.Initialize(client);
     }
@@ -60,7 +62,18 @@ public sealed class NetworkSessionController : MonoBehaviour
             if (inputSource != null) inputSource.Clear();
             if (runner.IsServer) NetworkWorld.For(runner)?.BeginSceneLoad();
         });
+        events.OnSceneLoadDone ??= new NetworkEvents.RunnerEvent();
+        events.OnSceneLoadDone.AddListener(ActivateSceneAuthority);
         Runner.AddCallbacks(events);
+    }
+
+    /// <summary>Applies server-only ownership after Fusion finishes assigning this Runner's loaded scene.</summary>
+    void ActivateSceneAuthority(NetworkRunner runner)
+    {
+        var scene = GetComponent<NetworkSceneManagerDefault>().MainRunnerScene;
+        foreach (var root in scene.GetRootGameObjects())
+            foreach (var serverOnly in root.GetComponentsInChildren<LiveStock.Multiplayer.ServerOnly>(true))
+                serverOnly.ActivateFor(runner);
     }
 
     /// <summary>Starts Fusion with the same room, region and scene contract for both entry points.</summary>

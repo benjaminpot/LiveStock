@@ -3145,8 +3145,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Waiting for connection...
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
+  m_sharedMaterial: {fileID: -8304962148266268796, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5307,6 +5307,7 @@ GameObject:
   - component: {fileID: 5078150365830688386}
   - component: {fileID: 5966261023624519557}
   - component: {fileID: 4766504040980935818}
+  - component: {fileID: 5726438656387750086}
   m_Layer: 0
   m_Name: ConnectionTestClient
   m_TagString: Untagged
@@ -5362,7 +5363,6 @@ MonoBehaviour:
   statusText: {fileID: 4821080113662717581}
   defaultRoomName: LIVESTOCK-DEV
   defaultRegion: asia
-  networkScenePath: Assets/_Project/Scenes/_flow test/Lobby.unity
   localVRRig: {fileID: 4632676638466003961}
   vrEventSystem: {fileID: 5007885778453587171}
   menuCanvas: {fileID: 750204378250273154}
@@ -5399,6 +5399,24 @@ MonoBehaviour:
   headTarget: {fileID: 7331157725968610902}
   leftHandTarget: {fileID: 6301981531968106110}
   rightHandTarget: {fileID: 8183323272288392148}
+--- !u!114 &5726438656387750086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9093446159300108948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48f62069f4a80fb42b074422a2b281a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerGameplay
+  stateText: {fileID: 780610447914930538}
+  appleIcons:
+  - {fileID: 284707671050753608}
+  - {fileID: 549605762144191418}
+  - {fileID: 3462201964580994301}
+  body: {fileID: 7405804793348542079}
 --- !u!1001 &809108375180637989
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5407,6 +5425,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5078150365830688386}
     m_Modifications:
+    - target: {fileID: 139557535219902031, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+      propertyPath: m_text
+      value: "\u7B49\u5F85\u904A\u6232\u958B\u59CB"
+      objectReference: {fileID: 0}
     - target: {fileID: 3682905815955127737, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.029999733
@@ -5456,11 +5478,44 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+--- !u!114 &284707671050753608 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 633314134374506861, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 809108375180637989}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!20 &409464759187488652 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 1050519316606634153, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
   m_PrefabInstance: {fileID: 809108375180637989}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &549605762144191418 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 908056144557356191, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 809108375180637989}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &780610447914930538 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 139557535219902031, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 809108375180637989}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!114 &1388406523911105889 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1764878509574003268, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
@@ -5472,6 +5527,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df9f338034892c44ebb62d97894772f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3462201964580994301 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4266792929431718872, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 809108375180637989}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!4 &4046141854869539484 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3682905815955127737, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
@@ -5505,6 +5571,11 @@ Transform:
 --- !u!4 &7331157725968610902 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7964342007316824435, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+  m_PrefabInstance: {fileID: 809108375180637989}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &7405804793348542079 stripped
+CapsuleCollider:
+  m_CorrespondingSourceObject: {fileID: 7925266614709369178, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
   m_PrefabInstance: {fileID: 809108375180637989}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8183323272288392148 stripped

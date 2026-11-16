@@ -30,8 +30,9 @@ public static class ValidateFusionAssets
             try
             {
                 var roots = scene.GetRootGameObjects();
-                var recycle = roots.Single(g=>g.name=="Recycle Bin");
-                return new {name,archivedChildren=recycle.transform.childCount,inactive=!recycle.activeSelf,
+                var recycle = roots.Where(g=>g.name=="Recycle Bin").ToArray();
+                return new {name,archiveRoots=recycle.Length,archivedChildren=recycle.Sum(g=>g.transform.childCount),
+                    inactive=ArchiveRootsAreInactive(roots),
                     missing=roots.SelectMany(g=>g.GetComponentsInChildren<Transform>(true))
                         .Sum(t=>GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject))};
             }
@@ -43,5 +44,38 @@ public static class ValidateFusionAssets
             Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
         if (!pass) throw new InvalidOperationException("Asset validation failed. Read the report.");
         return result;
+    }
+
+    // A map need not contain archived previews; any archive it does contain must stay inactive and unique.
+    static bool ArchiveRootsAreInactive(GameObject[] roots)
+    {
+        var archives = roots.Where(g=>g.name=="Recycle Bin").ToArray();
+        return archives.Length <= 1 && archives.All(g=>!g.activeSelf);
+    }
+
+    /// <summary>Checks optional, active and duplicate archive roots without saving or changing a scene.</summary>
+    public static object RunContractChecks()
+    {
+        var scene = EditorSceneManager.NewPreviewScene();
+        try
+        {
+            var first = new GameObject("Recycle Bin");
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(first, scene);
+            bool missing = ArchiveRootsAreInactive(Array.Empty<GameObject>());
+            bool activeRejected = !ArchiveRootsAreInactive(new[]{first});
+            first.SetActive(false);
+            bool inactive = ArchiveRootsAreInactive(new[]{first});
+            var second = new GameObject("Recycle Bin");
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(second, scene);
+            second.SetActive(false);
+            bool duplicateRejected = !ArchiveRootsAreInactive(new[]{first,second});
+            var result = new {pass=missing&&activeRejected&&inactive&&duplicateRejected,
+                missing,activeRejected,inactive,duplicateRejected};
+            File.WriteAllText("Docs/Fusion_Asset_Contract_Report.json",
+                Newtonsoft.Json.JsonConvert.SerializeObject(result,Newtonsoft.Json.Formatting.Indented));
+            if (!result.pass) throw new InvalidOperationException("Archive root contract checks failed.");
+            return result;
+        }
+        finally {EditorSceneManager.ClosePreviewScene(scene);}
     }
 }

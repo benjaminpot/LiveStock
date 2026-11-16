@@ -6,8 +6,11 @@ using UnityEngine;
 public struct PlayerNetworkInput : INetworkInput
 {
     public NetworkBool IsVR, HasPose;
+    /// <summary>Device tracking validity is independent of whether Transform poses can be replicated.</summary>
+    public NetworkBool TrackingValid;
     public int Stage;
     public VRTrackedPose Pose;
+    public PlayerBodyPose Body;
 }
 
 /// <summary>Caches one Client's completed render-frame pose for its Runner's OnInput callback.</summary>
@@ -29,7 +32,10 @@ public sealed class NetworkInputSource : MonoBehaviour
         desktop = client.GetComponentInChildren<DesktopTestPlayer>(true);
     }
 
+    /// <summary>Revokes cached pose and body input during scene changes or when this source is disabled.</summary>
     public void Clear() => cached = default;
+
+    void OnDisable() => Clear();
 
     void LateUpdate()
     {
@@ -40,6 +46,8 @@ public sealed class NetworkInputSource : MonoBehaviour
         if (marker == null) return;
         cached.Stage = marker.Stage;
         cached.IsVR = !owner.IsDesktop;
+        var gameplay = owner.GetComponent<PlayerGameplay>();
+        if (gameplay != null) cached.Body = gameplay.ReadBody();
         if (owner.IsDesktop && desktop != null && desktop.isActiveAndEnabled)
         {
             cached.Pose = new VRTrackedPose
@@ -49,10 +57,11 @@ public sealed class NetworkInputSource : MonoBehaviour
             };
             cached.HasPose = true;
         }
-        else if (!owner.IsDesktop && vr != null && vr.isActiveAndEnabled && vr.IsConfigured && vr.TrackingAvailable)
+        else if (!owner.IsDesktop && vr != null && vr.isActiveAndEnabled && vr.IsConfigured)
         {
             cached.Pose = vr.ReadPose();
-            cached.HasPose = true;
+            cached.HasPose = cached.Pose.IsFinite;
+            cached.TrackingValid = vr.TrackingAvailable;
         }
     }
 }

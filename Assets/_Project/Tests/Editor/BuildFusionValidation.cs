@@ -11,6 +11,34 @@ using UnityEngine.XR.Management;
 /// <summary>Builds the same Windows Development Player for local Server/Client acceptance.</summary>
 public static class BuildFusionValidation
 {
+    const string ReloadPending = "LiveStock.ValidationBuildReloadPending";
+    const string ReloadMarker = ".tmp/FusionAcceptance/BuildDomainReload.txt";
+
+    /// <summary>Requests a clean domain without loading a temporary eval assembly before SDK build callbacks.</summary>
+    [MenuItem("LiveStock/Connection Test/Prepare Fusion Validation Build")]
+    public static void PrepareBuild()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            throw new InvalidOperationException("Stop Play Mode before building.");
+        for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+            if (UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty)
+                throw new InvalidOperationException("Save modified scenes before building.");
+        SessionState.SetBool(ReloadPending, true);
+        UnityEngine.Debug.Log("[FusionValidationBuild] Requesting clean domain reload.");
+        EditorUtility.RequestScriptReload();
+    }
+
+    /// <summary>Confirms the requested domain reload actually reached initialization before a build starts.</summary>
+    [InitializeOnLoadMethod]
+    static void RecordBuildReload()
+    {
+        if (!SessionState.GetBool(ReloadPending, false)) return;
+        SessionState.EraseBool(ReloadPending);
+        Directory.CreateDirectory(Path.GetDirectoryName(ReloadMarker));
+        File.WriteAllText(ReloadMarker, DateTime.UtcNow.ToString("O"));
+        UnityEngine.Debug.Log("[FusionValidationBuild] Clean domain initialized.");
+    }
+
     [MenuItem("LiveStock/Connection Test/Build Fusion Validation Player")]
     public static void BuildFromMenu() => Run();
 

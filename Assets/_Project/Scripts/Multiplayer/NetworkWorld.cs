@@ -27,6 +27,8 @@ public sealed class NetworkWorld : NetworkBehaviour
         public int Stage;
         public bool Spawning;
         public NetworkObject Avatar;
+        public PlayerBodyPose Body;
+        public TickTimer InputExpiry;
     }
 
     readonly Dictionary<PlayerRef, PlayerEntry> players = new();
@@ -34,6 +36,14 @@ public sealed class NetworkWorld : NetworkBehaviour
     LobbySessionState state;
     int sceneGeneration;
     bool npcsStarted;
+    [Networked] public int CollectedFruitCount { get; private set; }
+    [Networked] public int RequiredFruitCount { get; private set; }
+    public bool MissionComplete => RequiredFruitCount > 0 && CollectedFruitCount >= RequiredFruitCount;
+
+    public override void Spawned()
+    {
+        if (Object.HasStateAuthority) RequiredFruitCount = 3;
+    }
     [Header("Runtime diagnostics")]
     [SerializeField, Tooltip("Number of accepted input samples on this Server. Client replicas keep their own zero counter.")]
     int acceptedInputCount;
@@ -85,7 +95,9 @@ public sealed class NetworkWorld : NetworkBehaviour
         foreach (var obj in spawnedSceneObjects) if (obj != null && obj.IsValid) Runner.Despawn(obj);
         spawnedSceneObjects.Clear();
         npcsStarted = false;
-        foreach (var entry in players.Values) entry.Stage = 0;
+        CollectedFruitCount = 0;
+        RequiredFruitCount = 3;
+        foreach (var entry in players.Values) { entry.Stage = 0; InvalidateInput(entry); }
     }
 
     /// <summary>Removes a departed player's avatar and its registration on the server.</summary>
@@ -111,6 +123,7 @@ public sealed class NetworkWorld : NetworkBehaviour
             {
                 EnsureAvatar(pair.Key, pair.Value);
                 if (Runner.TryGetInputForPlayer(pair.Key, out PlayerNetworkInput input)) ApplyInput(pair.Value, input);
+                else if (pair.Value.InputExpiry.ExpiredOrNotRunning(Runner)) InvalidateInput(pair.Value);
             }
         }
         foreach (var player in departed) RemovePlayer(player);
@@ -153,12 +166,31 @@ public sealed class NetworkWorld : NetworkBehaviour
     {
         if (input.IsVR != entry.IsVR || entry.Stage == 0
             || input.Stage != entry.Stage || Runner.IsSceneManagerBusy || entry.Avatar == null
-            || state.Phase == LobbySessionState.SessionPhase.LoadingMainGame) return;
-        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(input.HasPose && input.Pose.IsFinite);
-        if (!input.HasPose || !input.Pose.IsFinite) return;
+            || state.Phase == LobbySessionState.SessionPhase.LoadingMainGame
+            || !input.HasPose || !input.Pose.IsFinite)
+        {
+            InvalidateInput(entry);
+            return;
+        }
+        bool trackingValid = !entry.IsVR || input.TrackingValid;
+        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(trackingValid);
+        // Tolerate brief packet loss, but never keep an interactive body indefinitely without input.
+        entry.InputExpiry = TickTimer.CreateFromSeconds(Runner, .5f);
+        // Collection uses body proximity even when one controller is unavailable for the full sheep pose.
+        entry.Body = input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
+            ? input.Body : default;
         if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetPose(input.Pose);
         else entry.Avatar.transform.SetPositionAndRotation(input.Pose.RootPosition, input.Pose.RootRotation.normalized);
         acceptedInputCount++;
+    }
+
+    /// <summary>Revokes interaction and VR tracking when a sample is invalid or its grace period expires.</summary>
+    void InvalidateInput(PlayerEntry entry)
+    {
+        entry.Body = default;
+        entry.InputExpiry = default;
+        if (entry.IsVR && entry.Avatar != null && entry.Avatar.IsValid)
+            entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(false);
     }
 
     /// <summary>Creates a registered Fusion prefab on this Server and tracks its scene lifetime.</summary>
@@ -183,6 +215,41 @@ public sealed class NetworkWorld : NetworkBehaviour
             || player.Stage != 2 || player.Avatar == null || !Runner.TryFindObject(targetId, out var target)
             || Vector3.Distance(player.Avatar.transform.position, target.transform.position) > 3f) return;
         target.GetComponent<NetworkSwitch>()?.ToggleAsServer();
+    }
+
+    /// <summary>Asks the server to check the selected apple's body-proximity range in this player's room.</summary>
+    public void RequestCollect(FruitPickup fruit)
+    {
+        if (Object.IsValid && fruit != null && fruit.Object != null && fruit.Object.IsValid && fruit.Runner == Runner)
+            RPC_RequestCollect(fruit.Object.Id);
+    }
+
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    void RPC_RequestCollect(NetworkId fruitId, RpcInfo info = default)
+    {
+        string feedback = "玩家尚未準備完成";
+        if (state.Phase == LobbySessionState.SessionPhase.Running && !Runner.IsSceneManagerBusy
+            && players.TryGetValue(info.Source, out var player) && player.Stage == 2 && player.Avatar != null
+            && Runner.TryFindObject(fruitId, out var target) && spawnedSceneObjects.Contains(target)
+            && target.TryGetComponent<FruitPickup>(out var fruit))
+        {
+            if (fruit.IsCollected) feedback = "這顆蘋果已被收集";
+            else if (!fruit.IsNearby(player.Body)) feedback = "請靠近蘋果";
+            else if (fruit.CollectAsServer())
+            {
+                CollectedFruitCount = spawnedSceneObjects.Count(o => o != null && o.IsValid
+                    && o.TryGetComponent<FruitPickup>(out var apple) && apple.IsCollected);
+                feedback = MissionComplete ? "蘋果已收集完成！" : $"已收集蘋果 {CollectedFruitCount}/{RequiredFruitCount}";
+            }
+        }
+        RPC_CollectFeedback(info.Source, feedback);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    void RPC_CollectFeedback(PlayerRef player, string feedback)
+    {
+        if (Runner.LocalPlayer == player)
+            ConnectionManager.For(Runner)?.GetComponent<PlayerGameplay>()?.ShowFeedback(feedback);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
