@@ -140,7 +140,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: "\u7B49\u5F85\u904A\u6232\u958B\u59CB"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
   m_sharedMaterial: {fileID: -8304962148266268796, guid: b6a0dbc57ac927a4db3c4ff163261615, type: 2}
@@ -567,6 +567,14 @@ PrefabInstance:
       propertyPath: wideMotionModeHandPosesEnabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 478840069603302655, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
+      propertyPath: _headPoseRelativeOffsetTranslation.y
+      value: 0.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 478840069603302655, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
+      propertyPath: _headPoseRelativeOffsetTranslation.z
+      value: 0.43
+      objectReference: {fileID: 0}
     - target: {fileID: 640725887797840613, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: useFixedUpdateForTracking
       value: 1
@@ -629,15 +637,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2559738077363760408, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.01
+      value: -11.97
       objectReference: {fileID: 0}
     - target: {fileID: 2559738077363760408, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.42
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 2559738077363760408, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 16.46
+      value: 12.5
       objectReference: {fileID: 0}
     - target: {fileID: 2559738077363760408, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -965,7 +973,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9036042282872125179, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9087505042782556626, guid: 2768a9b462079cd4ca6b1f249de832d8, type: 3}
       propertyPath: m_LocalPosition.x

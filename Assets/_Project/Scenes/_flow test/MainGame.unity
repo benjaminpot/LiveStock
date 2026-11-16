@@ -1835,7 +1835,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &137513004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4060,7 +4060,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &338129131
 Transform:
   m_ObjectHideFlags: 0
@@ -4070,7 +4070,7 @@ Transform:
   m_GameObject: {fileID: 338129130}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.68, y: 1.25, z: 16.61}
+  m_LocalPosition: {x: -1.68, y: 1.341, z: 16.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21926,7 +21926,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[2].Offset.y
-      value: 1.25
+      value: 1.341
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[2].Offset.z
@@ -21938,7 +21938,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[3].Offset.y
-      value: 1.25
+      value: 1.341
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[3].Offset.z
@@ -21950,7 +21950,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[4].Offset.y
-      value: 1.25
+      value: 1.341
       objectReference: {fileID: 0}
     - target: {fileID: 4106106046916727606, guid: 0a8ff721afbae8e448d94e6f0de86de1, type: 3}
       propertyPath: sceneObjects.Array.data[4].Offset.z

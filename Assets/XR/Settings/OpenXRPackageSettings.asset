@@ -326,23 +326,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
   - {fileID: 9209765687440625451}
-  - {fileID: -8935460777053641421}
-  - {fileID: -5200944691360609177}
+  - {fileID: 3538557591385424698}
+  - {fileID: -2884366469917944231}
   - {fileID: 4721946710240326916}
-  - {fileID: -8816087283027692177}
+  - {fileID: -7170660834493390174}
   - {fileID: -7765151931701711765}
   - {fileID: -1366185939518579887}
   - {fileID: 1778152520589257936}
-  - {fileID: -9221761153431905385}
+  - {fileID: 8123383554036057076}
   - {fileID: 160038093472317081}
-  - {fileID: 2614100742897186136}
+  - {fileID: 5765470228147345629}
   - {fileID: -2390538734411339717}
   - {fileID: 8087909144984826932}
-  - {fileID: 4130431466141597787}
+  - {fileID: 340299082296121838}
   - {fileID: -1037454329268254819}
-  - {fileID: -8974383934929998549}
+  - {fileID: 6007657129951040535}
   - {fileID: 8543226857594433426}
-  - {fileID: -108721792611584137}
+  - {fileID: 5904288877106228826}
   - {fileID: 1836589208437646404}
   customLoaderName: 
   m_renderMode: 1
@@ -851,7 +851,7 @@ MonoBehaviour:
   m_Name: WebGL
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: 4135958708122830377}
+  - {fileID: 3512171664030431084}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -1683,7 +1683,7 @@ MonoBehaviour:
   m_Name: tvOS
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: 1229575497998687524}
+  - {fileID: -5386877405817261370}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -1809,7 +1809,7 @@ MonoBehaviour:
   m_Name: VisionOS
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: -5953317943588604183}
+  - {fileID: -564460282596353921}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0
@@ -2052,7 +2052,7 @@ MonoBehaviour:
   m_Name: iPhone
   m_EditorClassIdentifier: Unity.XR.OpenXR::UnityEngine.XR.OpenXR.OpenXRSettings
   features:
-  - {fileID: -7454313236048773300}
+  - {fileID: -2457049955364071562}
   customLoaderName: 
   m_renderMode: 1
   m_latencyOptimization: 0

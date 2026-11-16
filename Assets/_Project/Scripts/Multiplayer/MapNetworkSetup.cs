@@ -15,10 +15,10 @@ public sealed class MapNetworkSetup : MonoBehaviour
         if (!world.Object.HasStateAuthority || world.Runner.IsSceneManagerBusy
             || LobbySessionState.For(world.Runner).Phase != LobbySessionState.SessionPhase.Running) return;
         LiveStock.Multiplayer.RandomNPCSpawner.SpawnFor(world.Runner);
-        var spawn = GetComponent<FlowSceneMarker>().VRSpawnPoint;
-        if (spawn == null) return;
+        // var spawn = GetComponent<FlowSceneMarker>().VRSpawnPoint;
+        // if (spawn == null) return;
         foreach (var item in sceneObjects)
             if (item.Prefab != null)
-                world.SpawnObject(item.Prefab, spawn.position + spawn.rotation * item.Offset, spawn.rotation);
+                world.SpawnObject(item.Prefab, item.Offset, Quaternion.identity);
     }
 }
