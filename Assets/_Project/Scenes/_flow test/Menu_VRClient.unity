@@ -326,19 +326,7 @@ MonoBehaviour:
       m_Calls: []
   _whenHover:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   _whenUnhover:
     m_PersistentCalls:
       m_Calls: []
@@ -4524,11 +4512,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5794370826473170252, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: _maxRayVisualLength
-      value: 5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 5794370826473170252, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: _hideWhenNoInteractable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6063377658003313002, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: m_Layer
@@ -4536,11 +4524,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7634068303655092000, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: _maxRayVisualLength
-      value: 5
+      value: 0.25
       objectReference: {fileID: 0}
     - target: {fileID: 7634068303655092000, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: _hideWhenNoInteractable
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7907587464484358918, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
       propertyPath: m_Layer
@@ -7142,19 +7130,7 @@ MonoBehaviour:
       m_Calls: []
   _whenHover:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   _whenUnhover:
     m_PersistentCalls:
       m_Calls: []

@@ -215,6 +215,7 @@ public class ConnectionManager : MonoBehaviour
         { SetStatus("Set App Id Fusion in Fusion > Realtime Settings first."); return false; }
         int index = SceneUtility.GetBuildIndexByScenePath(NetworkSceneSettings.Current.LobbyScene);
         if (index < 0) { SetStatus("Enable the Lobby scene in the build Scene List."); return false; }
+        if (!IsDesktop && ConnectionTestViews.Instance != null) ConnectionTestViews.Instance.Select(this);
         IsBusy = true;
         NetworkSessionController connecting = null;
         try

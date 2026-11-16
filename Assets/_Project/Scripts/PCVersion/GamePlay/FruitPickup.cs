@@ -13,7 +13,6 @@ public class FruitPickup : NetworkBehaviour
     [Networked, OnChangedRender(nameof(ApplyCollected))] public NetworkBool IsCollected { get; private set; }
     private Renderer[] visuals;
     private Collider[] colliders;
-    private readonly RaycastHit[] hits = new RaycastHit[64];
     private bool appliedCollected;
     public Collider RayCollider => rayCollider;
 
@@ -34,26 +33,6 @@ public class FruitPickup : NetworkBehaviour
     /// <summary>Tests the same capsule-versus-trigger rule for local feedback and the server.</summary>
     public bool IsNearby(PlayerBodyPose body) => body.Overlaps(proximityTrigger);
 
-    /// <summary>Requires the small apple surface and rejects nearer solid obstacles in this Runner.</summary>
-    public bool HasClearRay(Ray ray, Transform ignoredPlayer = null)
-    {
-        if (rayCollider == null || !rayCollider.enabled || !PlayerBodyPose.Finite(ray.origin)
-            || !PlayerBodyPose.Finite(ray.direction) || ray.direction.sqrMagnitude < .001f) return false;
-        ray.direction = ray.direction.normalized;
-        if (!rayCollider.Raycast(ray, out var target, float.MaxValue)) return false;
-        var physics = Runner.GetPhysicsScene();
-        int count = physics.Raycast(ray.origin, ray.direction, hits, target.distance + .01f, ~0, QueryTriggerInteraction.Ignore);
-        if (count == hits.Length) return false;
-        for (int i = 0; i < count; i++)
-        {
-            var hit = hits[i];
-            if (hit.collider.GetComponentInParent<FruitPickup>() == this
-                || (ignoredPlayer != null && hit.collider.transform.IsChildOf(ignoredPlayer))) continue;
-            if (hit.distance < target.distance - .01f) return false;
-        }
-        return true;
-    }
-
     /// <summary>Called after NetworkWorld validates the authenticated player's request.</summary>
     public bool CollectAsServer()
     {
@@ -63,10 +42,11 @@ public class FruitPickup : NetworkBehaviour
         return true;
     }
 
+    /// <summary>Keeps collected meshes hidden even when Fusion reapplies the selected peer's renderer visibility.</summary>
     void ApplyCollected()
     {
         appliedCollected = IsCollected;
-        foreach (var visual in visuals) visual.enabled = !IsCollected;
+        foreach (var visual in visuals) visual.forceRenderingOff = IsCollected;
         foreach (var collider in colliders) collider.enabled = !IsCollected;
         if (rayInteractable != null) rayInteractable.enabled = !IsCollected;
     }

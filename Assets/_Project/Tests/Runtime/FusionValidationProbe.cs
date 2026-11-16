@@ -156,13 +156,11 @@ public sealed class FusionValidationProbe : MonoBehaviour
             && int.TryParse(command.Substring("approach-fruit ".Length), out int fruitIndex)) ApproachFruit(client, fruitIndex);
         else if (command == "collect-fruit" && client != null && selectedFruit != null)
         {
-            var camera = client.GetComponentInChildren<DesktopTestPlayer>().ViewCamera;
-            client.GetComponent<PlayerGameplay>().TryCollect(selectedFruit, camera.ViewportPointToRay(new Vector3(.5f, .5f)));
+            client.GetComponent<PlayerGameplay>().TryCollect(selectedFruit);
         }
         else if (command == "repeat-fruit" && client != null && selectedFruit != null)
         {
-            var camera = client.GetComponentInChildren<DesktopTestPlayer>().ViewCamera;
-            client.State.World.RequestCollect(selectedFruit, camera.ViewportPointToRay(new Vector3(.5f, .5f)));
+            client.State.World.RequestCollect(selectedFruit);
         }
         else if (command == "move" && client != null)
         {
@@ -195,8 +193,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
         {
             actor.transform.position = fruit.RayCollider.bounds.center + offset * .75f - Vector3.up;
             actor.ViewCamera.transform.LookAt(fruit.RayCollider.bounds.center);
-            if (fruit.IsNearby(gameplay.ReadBody()) && fruit.HasClearRay(
-                actor.ViewCamera.ViewportPointToRay(new Vector3(.5f, .5f)), client.transform))
+            if (fruit.IsNearby(gameplay.ReadBody()))
             {
                 selectedFruit = fruit;
                 return;

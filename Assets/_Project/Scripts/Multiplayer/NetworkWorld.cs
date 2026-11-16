@@ -176,7 +176,8 @@ public sealed class NetworkWorld : NetworkBehaviour
         if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(trackingValid);
         // Tolerate brief packet loss, but never keep an interactive body indefinitely without input.
         entry.InputExpiry = TickTimer.CreateFromSeconds(Runner, .5f);
-        entry.Body = trackingValid && input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
+        // Collection uses body proximity even when one controller is unavailable for the full sheep pose.
+        entry.Body = input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
             ? input.Body : default;
         if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetPose(input.Pose);
         else entry.Avatar.transform.SetPositionAndRotation(input.Pose.RootPosition, input.Pose.RootRotation.normalized);
@@ -216,15 +217,15 @@ public sealed class NetworkWorld : NetworkBehaviour
         target.GetComponent<NetworkSwitch>()?.ToggleAsServer();
     }
 
-    /// <summary>Sends a ray-selected apple request through this player's own room object.</summary>
-    public void RequestCollect(FruitPickup fruit, Ray ray)
+    /// <summary>Asks the server to check the selected apple's body-proximity range in this player's room.</summary>
+    public void RequestCollect(FruitPickup fruit)
     {
         if (Object.IsValid && fruit != null && fruit.Object != null && fruit.Object.IsValid && fruit.Runner == Runner)
-            RPC_RequestCollect(fruit.Object.Id, ray.origin, ray.direction);
+            RPC_RequestCollect(fruit.Object.Id);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    void RPC_RequestCollect(NetworkId fruitId, Vector3 origin, Vector3 direction, RpcInfo info = default)
+    void RPC_RequestCollect(NetworkId fruitId, RpcInfo info = default)
     {
         string feedback = "玩家尚未準備完成";
         if (state.Phase == LobbySessionState.SessionPhase.Running && !Runner.IsSceneManagerBusy
@@ -232,12 +233,8 @@ public sealed class NetworkWorld : NetworkBehaviour
             && Runner.TryFindObject(fruitId, out var target) && spawnedSceneObjects.Contains(target)
             && target.TryGetComponent<FruitPickup>(out var fruit))
         {
-            bool tracking = !player.IsVR || player.Avatar.GetComponent<VRNetworkAvatar>().TrackingValid;
-            if (!tracking || player.InputExpiry.ExpiredOrNotRunning(Runner) || !player.Body.IsValid) feedback = "等待玩家追蹤資料";
-            else if (fruit.IsCollected) feedback = "這顆蘋果已被收集";
+            if (fruit.IsCollected) feedback = "這顆蘋果已被收集";
             else if (!fruit.IsNearby(player.Body)) feedback = "請靠近蘋果";
-            else if (!PlayerBodyPose.Finite(origin) || Vector3.Distance(origin, player.Body.Center) > (player.IsVR ? 3f : 5f)
-                || !fruit.HasClearRay(new Ray(origin, direction), player.Avatar.transform)) feedback = "請重新瞄準蘋果";
             else if (fruit.CollectAsServer())
             {
                 CollectedFruitCount = spawnedSceneObjects.Count(o => o != null && o.IsValid

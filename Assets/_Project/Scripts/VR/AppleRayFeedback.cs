@@ -77,6 +77,8 @@ public sealed class AppleRayFeedback : MonoBehaviour
             return;
         }
         appleRenderer.GetPropertyBlock(feedbackProperties);
+        // The original palette texture can hide a tint (red multiplied by yellow still looks red).
+        feedbackProperties.SetTexture("_BaseMap", Texture2D.whiteTexture);
         feedbackProperties.SetColor(colorProperty, selectedUntil > 0 ? Color.cyan : Color.yellow);
         appleRenderer.SetPropertyBlock(feedbackProperties);
     }
