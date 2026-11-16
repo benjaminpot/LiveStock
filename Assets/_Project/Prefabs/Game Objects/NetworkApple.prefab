@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1621575128780187765}
   - component: {fileID: 2572325495014545763}
   - component: {fileID: 7954996446702008835}
+  - component: {fileID: 2838464714822821605}
   m_Layer: 0
   m_Name: NetworkApple
   m_TagString: Untagged
@@ -199,6 +200,19 @@ MonoBehaviour:
   _whenCancel:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2838464714822821605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152850183782698683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eed566d10eb21ad41ae4fc9460353ae2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AppleRayFeedback
+  appleRenderer: {fileID: 3038226034392003419}
 --- !u!1 &7615149430248163641
 GameObject:
   m_ObjectHideFlags: 0

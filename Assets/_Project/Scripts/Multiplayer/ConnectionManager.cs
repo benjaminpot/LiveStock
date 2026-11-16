@@ -167,7 +167,12 @@ public class ConnectionManager : MonoBehaviour
     {
         if (ViewSelected == selected) return;
         ViewSelected = selected;
-        foreach (var root in menuWorldRoots) if (root != null) root.SetActive(selected && shownStage == 0);
+        // The unselected VR rig still simulates locomotion, so its menu floor must keep colliding.
+        foreach (var root in menuWorldRoots) if (root != null)
+        {
+            root.SetActive(shownStage == 0);
+            foreach (var visual in root.GetComponentsInChildren<Renderer>(true)) visual.forceRenderingOff = !selected;
+        }
         if (desktopPlayer != null)
             foreach (var visual in desktopPlayer.GetComponentsInChildren<Renderer>(true)) visual.enabled = selected;
         // Keep the local rig tracking while preventing its model from appearing in another peer's camera.
@@ -178,7 +183,7 @@ public class ConnectionManager : MonoBehaviour
         {
             viewStates.Clear();
             foreach (var component in GetComponentsInChildren<UnityEngine.Behaviour>(true))
-                if (component is Canvas || component is Camera || component is AudioListener
+                if (component is Canvas || component is Camera || component is AudioListener || component is Light
                     || component is UnityEngine.EventSystems.EventSystem)
                 {
                     viewStates[component] = component.enabled;
@@ -279,7 +284,6 @@ public class ConnectionManager : MonoBehaviour
                 desktopCamera.cullingMask = IsDesktop ? 0 : desktopWorldMask;
                 desktopCamera.transform.SetPositionAndRotation(menuCameraPosition, menuCameraRotation);
             }
-            foreach (var root in menuWorldRoots) if (root != null) root.SetActive(ViewSelected);
             returning = false;
             SetStatus("Ready to connect.");
         }
