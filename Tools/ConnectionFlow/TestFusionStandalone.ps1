@@ -1,4 +1,4 @@
-param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser, [switch]$BatchGraphics)
+param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser, [switch]$BatchGraphics, [switch]$DiagnoseCctv)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $executable = Join-Path $projectRoot 'Builds/FusionValidation/LiveStockFusion.exe'
@@ -66,7 +66,7 @@ try {
         $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
     }
     Wait-For { (Read-Peer 'server').connected -and (Read-Peer 'desktop') -and (Read-Peer 'vr-preview') } 'process startup'
-    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 4}).Count -eq 0)
+    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 5}).Count -eq 0)
     Check 'Three independent Players start with zero Lobby NPCs' ((Read-Peer 'server').npcs -eq 0 -and $processes.Count -eq 3)
     Send-Command 'desktop' 'connect'
     Wait-For { (Read-Peer 'server').loaded -eq 1 -and (Read-Peer 'desktop').connected } 'Desktop connection'
@@ -114,6 +114,10 @@ try {
         Wait-For { (Read-Browser).ready -or (Read-Browser).errors.Count -gt 0 } 'two browser video streams' 150
         Send-Command 'server' 'capture-cctv'
         Start-Sleep -Seconds 1
+        if ($DiagnoseCctv -and !(Read-Browser).ready) {
+            Send-Command 'server' 'diagnose-cctv'
+            Wait-For { Test-Path -LiteralPath (Join-Path $runRoot 'cctv-manual-source.png') } 'explicit manual source diagnostic' 20
+        }
         Check 'Two browsers decode advancing video and receive 0/3' ((Read-Browser).ready -and (Read-Browser).errors.Count -eq 0) (Read-Browser)
     }
     foreach ($index in 0..2) {

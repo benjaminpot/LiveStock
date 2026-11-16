@@ -18,7 +18,7 @@ public static class AuditCctvSources
             var result=Enumerable.Range(0,views.arraySize).Select(i=>{
                 var camera=(Camera)views.GetArrayElementAtIndex(i).FindPropertyRelative("streamCamera").objectReferenceValue;
                 var data=camera.GetComponent<UniversalAdditionalCameraData>();
-                return new{index=i,camera=camera.name,mask=camera.cullingMask,position=camera.transform.position.ToString("F3"),
+                return new{index=i,camera=camera.name,mask=camera.cullingMask,camera.targetDisplay,camera.cameraType,position=camera.transform.position.ToString("F3"),
                     forward=camera.transform.forward.ToString("F3"),rect=camera.rect.ToString(),camera.nearClipPlane,camera.farClipPlane,
                     renderType=data!=null?data.renderType.ToString():"Default"};
             }).ToArray();

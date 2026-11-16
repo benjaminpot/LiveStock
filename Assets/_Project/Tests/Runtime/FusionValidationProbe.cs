@@ -1,10 +1,12 @@
 #if FUSION_ACCEPTANCE && DEVELOPMENT_BUILD && !UNITY_EDITOR
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Fusion;
 using LiveStock.Multiplayer;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>Local file-based evidence probe included only in the explicit Development acceptance build.</summary>
 public sealed class FusionValidationProbe : MonoBehaviour
@@ -20,7 +22,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
     [Serializable]
     public sealed class Snapshot
     {
-        public int probeVersion = 4;
+        public int probeVersion = 5;
         public string role, phase;
         public bool connected, canStart, inputActive, runnerVisible;
         public int frame, tick, players, loaded, npcs, acceptedInputs;
@@ -38,6 +40,25 @@ public sealed class FusionValidationProbe : MonoBehaviour
     double frameTime;
     int frames;
     FruitPickup selectedFruit;
+    readonly Dictionary<int, int> renderedFrames = new();
+
+    void OnEnable()
+    {
+        RenderPipelineManager.endCameraRendering += CountRenderedCamera;
+        Camera.onPostRender += CountBuiltInCamera;
+    }
+    void OnDisable()
+    {
+        RenderPipelineManager.endCameraRendering -= CountRenderedCamera;
+        Camera.onPostRender -= CountBuiltInCamera;
+    }
+    void CountBuiltInCamera(Camera camera) => CountRenderedCamera(default, camera);
+    void CountRenderedCamera(ScriptableRenderContext context, Camera camera)
+    {
+        int id = camera.GetInstanceID();
+        renderedFrames.TryGetValue(id, out int count);
+        renderedFrames[id] = count + 1;
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void StartProbe()
@@ -89,8 +110,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
             missionComplete = world != null && world.MissionComplete,
             targetFruit = selectedFruit != null && selectedFruit.Object != null && selectedFruit.Object.IsValid ? (int)selectedFruit.Object.Id.Raw : 0,
             feedback = client != null ? client.GetComponent<PlayerGameplay>()?.Feedback : null,
-            cctvCameras = server != null ? FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None)
-                .Where(c => c.name == "View 1" || c.name.StartsWith("CCTV_")).Select(c => $"{c.name} active={c.gameObject.activeInHierarchy} enabled={c.enabled} mask={c.cullingMask} override={c.overrideSceneCullingMask} pos={c.transform.position} forward={c.transform.forward} texture={c.targetTexture != null} scene={c.gameObject.scene.name}").ToArray() : Array.Empty<string>(),
+            cctvCameras = server != null ? CameraDiagnostics() : Array.Empty<string>(),
             averageFrameIntervalMs = (float)(frameTime / frames),
             allocatedBytes = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong(),
             vr = FindObjectsByType<VRNetworkAvatar>(FindObjectsSortMode.None)
@@ -128,7 +148,8 @@ public sealed class FusionValidationProbe : MonoBehaviour
         else if (command == "load" && server != null) server.LoadMainGame();
         else if (command == "start" && server != null) server.StartGame();
         else if (command == "stop" && server != null) server.StopServer();
-        else if (command == "capture-cctv" && server != null) CaptureCctv();
+        else if (command == "capture-cctv" && server != null) CaptureCctv(server.Runner);
+        else if (command == "diagnose-cctv" && server != null) DiagnoseCctv(server.Runner);
         else if ((command == "input-off" || command == "input-on") && client != null && client.IsConnected)
             client.Runner.GetComponent<NetworkInputSource>().enabled = command == "input-on";
         else if (command.StartsWith("approach-fruit ") && client != null && client.IsDesktop
@@ -184,8 +205,15 @@ public sealed class FusionValidationProbe : MonoBehaviour
     }
 
     /// <summary>Captures the actual sender render textures to distinguish rendering faults from browser decoding.</summary>
-    void CaptureCctv()
+    void CaptureCctv(NetworkRunner runner)
     {
+        string prefix = Path.Combine(Path.GetDirectoryName(output), "cctv-" + Time.frameCount);
+        var renderers = FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .Where(r => NetworkRunner.GetRunnerForGameObject(r.gameObject) == runner).ToArray();
+        File.WriteAllLines(prefix + "-diagnostics.txt", CameraDiagnostics()
+            .Prepend($"Renderer count={renderers.Length} enabled={renderers.Count(r => r.enabled && r.gameObject.activeInHierarchy)}")
+            .Prepend($"Pipeline={GraphicsSettings.currentRenderPipeline?.GetType().Name ?? "Built-in"} device={SystemInfo.graphicsDeviceType} batch={Application.isBatchMode} peer={runner.Config.PeerMode} quality={QualitySettings.GetQualityLevel()}")
+            .Concat(renderers.Take(12).Select(r => $"{r.name} enabled={r.enabled} active={r.gameObject.activeInHierarchy} bounds={r.bounds} material={r.sharedMaterial?.name}")));
         int index = 0;
         var previous = RenderTexture.active;
         foreach (var camera in FindObjectsByType<Camera>(FindObjectsSortMode.None).Where(c => c.name == "View 1" && c.targetTexture != null))
@@ -197,9 +225,45 @@ public sealed class FusionValidationProbe : MonoBehaviour
                 RenderTexture.active = target;
                 pixels.ReadPixels(new Rect(0, 0, target.width, target.height), 0, 0);
                 pixels.Apply();
-                File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(output), "cctv-" + index++ + ".png"), pixels.EncodeToPNG());
+                File.WriteAllBytes(prefix + "-" + index++ + ".png", pixels.EncodeToPNG());
             }
             finally { RenderTexture.active = previous; Destroy(pixels); }
+        }
+    }
+
+    /// <summary>Records completed camera renders from either SRP or the built-in pipeline.</summary>
+    string[] CameraDiagnostics() => FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+        .Where(c => c.name == "View 1" || c.name.StartsWith("CCTV_")).Select(c =>
+        {
+            renderedFrames.TryGetValue(c.GetInstanceID(), out int count);
+            return $"{c.name} active={c.gameObject.activeInHierarchy} enabled={c.enabled} rendered={count} mask={c.cullingMask} override={c.overrideSceneCullingMask} pos={c.transform.position} forward={c.transform.forward} texture={c.targetTexture != null} scene={c.gameObject.scene.name}";
+        }).ToArray();
+
+    /// <summary>Explicit diagnostic only: renders one authored source after recording the unmodified sender textures.</summary>
+    void DiagnoseCctv(NetworkRunner runner)
+    {
+        CaptureCctv(runner);
+        var camera = FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .First(c => c.name.StartsWith("CCTV_01") && NetworkRunner.GetRunnerForGameObject(c.gameObject) == runner);
+        var original = camera.targetTexture;
+        var previous = RenderTexture.active;
+        var target = new RenderTexture(512, 288, 24);
+        var pixels = new Texture2D(512, 288, TextureFormat.RGB24, false);
+        try
+        {
+            camera.targetTexture = target;
+            camera.Render();
+            RenderTexture.active = target;
+            pixels.ReadPixels(new Rect(0, 0, 512, 288), 0, 0);
+            pixels.Apply();
+            File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(output), "cctv-manual-source.png"), pixels.EncodeToPNG());
+        }
+        finally
+        {
+            camera.targetTexture = original;
+            RenderTexture.active = previous;
+            Destroy(pixels);
+            Destroy(target);
         }
     }
 }

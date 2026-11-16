@@ -49,7 +49,7 @@
     "pass": false,
     "evidence": {
       "pass": false,
-      "host": "StandaloneHidden",
+      "host": "StandaloneBatchGraphics",
       "ready": false,
       "completed": false,
       "reconnected": false,
@@ -65,7 +65,7 @@
           "blackout": false,
           "connection": "CONNECTED",
           "width": 1920,
-          "frames": 124,
+          "frames": 126,
           "droppedFrames": 2,
           "missionHistory": [
             "等待任務資料",
@@ -80,8 +80,8 @@
           "blackout": false,
           "connection": "CONNECTED",
           "width": 1920,
-          "frames": 124,
-          "droppedFrames": 2,
+          "frames": 125,
+          "droppedFrames": 3,
           "missionHistory": [
             "等待任務資料",
             "羊方已收集 0/3 顆蘋果"
@@ -97,7 +97,7 @@
           "blackout": false,
           "connection": "CONNECTED",
           "width": 1920,
-          "frames": 14,
+          "frames": 15,
           "droppedFrames": 2,
           "missionHistory": [
             "等待任務資料",
@@ -113,7 +113,7 @@
           "connection": "CONNECTED",
           "width": 1920,
           "frames": 14,
-          "droppedFrames": 2,
+          "droppedFrames": 3,
           "missionHistory": [
             "等待任務資料",
             "羊方已收集 0/3 顆蘋果"

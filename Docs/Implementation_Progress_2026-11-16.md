@@ -71,6 +71,7 @@
 - `7f5153f9`：第 7 輪停用輸入來源時清理快取。
 - `a57adcca`：第 8 輪載入完成啟動 ServerOnly，兩位瀏覽器影像／逐顆進度／重連通過。
 - `cf338aa1`：第 9 輪最新 Player 的 21 項獨立程序回歸；影片失敗另存。
+- `81e547b5`：第 10 輪獨立 Server 保持世界可見；hidden／batch 影片仍失敗。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -154,4 +155,22 @@
 
 驗證：重建 0 error／3 warning，獨立 Server 的可見性檢查通過。然而兩個瀏覽器仍在未過熱時解碼全黑，不能宣告影片問題已修好。再以同一建置對照 D3D11 圖形 batch 模式，仍失敗；證據分別在 `.tmp/FusionStandalone-20261116-063329`、`.tmp/FusionStandalone-20261116-063541`。batch 模式保留為明確選項，不作為影像成功的替代判準。
 
-下一步：在 Development probe 補實際相機渲染回呼與 Renderer 狀態診斷，區分未排程繪製、場景內容與編碼問題。保留可見性修正，因原本無條件隱藏也會阻止獨立 Server 正常繪製世界；不將它描述成唯一根因。
+當時下一步：補實際相機渲染回呼與 Renderer 診斷。後續核對發現驗收建置明確設定 Single Peer，上述 Multi-Peer 分支並未參與這個 Player 案例；第 11 輪撤回無重現依據的正式可見性變更。此輪不能視為黑影像修正。
+
+## 第 11 輪：相機實際繪製的診斷（進行中）
+
+修改：Development probe 版本 5 記錄 SRP endCameraRendering 次數、所屬 Runner 的 Renderer 啟用數與少量內容樣本。一般 capture-cctv 只讀取現有 sender 貼圖；明確的 diagnose-cctv 另將一個原始 CCTV 相機手動渲染到獨立暫存貼圖後還原。
+
+代做決定：診斷只在嚴格影片已失敗後執行，原始失敗判定不變；手動來源圖不代表自然持續串流成功，不放進 ready 判斷，也不把手動 Render 加入正式 LateUpdate。
+
+修正前輪推論：BuildFusionValidation 明確使用 Single Peer，沒有執行 SetVisible(false) 的 Multi-Peer 分支。因此撤回第 10 輪 ServerConnectionManager 的修改，避免保留尚無有效負向重現的正式程式變更；可見性欄位與模式對照仍保留供驗收診斷。
+
+初次診斷：Player 中 4266 個所屬 Renderer、4025 個在階層與元件層級均啟用；明確手動渲染原始來源能取得正常農場圖，已目視確認。證據在 `.tmp/FusionStandalone-20261116-064138/cctv-manual-source.png`。這排除了場景內容完全缺失的推論，仍不代表持續串流通過。
+
+診斷改善：捕捉檔名加入 frame，避免瀏覽器斷線後的樣本覆蓋最初 sender 狀態；同時記錄實際 pipeline／graphics device／peer mode，支援 SRP 與內建 pipeline 的完成回呼，不以單一回呼為零就推定完全未繪製。之後仍需主要 Editor／替換地圖回歸。
+
+後續證據：`.tmp/FusionStandalone-20261116-064515/cctv-1067-diagnostics.txt` 顯示 URP、D3D11、非 batch、Single Peer；兩個實際 sender 相機均 active／enabled、有 RenderTexture，但自然繪製完成數為 0。原始貼圖仍黑，手動來源正常。這把缺口收斂到 Player 的自然相機繪製鏈路，尚不能宣告是單一 Windows 視窗原因；未為繞過失敗而在正式程式加手動每幀 Render。
+
+圖形 batch 的同版診斷也得到兩個 sender 自然繪製完成數 0，證據在 `.tmp/FusionStandalone-20261116-064649`。來源唯讀 audit 確認兩個實際 streamCamera 都指定 targetDisplay=1（第二個顯示器）、CameraType.Game、URP Base；動態輸出透過 CopyFrom 繼承設定。下一步候選是只對串流輸出取消副顯示器綁定，再用相同嚴格案例驗證，不修改原始相機。
+
+額度保存點：最後一批第 11 輪 commit／targetDisplay 候選修正／重建曾因自動核准審查的使用額度錯誤而完全未執行。重新唯讀核對後，最後 commit 仍是 81e547b5，九個檔案留有本輪修改。候選正式修正尚未套用；主要 Editor／換圖最終回歸尚待執行。

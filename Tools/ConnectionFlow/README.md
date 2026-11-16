@@ -45,6 +45,8 @@ npm --prefix WebApp run build
 
 同樣的瀏覽器準備完成後，可執行 `& ./Tools/ConnectionFlow/Test-Fusion.ps1 -Suite Cctv`。它選取 Editor 的伺服器世界供實際相機渲染，並交替由兩個桌面 Client 收集。Editor 的報告為 `Docs/Fusion_CCTV_Editor_*_Report.json`，獨立 Player 的影片報告為 `Docs/Fusion_CCTV_Browser_Report.json`；兩種環境分別判定，不能相互替代。
 
+獨立腳本另支援 `-BatchGraphics` 做圖形 batch 對照，仍須通過相同影片內容檢查。`-DiagnoseCctv` 只在影片失敗後額外記錄相機實際繪製次數、Renderer 狀態與一張手動來源圖；這張診斷圖不會讓影片驗收通過。兩者都不改寫正式場景或相機資產。
+
 MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前次中斷的地圖測試。手動復原可在 Edit Mode 執行 `MapSwapAcceptance.Restore`。準備及復原的詳細日誌也放在 `.tmp/FusionAcceptance/`。
 
 ## 手動與實體頭盔驗收
