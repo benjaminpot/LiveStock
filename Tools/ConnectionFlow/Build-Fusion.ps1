@@ -28,18 +28,20 @@ try {
     if (!$compile.success -or $compile.data.failed) { throw ($compile | ConvertTo-Json -Depth 8) }
     Wait-Idle
     # Roslyn's temporary Pipeline assemblies can fail GetName() in SDK build callbacks on this Mono runtime.
-    # Check unsaved scenes, then unload those assemblies before invoking the compiled build menu.
-    $code = 'if (UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode) throw new System.InvalidOperationException("Stop Play Mode before building."); for (int i=0;i<UnityEngine.SceneManagement.SceneManager.sceneCount;i++) if (UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty) throw new System.InvalidOperationException("Save modified scenes before building."); UnityEditor.EditorApplication.delayCall += () => UnityEditor.EditorUtility.RequestScriptReload(); return true;'
-    $reload = & unity command eval --caller plugin --skill unity-cli --timeout 30 --format json -- --code $code --timeout 15000 | ConvertFrom-Json
-    if (!$reload.success -or $reload.data.result.success -ne $true) { throw ($reload | ConvertTo-Json -Depth 8) }
-    Start-Sleep -Seconds 3
-    $ready = & unity status --until-ready --format json | ConvertFrom-Json
-    if (!$ready.success) { throw ($ready | ConvertTo-Json -Depth 8) }
-    # The listener may reconnect before the compiler and delayed domain reload have settled.
+    # A compiled menu validates unsaved scenes and requests reload without creating another eval assembly.
+    $requested = [DateTime]::UtcNow
+    $reload = & unity command menu --caller plugin --skill unity-cli --timeout 30 --format json -- --path 'LiveStock/Connection Test/Prepare Fusion Validation Build' | ConvertFrom-Json
+    if (!$reload.success -or $reload.data.result.success -eq $false) { throw ($reload | ConvertTo-Json -Depth 8) }
+    $marker = Join-Path $projectRoot '.tmp/FusionAcceptance/BuildDomainReload.txt'
+    $deadline = [DateTime]::UtcNow.AddMinutes(2)
+    while (!(Test-Path -LiteralPath $marker) -or (Get-Item -LiteralPath $marker).LastWriteTimeUtc -lt $requested) {
+        if ([DateTime]::UtcNow -gt $deadline) { throw 'No completion marker from the requested build domain reload.' }
+        Start-Sleep -Milliseconds 500
+    }
     Wait-Idle
     $started = [DateTime]::UtcNow
     $response = & unity command menu --caller plugin --skill unity-cli --timeout 1900 --format json -- --path 'LiveStock/Connection Test/Build Fusion Validation Player' | ConvertFrom-Json
-    if (!$response.success) { throw ($response | ConvertTo-Json -Depth 8) }
+    if (!$response.success -or $response.data.result.success -eq $false) { throw ($response | ConvertTo-Json -Depth 8) }
     $report = Get-Item -LiteralPath 'Docs/Fusion_Sync_Build_Report.json'
     $result = Get-Content -LiteralPath $report.FullName -Raw | ConvertFrom-Json
     if ($report.LastWriteTimeUtc -lt $started -or $result.result -ne 'Succeeded') {
