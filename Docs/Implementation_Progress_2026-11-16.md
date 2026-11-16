@@ -76,6 +76,7 @@
 - `603a26b9`：已編譯的建置準備選單與真正重載完成標記，Windows 建置通過。
 - `3490242d`：第 12 輪證據發布／存續相機診斷與 13 項 Editor CCTV 對照；Player 重建仍待完成。
 - `f85a76d8`：第 13 輪完整回歸、probe 7 建置與 22 項獨立功能通過；保留影片與 HMD 缺口。
+- `bdfa8eeb`：第 14 輪隔離 BitBlt 對照仍未恢復自然渲染，原有通過報告保留。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -253,3 +254,9 @@ Editor 回歸：Cctv 13 項、Editor 五組、Fruit 33 項、Assets 與 MapSwap 
 代做決定：沒有足夠證據把正式 swapchain 設定改成 BitBlt，保留原設定；也不加入每幀手動繪製來繞過原失敗案例。下一個必要對照仍是可視圖形 Player 的自然繪製，再接實體 HMD／手把操作。這些外部互動／設備門檻在這幾輪仍未取得驗收條件；單靠隱藏程序與合成姿態不能完成它們，目標不標記為完成。
 
 清理：本次 Player 與 port 80 測試服務已結束。後續只保存上述失敗證據與本輪決策；沒有變更正式遊戲程式或已通過的驗收判準。
+
+### 互動驗收的外部阻礙
+
+額外唯讀檢查先發現同一工作階段有 LogonUI，再以 WTSQuerySessionInformationW／WTSSessionInfoEx 查詢。`Fusion_Interactive_Session_Report.json` 記錄 2026-11-16T03:35:36Z、Windows 10.0.26200、Session 1、SessionFlags=0。[Microsoft 的 WTSINFOEX_LEVEL1 定義](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/ns-wtsapi32-wtsinfoex_level1_w) 在目前 Windows 版本將 0 定義為鎖定；查詢只讀三個狀態欄位，未讀取使用者名稱或操作登入介面。
+
+鎖定狀態本身不證明 Unity 黑影像的根因。下一個必要對照是外部解鎖後，在可視圖形 Player 用同一份建置觀察自然繪製與雙瀏覽器影片；實體 HMD／手把門檻也仍需要真實物理操作。這兩類互動條件在連續多輪都尚未具備，不能靠重複隱藏程序、合成姿態或猜測性程式修改完成。保存目前結果後，目標保留未完成並等待外部條件改變。
