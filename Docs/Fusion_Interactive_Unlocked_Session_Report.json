@@ -1,0 +1,10 @@
+{
+  "observedAtUtc": "2026-11-16T04:17:59.6446068Z",
+  "osVersion": "Microsoft Windows NT 10.0.26200.0",
+  "sessionId": 1,
+  "connectionState": 0,
+  "sessionFlags": 1,
+  "locked": false,
+  "source": "WTSQuerySessionInformationW / WTSSessionInfoEx",
+  "scope": "Read-only resumed session state; lock state alone does not prove rendering causality."
+}

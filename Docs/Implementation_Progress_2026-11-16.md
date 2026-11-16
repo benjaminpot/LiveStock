@@ -2,6 +2,8 @@
 
 基準：`1c1ff4b6`，分支 `single-to-multi`。使用者授權依規劃持續實作、驗證並分階段 commit，無須等待確認。
 
+最新狀態（第 15 輪）：可視 Server＋兩個獨立 Client／兩個瀏覽器的 24 項整合檢查已通過，含正常影片、逐顆進度、重連與清理；隱藏 Player 模式仍不出圖。實體 HMD／手把尚未驗收。使用者已要求本階段後總結並確認保留範圍，後續新實作與整理等待其選擇。
+
 ## 原則與待驗收邊界
 
 - 保留既有 VR rig、Locomotor、UI 階層、Fusion 連線與兩階段開始流程。
@@ -260,3 +262,21 @@ Editor 回歸：Cctv 13 項、Editor 五組、Fruit 33 項、Assets 與 MapSwap 
 額外唯讀檢查先發現同一工作階段有 LogonUI，再以 WTSQuerySessionInformationW／WTSSessionInfoEx 查詢。`Fusion_Interactive_Session_Report.json` 記錄 2026-11-16T03:35:36Z、Windows 10.0.26200、Session 1、SessionFlags=0。[Microsoft 的 WTSINFOEX_LEVEL1 定義](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/ns-wtsapi32-wtsinfoex_level1_w) 在目前 Windows 版本將 0 定義為鎖定；查詢只讀三個狀態欄位，未讀取使用者名稱或操作登入介面。
 
 鎖定狀態本身不證明 Unity 黑影像的根因。下一個必要對照是外部解鎖後，在可視圖形 Player 用同一份建置觀察自然繪製與雙瀏覽器影片；實體 HMD／手把門檻也仍需要真實物理操作。這兩類互動條件在連續多輪都尚未具備，不能靠重複隱藏程序、合成姿態或猜測性程式修改完成。保存目前結果後，目標保留未完成並等待外部條件改變。
+
+## 第 15 輪：解鎖與可視 Player 對照、桌面整合通過
+
+外部條件更新：恢復目標後重新查詢 WTS，SessionFlags=1、locked=false，保存在 `Fusion_Interactive_Unlocked_Session_Report.json`。同一份 probe 7 Player、原有隱藏啟動參數仍失敗，`.tmp/FusionStandalone-20261116-121839` 的 5 個相機總自然繪製回呼仍為 0。因此不能把鎖定視為唯一條件，也未據此修改 XR 或正式渲染。
+
+修改：TestFusionStandalone 新增明確的 `-InteractiveServer` 對照模式，只顯示原 Server 控制視窗，其餘背景角色仍隱藏；要求非 batch 圖形模式。普通瀏覽器整合改寫 `Fusion_Map_Standalone_Browser_Report.json`，互動模式使用 `Fusion_Map_Interactive_Standalone_Report.json` 與 `Fusion_CCTV_Interactive_Browser_Report.json`。純功能的 `Fusion_Map_Standalone_Report.json` 保留原本 22 項結果，不再被影片前置檢查或失敗覆蓋。
+
+第一輪可視對照：`.tmp/FusionStandalone-20261116-122659` 已出現自然繪製回呼，兩個 sender 各觀察到 59 次，總完成數 1653。兩個瀏覽器的非黑影像與 0/3 → 1/3 → 2/3 → 完成均通過。重連快照其實已有完成狀態、CCTV 02、正常解碼與非黑像素，但測試仍等待相機按鈕 aria-disabled=false 而逾時。
+
+測試誤判修正：既有 cctv-panel.js 明確將已選相機標為 aria-pressed=true 並 aria-disabled=true。連線助手現在接受「已選中所需相機」或「可以切換」兩種準備狀態；已選中時不重複按同一按鈕。影片內容、解碼前進、逐顆進度、重連後快照等判準保持不變，沒有修改正式前端邏輯。
+
+最終結果：`.tmp/FusionStandalone-20261116-123247` 的 24 項全部通過，瀏覽器報告 ready／completed／reconnected／pass 均為 true，errors 為空；包含每端 30 隻 NPC／30 秒持續、輸入停用與恢復、RPC 去重及關服清理。已目視確認 browser-reconnected.png 有正常農場影像與完成文字。這是可視 Server、Desktop／VR 預覽及兩個隔離瀏覽器的桌面整合驗收，仍不代替實體 VR 操作。
+
+建置設定核對：目前 active target 為 StandaloneWindows64、subtarget 為 Player，並非意外沿用 Dedicated Server。沒有為該猜測更動建置子目標；也沒有保留先前無效的 SetVisible／targetDisplay／BitBlt 正式候選。
+
+代做決定：保留原遊戲渲染架構，將可視圖形運作方式與隱藏模式結果分開記錄；日常功能、影片整合與互動對照報告分流。此輪正式遊戲程式未變更，變更集中在驗收啟動模式、報告範圍與重連等待條件。
+
+依使用者新指示，本階段到此收尾；下一步先確認三類保留範圍：正式功能／修正、可重跑驗收與診斷工具、實驗報告與本次測試暫存。原始場景備份另行保護。實體 HMD／手把與後續新實作不在本階段繼續展開。

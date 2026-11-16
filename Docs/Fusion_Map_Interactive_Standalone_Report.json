@@ -1,0 +1,447 @@
+[
+  {
+    "test": "All processes expose the current acceptance probe",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Three independent Players start with zero Lobby NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Desktop joins the independent Server",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both roles replicate across three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Client-selected roots reach the other Client",
+    "pass": true,
+    "evidence": 0.00039064884185791016
+  },
+  {
+    "test": "All three VR targets reach Server and Desktop",
+    "pass": true,
+    "evidence": 0.0
+  },
+  {
+    "test": "Loaded map waits with zero NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "All processes receive the authored map NPC count",
+    "pass": true,
+    "evidence": 30
+  },
+  {
+    "test": "Standalone Server keeps its world visible for CCTV rendering",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Two browsers decode advancing video and receive 0/3",
+    "pass": true,
+    "evidence": {
+      "pass": false,
+      "host": "StandaloneInteractiveServer",
+      "ready": true,
+      "completed": false,
+      "reconnected": false,
+      "errors": [],
+      "samples": [
+        {
+          "stage": "initial",
+          "browsers": [
+            {
+              "mission": "羊方已收集 0/3 顆蘋果",
+              "camera": "CCTV 01",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 24,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果"
+              ],
+              "pixelRange": 206.66666666666666,
+              "nonBlackPixels": 576
+            },
+            {
+              "mission": "羊方已收集 0/3 顆蘋果",
+              "camera": "CCTV 02",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 36,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果"
+              ],
+              "pixelRange": 193.66666666666666,
+              "nonBlackPixels": 576
+            }
+          ]
+        }
+      ],
+      "browserVersion": "157.0.8103.52",
+      "latest": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 1,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 236.66666666666666,
+          "nonBlackPixels": 576
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 2,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 195,
+          "nonBlackPixels": 576
+        }
+      ],
+      "firstDecoded": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 1,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 236.66666666666666,
+          "nonBlackPixels": 576
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 2,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 195,
+          "nonBlackPixels": 576
+        }
+      ]
+    }
+  },
+  {
+    "test": "Disabled input source cannot collect with its old cached pose",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Input source resumes without reconnecting",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 1 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 2 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Apple 3 collection reaches all three processes",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Duplicate RPC does not increase progress",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both clients show completion from shared state",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Both browsers complete and reconnect with current state",
+    "pass": true,
+    "evidence": {
+      "pass": true,
+      "host": "StandaloneInteractiveServer",
+      "ready": true,
+      "completed": true,
+      "reconnected": true,
+      "errors": [],
+      "samples": [
+        {
+          "stage": "initial",
+          "browsers": [
+            {
+              "mission": "羊方已收集 0/3 顆蘋果",
+              "camera": "CCTV 01",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 24,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果"
+              ],
+              "pixelRange": 206.66666666666666,
+              "nonBlackPixels": 576
+            },
+            {
+              "mission": "羊方已收集 0/3 顆蘋果",
+              "camera": "CCTV 02",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 36,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果"
+              ],
+              "pixelRange": 193.66666666666666,
+              "nonBlackPixels": 576
+            }
+          ]
+        },
+        {
+          "stage": "completed",
+          "browsers": [
+            {
+              "mission": "蘋果已收集完成！",
+              "camera": "CCTV 01",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 544,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果",
+                "羊方已收集 1/3 顆蘋果",
+                "羊方已收集 2/3 顆蘋果",
+                "蘋果已收集完成！"
+              ],
+              "pixelRange": 213.33333333333334,
+              "nonBlackPixels": 576
+            },
+            {
+              "mission": "蘋果已收集完成！",
+              "camera": "CCTV 02",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 556,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果",
+                "羊方已收集 1/3 顆蘋果",
+                "羊方已收集 2/3 顆蘋果",
+                "蘋果已收集完成！"
+              ],
+              "pixelRange": 190.66666666666669,
+              "nonBlackPixels": 576
+            }
+          ]
+        },
+        {
+          "stage": "reconnected",
+          "browsers": [
+            {
+              "mission": "蘋果已收集完成！",
+              "camera": "CCTV 01",
+              "blackout": true,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 585,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "羊方已收集 0/3 顆蘋果",
+                "羊方已收集 1/3 顆蘋果",
+                "羊方已收集 2/3 顆蘋果",
+                "蘋果已收集完成！"
+              ],
+              "pixelRange": 0,
+              "nonBlackPixels": 0
+            },
+            {
+              "mission": "蘋果已收集完成！",
+              "camera": "CCTV 02",
+              "blackout": false,
+              "connection": "CONNECTED",
+              "width": 1920,
+              "frames": 2,
+              "droppedFrames": 0,
+              "missionHistory": [
+                "等待任務資料",
+                "蘋果已收集完成！"
+              ],
+              "pixelRange": 207.66666666666666,
+              "nonBlackPixels": 576
+            }
+          ]
+        }
+      ],
+      "browserVersion": "157.0.8103.52",
+      "latest": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 1,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 236.66666666666666,
+          "nonBlackPixels": 576
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 2,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 195,
+          "nonBlackPixels": 576
+        }
+      ],
+      "firstDecoded": [
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 01",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 1,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 236.66666666666666,
+          "nonBlackPixels": 576
+        },
+        {
+          "mission": "羊方已收集 0/3 顆蘋果",
+          "camera": "CCTV 02",
+          "blackout": false,
+          "connection": "CONNECTED",
+          "width": 1920,
+          "frames": 2,
+          "droppedFrames": 0,
+          "missionHistory": [
+            "等待任務資料",
+            "羊方已收集 0/3 顆蘋果"
+          ],
+          "pixelRange": 195,
+          "nonBlackPixels": 576
+        }
+      ]
+    }
+  },
+  {
+    "test": "Independent processes remain connected with stable NPC count",
+    "pass": true,
+    "evidence": {
+      "scope": "Three Development Players on one Windows computer. Graphics enabled = True, batch graphics = False, interactive Server = True. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.",
+      "seconds": 30.3596293,
+      "peers": [
+        {
+          "role": "server",
+          "npcs": 30,
+          "frame": 3780,
+          "averageFrameIntervalMs": 18.897781372070312,
+          "allocatedBytes": 205640475
+        },
+        {
+          "role": "desktop",
+          "npcs": 30,
+          "frame": 4012,
+          "averageFrameIntervalMs": 17.68688201904297,
+          "allocatedBytes": 180617450
+        },
+        {
+          "role": "vr-preview",
+          "npcs": 30,
+          "frame": 4023,
+          "averageFrameIntervalMs": 17.738187789916992,
+          "allocatedBytes": 187013284
+        }
+      ],
+      "observedServerTicksPerSecond": 63.27296648771868,
+      "minimumNPCs": 30
+    }
+  },
+  {
+    "test": "Server continues accepting inputs during NPC simulation",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Stopping Server disconnects both Clients and removes NPCs",
+    "pass": true,
+    "evidence": null
+  },
+  {
+    "test": "Player logs contain no detected runtime exceptions or render-pass errors",
+    "pass": true,
+    "evidence": []
+  }
+]

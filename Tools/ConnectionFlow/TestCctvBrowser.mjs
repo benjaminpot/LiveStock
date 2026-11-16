@@ -8,7 +8,8 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const output = path.resolve(process.argv[2] ?? '.tmp/FusionBrowser/browser-evidence.json');
 const host = process.argv[3] ?? 'StandaloneHidden';
-const reportName = host === 'EditorMultiPeer' ? 'Fusion_CCTV_Editor_Browser_Report.json' : 'Fusion_CCTV_Browser_Report.json';
+const reportName = host === 'EditorMultiPeer' ? 'Fusion_CCTV_Editor_Browser_Report.json'
+  : host === 'StandaloneInteractiveServer' ? 'Fusion_CCTV_Interactive_Browser_Report.json' : 'Fusion_CCTV_Browser_Report.json';
 mkdirSync(path.dirname(output), { recursive: true });
 const log = createWriteStream(path.join(path.dirname(output), 'signaling.log'));
 const server = spawn(process.execPath, ['build/index.js', '-p', '80', '-l', 'none'], {
@@ -85,8 +86,13 @@ async function connect(page, cameraIndex = 0) {
   await page.goto('http://127.0.0.1/receiver/live.html');
   await page.locator('#playButton').click();
   if (cameraIndex === 1) {
-    await page.waitForFunction(() => document.querySelectorAll('.cctv-monitor button')[1]?.getAttribute('aria-disabled') === 'false', null, { timeout: 30000 });
-    await page.locator('.cctv-monitor button').nth(1).click();
+    // A reconnect can restore this view; its selected button is intentionally aria-disabled.
+    await page.waitForFunction(() => {
+      const button = document.querySelectorAll('.cctv-monitor button')[1];
+      return button?.getAttribute('aria-pressed') === 'true' || button?.getAttribute('aria-disabled') === 'false';
+    }, null, { timeout: 30000 });
+    const button = page.locator('.cctv-monitor button').nth(1);
+    if (await button.getAttribute('aria-pressed') !== 'true') await button.click();
     await page.evaluate(() => window.scrollTo(0, 0));
   }
 }

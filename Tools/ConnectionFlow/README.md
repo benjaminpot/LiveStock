@@ -47,6 +47,8 @@ npm --prefix WebApp run build
 
 獨立腳本另支援 `-BatchGraphics` 做圖形 batch 對照，仍須通過相同影片內容檢查。`-DiagnoseCctv` 只在影片失敗後額外記錄相機實際繪製次數、Renderer 狀態與一張手動來源圖；這張診斷圖不會讓影片驗收通過。兩者都不改寫正式場景或相機資產。
 
+解鎖桌面後的互動圖形對照使用 `-UseGraphics -WithBrowser -InteractiveServer`：只顯示原 Server 控制視窗，其餘背景測試角色仍隱藏。它要求非 batch 圖形模式，使用 `Fusion_Map_Interactive_Standalone_Report.json` 與 `Fusion_CCTV_Interactive_Browser_Report.json`。一般帶瀏覽器的整合結果使用 `Fusion_Map_Standalone_Browser_Report.json`，不覆蓋純功能的 `Fusion_Map_Standalone_Report.json`；影片判準保持相同。
+
 MapSwap 開始前若已有 `.tmp/MapSwapSettings.json`，會要求先處理前次中斷的地圖測試。手動復原可在 Edit Mode 執行 `MapSwapAcceptance.Restore`。準備及復原的詳細日誌也放在 `.tmp/FusionAcceptance/`。
 
 ## 手動與實體頭盔驗收

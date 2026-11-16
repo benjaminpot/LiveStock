@@ -1,9 +1,10 @@
-param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser, [switch]$BatchGraphics, [switch]$DiagnoseCctv)
+param([int]$SampleSeconds = 30, [switch]$UseGraphics, [switch]$WithBrowser, [switch]$BatchGraphics, [switch]$DiagnoseCctv, [switch]$InteractiveServer)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $executable = Join-Path $projectRoot 'Builds/FusionValidation/LiveStockFusion.exe'
 $runRoot = Join-Path $projectRoot ('.tmp/FusionStandalone-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
-$reportPath = Join-Path $projectRoot 'Docs/Fusion_Map_Standalone_Report.json'
+$reportName = if ($InteractiveServer) { 'Fusion_Map_Interactive_Standalone_Report.json' } elseif ($WithBrowser) { 'Fusion_Map_Standalone_Browser_Report.json' } else { 'Fusion_Map_Standalone_Report.json' }
+$reportPath = Join-Path $projectRoot ('Docs/'+$reportName)
 New-Item -ItemType Directory -Path $runRoot -Force | Out-Null
 $processes = @{}
 $checks = [Collections.Generic.List[object]]::new()
@@ -50,9 +51,10 @@ function Distance($A, $B) {
 
 try {
     '[]' | Set-Content -LiteralPath $reportPath
+    if ($InteractiveServer -and (!$UseGraphics -or $BatchGraphics)) { throw 'Interactive Server validation requires non-batch graphics.' }
     if ($WithBrowser) {
         if (!$UseGraphics) { throw 'Browser video acceptance requires -UseGraphics.' }
-        $browserHost = if ($BatchGraphics) { 'StandaloneBatchGraphics' } else { 'StandaloneHidden' }
+        $browserHost = if ($InteractiveServer) { 'StandaloneInteractiveServer' } elseif ($BatchGraphics) { 'StandaloneBatchGraphics' } else { 'StandaloneHidden' }
         $browserProcess = Start-Process -FilePath 'node' -ArgumentList @(
             ('"'+(Join-Path $PSScriptRoot 'TestCctvBrowser.mjs')+'"'), ('"'+$browserEvidence+'"'), $browserHost
         ) -WindowStyle Hidden -PassThru
@@ -63,7 +65,9 @@ try {
         $modeArguments = if ($UseGraphics -and !$BatchGraphics) { @('-screen-fullscreen','0','-screen-width','640','-screen-height','360') } else { @('-batchmode') }
         $arguments = @($modeArguments) + @($graphicsOption,('-flow-'+$role),'-logFile',
             (Join-Path $runRoot ($role+'.log')),'-fusion-probe-output',(Join-Path $runRoot ($role+'.json')))
-        $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
+        # The authored server control window is visible only for this explicit interactive graphics comparison.
+        $windowStyle = if ($InteractiveServer -and $role -eq 'server') { 'Normal' } else { 'Hidden' }
+        $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle $windowStyle -PassThru
     }
     Wait-For { (Read-Peer 'server').connected -and (Read-Peer 'desktop') -and (Read-Peer 'vr-preview') } 'process startup'
     Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 7}).Count -eq 0)
@@ -169,7 +173,7 @@ try {
     Check 'Independent processes remain connected with stable NPC count' ($minimumNPCs -eq $npcCount) @{
         seconds=$timer.Elapsed.TotalSeconds; minimumNPCs=$minimumNPCs
         observedServerTicksPerSecond=($end.tick-$start.tick)/$timer.Elapsed.TotalSeconds
-        peers=$measurements; scope=('Three Development Players on one Windows computer. Graphics enabled = '+[bool]$UseGraphics+', batch graphics = '+[bool]$BatchGraphics+'. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.')
+        peers=$measurements; scope=('Three Development Players on one Windows computer. Graphics enabled = '+[bool]$UseGraphics+', batch graphics = '+[bool]$BatchGraphics+', interactive Server = '+[bool]$InteractiveServer+'. Frame intervals include the 60 FPS cap and startup. GPU and HMD frame time are unmeasured.')
     }
     Check 'Server continues accepting inputs during NPC simulation' ($end.acceptedInputs -gt $start.acceptedInputs)
     Send-Command 'server' 'stop'
