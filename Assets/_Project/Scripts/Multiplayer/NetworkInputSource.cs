@@ -6,6 +6,8 @@ using UnityEngine;
 public struct PlayerNetworkInput : INetworkInput
 {
     public NetworkBool IsVR, HasPose;
+    /// <summary>Device tracking validity is independent of whether Transform poses can be replicated.</summary>
+    public NetworkBool TrackingValid;
     public int Stage;
     public VRTrackedPose Pose;
     public PlayerBodyPose Body;
@@ -55,10 +57,11 @@ public sealed class NetworkInputSource : MonoBehaviour
             };
             cached.HasPose = true;
         }
-        else if (!owner.IsDesktop && vr != null && vr.isActiveAndEnabled && vr.IsConfigured && vr.TrackingAvailable)
+        else if (!owner.IsDesktop && vr != null && vr.isActiveAndEnabled && vr.IsConfigured)
         {
             cached.Pose = vr.ReadPose();
-            cached.HasPose = true;
+            cached.HasPose = cached.Pose.IsFinite;
+            cached.TrackingValid = vr.TrackingAvailable;
         }
     }
 }

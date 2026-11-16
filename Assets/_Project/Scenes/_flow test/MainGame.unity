@@ -77606,6 +77606,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: '[BuildingBlock] Camera Rig Variant'
       objectReference: {fileID: 0}
+    - target: {fileID: 5435867961655764188, guid: 064c5184b7436ab47bdaf39a46be8f76, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

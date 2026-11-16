@@ -172,10 +172,11 @@ public sealed class NetworkWorld : NetworkBehaviour
             InvalidateInput(entry);
             return;
         }
-        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(true);
+        bool trackingValid = !entry.IsVR || input.TrackingValid;
+        if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetTrackingValid(trackingValid);
         // Tolerate brief packet loss, but never keep an interactive body indefinitely without input.
         entry.InputExpiry = TickTimer.CreateFromSeconds(Runner, .5f);
-        entry.Body = input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
+        entry.Body = trackingValid && input.Body.IsValid && Vector3.Distance(input.Body.Center, input.Pose.RootPosition) < 4f
             ? input.Body : default;
         if (entry.IsVR) entry.Avatar.GetComponent<VRNetworkAvatar>().SetPose(input.Pose);
         else entry.Avatar.transform.SetPositionAndRotation(input.Pose.RootPosition, input.Pose.RootRotation.normalized);

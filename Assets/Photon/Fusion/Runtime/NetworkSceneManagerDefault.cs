@@ -64,6 +64,12 @@ namespace Fusion {
     public Scene MultiPeerScene { get; private set; }
 
     /// <summary>
+    /// Uses the default 3D physics scene for a single local VR peer whose SDK queries UnityEngine.Physics.
+    /// Set before Initialize; other peers retain their isolated physics scenes.
+    /// </summary>
+    public bool UseDefaultPhysicsScene { get; set; }
+
+    /// <summary>
     /// Root for DontDestroyOnLoad objects. Instantiated on <see cref="MultiPeerScene"/>.
     /// </summary>
     public Transform MultiPeerDontDestroyOnLoadRoot { get; private set; }
@@ -91,7 +97,7 @@ namespace Fusion {
     #region INetworkSceneManager
 
     /// <summary>
-    /// Assigns the runner and, in multiple peer mode, creates a new meta-scene to isolate physics.
+    /// Assigns the runner and, in multiple peer mode, creates its meta-scene with the configured physics isolation.
     /// </summary>
     /// <param name="runner"></param>
     public virtual void Initialize(NetworkRunner runner) {
@@ -114,11 +120,10 @@ namespace Fusion {
         }
       }
       
-      // assign an empty scene with a separate physics stage immediately, so that they won't spawn anything on the currently active scene
-      // and lose track of it
+      // Assign an empty scene immediately so peers do not spawn into the currently active scene.
       if (IsMultiplePeer) {
         var scene = SceneManager.CreateScene($"{runner.name}_{runner.LocalPlayer}",
-          new CreateSceneParameters(LocalPhysicsMode.Physics2D | LocalPhysicsMode.Physics3D));
+          new CreateSceneParameters(LocalPhysicsMode.Physics2D | (UseDefaultPhysicsScene ? LocalPhysicsMode.None : LocalPhysicsMode.Physics3D)));
         Log.TraceSceneManager(Runner, $"Assigned an initial scene: {scene.Dump()}");
 
         MultiPeerScene                 = scene;

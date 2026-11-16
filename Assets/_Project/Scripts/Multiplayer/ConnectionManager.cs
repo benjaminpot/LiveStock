@@ -170,6 +170,9 @@ public class ConnectionManager : MonoBehaviour
         foreach (var root in menuWorldRoots) if (root != null) root.SetActive(selected && shownStage == 0);
         if (desktopPlayer != null)
             foreach (var visual in desktopPlayer.GetComponentsInChildren<Renderer>(true)) visual.enabled = selected;
+        // Keep the local rig tracking while preventing its model from appearing in another peer's camera.
+        if (localVRRig != null)
+            foreach (var visual in localVRRig.GetComponentsInChildren<Renderer>(true)) visual.forceRenderingOff = !selected;
         // Preserve each camera's SDK/authored state. Enabling every eye and fallback camera breaks VR rendering.
         if (!selected)
         {

@@ -18,6 +18,8 @@ public sealed class NetworkSessionController : MonoBehaviour
     /// <summary>Attaches this Client's local input cache before starting its Runner.</summary>
     public void BindClient(ConnectionManager client)
     {
+        // Meta locomotion uses static Physics queries, so only the local VR peer shares the default 3D scene.
+        GetComponent<NetworkSceneManagerDefault>().UseDefaultPhysicsScene = !client.IsDesktop;
         inputSource = gameObject.AddComponent<NetworkInputSource>();
         inputSource.Initialize(client);
     }
