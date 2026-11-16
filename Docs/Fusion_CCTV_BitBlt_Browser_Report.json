@@ -1,0 +1,76 @@
+{
+  "pass": false,
+  "host": "StandaloneBitBlt",
+  "ready": false,
+  "completed": false,
+  "reconnected": false,
+  "errors": [
+    "Error: Both browsers decode black video while cameras are not overheated.\n    at file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/.tmp/FusionSwapchain/TestCctvBrowser.mjs:133:13\n    at async waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/.tmp/FusionSwapchain/TestCctvBrowser.mjs:43:11)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/.tmp/FusionSwapchain/TestCctvBrowser.mjs:124:3"
+  ],
+  "samples": [],
+  "browserVersion": "157.0.8103.52",
+  "latest": [
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "camera": "CCTV 01",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 150,
+      "droppedFrames": 2,
+      "missionHistory": [
+        "等待任務資料",
+        "羊方已收集 0/3 顆蘋果"
+      ],
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    },
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "camera": "CCTV 02",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 150,
+      "droppedFrames": 2,
+      "missionHistory": [
+        "等待任務資料",
+        "羊方已收集 0/3 顆蘋果"
+      ],
+      "pixelRange": 0,
+      "nonBlackPixels": 0
+    }
+  ],
+  "firstDecoded": [
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "camera": "CCTV 01",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 13,
+      "droppedFrames": 2,
+      "missionHistory": [
+        "等待任務資料",
+        "羊方已收集 0/3 顆蘋果"
+      ],
+      "pixelRange": 1,
+      "nonBlackPixels": 0
+    },
+    {
+      "mission": "羊方已收集 0/3 顆蘋果",
+      "camera": "CCTV 02",
+      "blackout": false,
+      "connection": "CONNECTED",
+      "width": 1920,
+      "frames": 14,
+      "droppedFrames": 2,
+      "missionHistory": [
+        "等待任務資料",
+        "羊方已收集 0/3 顆蘋果"
+      ],
+      "pixelRange": 1,
+      "nonBlackPixels": 0
+    }
+  ]
+}

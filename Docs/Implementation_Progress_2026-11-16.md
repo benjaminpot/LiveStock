@@ -75,6 +75,7 @@
 - `63e9d623`：第 11 輪實際相機繪製診斷，撤回無重現依據的可見性變更；測試未完成。
 - `603a26b9`：已編譯的建置準備選單與真正重載完成標記，Windows 建置通過。
 - `3490242d`：第 12 輪證據發布／存續相機診斷與 13 項 Editor CCTV 對照；Player 重建仍待完成。
+- `f85a76d8`：第 13 輪完整回歸、probe 7 建置與 22 項獨立功能通過；保留影片與 HMD 缺口。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -235,3 +236,20 @@ Editor 回歸：Cctv 13 項、Editor 五組、Fruit 33 項、Assets 與 MapSwap 
 3. 以裝置實際刷新率量測 CPU／GPU frame time；目前共享 Editor 與無自然繪製的隱藏程序數字都不替代這個門檻。
 
 收尾檢查：Editor stopped／非 compiling、無本輪 LiveStockFusion 程序、port 80 無本輪服務，建置快取與測試設定已還原。整體 E2E 尚未完成，不將剩餘兩個門檻標成通過。
+
+## 第 14 輪：全域渲染設定與 BitBlt 對照
+
+排查：工作樹從 f85a76d8 的乾淨狀態開始。專案與本機套件未找到對 `OnDemandRendering.renderFrameInterval` 的指派；本機 OVRManager.OnApplicationFocus 只有日誌。這不證明原生 XR／視窗層完全無關，因此沒有據此修改 XR 或遊戲程式。
+
+實驗：ProjectSettings 的 useFlipModelSwapchain=1。依 [Unity 6000.3 Player 參數文件](https://docs.unity.com/en-us/engine/6000.3/manual/unity-editor/command-line-arguments/player)，在同一份 probe 7 Player 的非 batch D3D11 啟動中額外指定 `-force-d3d11-bitblt-model`。把 f85a76d8 的 TestFusionStandalone.ps1／TestCctvBrowser.mjs 複製到 `.tmp/FusionSwapchain/`，保留兩層目錄的相對路徑；只增加該旗標、將 host 改為 StandaloneBitBlt，並使用獨立的 BitBlt 報告檔名。使用 `-UseGraphics -WithBrowser -SampleSeconds 30`，仍以 Hidden 啟動，不修改 PlayerSettings 或來源相機。
+
+結果：仍失敗。`.tmp/FusionStandalone-20261116-112521` 記錄 URP／D3D11／Single Peer，allCameras=5、自然完成回呼總數 0、4266 個所屬 Renderer 中 4025 個啟用；兩個瀏覽器未過熱卻持續解碼黑影像。原本的 22 項獨立功能與 13 項 Editor CCTV 通過報告均保留，沒有用此對照覆蓋。
+
+新增證據：`Fusion_CCTV_BitBlt_Browser_Report.json` 與 `Fusion_Map_BitBlt_Standalone_Report.json`，兩者均記錄本次未通過；後者是影片前的功能檢查加上失敗，不是新的完整 RPC 通過報告。實驗副本 SHA256：
+
+- TestFusionStandalone.ps1：3A6CCA0E751C4DCA40584D77568B46232C7F000876557A641312BB712D287427
+- TestCctvBrowser.mjs：99E269E3F5ADE7DC6F0D96C7846910679117FE270439831D8FE5CC9FC852CA18
+
+代做決定：沒有足夠證據把正式 swapchain 設定改成 BitBlt，保留原設定；也不加入每幀手動繪製來繞過原失敗案例。下一個必要對照仍是可視圖形 Player 的自然繪製，再接實體 HMD／手把操作。這些外部互動／設備門檻在這幾輪仍未取得驗收條件；單靠隱藏程序與合成姿態不能完成它們，目標不標記為完成。
+
+清理：本次 Player 與 port 80 測試服務已結束。後續只保存上述失敗證據與本輪決策；沒有變更正式遊戲程式或已通過的驗收判準。
