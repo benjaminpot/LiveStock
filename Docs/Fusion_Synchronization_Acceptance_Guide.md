@@ -138,6 +138,8 @@ VR 預覽測試提供模擬追蹤資料。實體 HMD、控制器、XR UI 與實�
 
 Editor 多開時，影格間隔和記憶體包含整個 Editor、所有 Runner 與場景複本。獨立程式的 Server、PC Client 和 VR Client 應分別量測。頭盔效能以實體設備的 CPU／GPU frame time 和刷新率判斷。
 
+`Fusion_Map_Acceptance_Report.json` 是最近一次完整配置地圖的結果，MapSwap 也會寫入同一份報告；請核對 `All Runners use configured gameplay scene` 的 evidence 判斷是原圖或臨時副本。副本報告保留不表示正式場景設定仍未還原。
+
 Server 與 Client 每次都使用同版本建置，本輪已變更輸入和 Prefab 的網路資料結構。
 
 ### 歷史量測與驗收限制

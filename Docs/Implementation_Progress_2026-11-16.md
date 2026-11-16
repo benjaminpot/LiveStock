@@ -74,6 +74,7 @@
 - `81e547b5`：第 10 輪獨立 Server 保持世界可見；hidden／batch 影片仍失敗。
 - `63e9d623`：第 11 輪實際相機繪製診斷，撤回無重現依據的可見性變更；測試未完成。
 - `603a26b9`：已編譯的建置準備選單與真正重載完成標記，Windows 建置通過。
+- `3490242d`：第 12 輪證據發布／存續相機診斷與 13 項 Editor CCTV 對照；Player 重建仍待完成。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -93,7 +94,7 @@
 
 下一步：依實測排查整合問題，再進行 60／100 隻的容量與弱網測試。
 
-## 第 6 輪：弱網互動與每端容量驗收（進行中）
+## 第 6 輪：弱網互動與每端容量驗收
 
 修改：弱網套件依現有地圖 NPC 配置驗收，並在每種延遲／丟包／抖動條件下，實際確認輸入停止後不能收集、恢復後三端共享 1/3。容量測試除了伺服器 AliveCount，還會等待與持續核對每個 Runner 的副本數；出現例外仍輸出失敗報告，避免留下前次成功結果。
 
@@ -159,7 +160,7 @@
 
 當時下一步：補實際相機渲染回呼與 Renderer 診斷。後續核對發現驗收建置明確設定 Single Peer，上述 Multi-Peer 分支並未參與這個 Player 案例；第 11 輪撤回無重現依據的正式可見性變更。此輪不能視為黑影像修正。
 
-## 第 11 輪：相機實際繪製的診斷（進行中）
+## 第 11 輪：相機實際繪製的診斷
 
 修改：Development probe 版本 5 記錄 SRP endCameraRendering 次數、所屬 Runner 的 Renderer 啟用數與少量內容樣本。一般 capture-cctv 只讀取現有 sender 貼圖；明確的 diagnose-cctv 另將一個原始 CCTV 相機手動渲染到獨立暫存貼圖後還原。
 
@@ -181,11 +182,9 @@
 
 ## 第 12 輪：排除副顯示器假說與強化建置／證據發布
 
-修改：只在動態輸出相機 CopyFrom 後將 targetDisplay 設為 0；原始 CCTV、預覽相機與位置均保留。probe 版本 6 在診斷回報 display 與 cameraType。
+試作與撤回：曾在動態輸出相機 CopyFrom 後將 targetDisplay 設為 0，原始 CCTV／預覽相機與位置保留。實測未恢復自然繪製，已撤回；probe 保留 display／cameraType 診斷。
 
-代做決定：串流輸出使用 RenderTexture，不應要求使用者先啟用組員相機原本指向的第二顯示器。不新增手動每幀渲染、不改 pipeline、過熱規則或編碼。
-
-驗證：待重建並執行同一嚴格雙瀏覽器案例。
+代做決定：不保留未通過原失敗案例的正式候選。保留建置閘門與證據工具的有效改進；不新增手動每幀渲染，不改 pipeline、過熱規則或編碼。
 
 建置閘門：首次重建遇到 SDK／InputSystem 枚舉暫時組件時的字串轉換例外，保留失敗報告，沒有啟動舊 Player 代替驗收。準備流程改為已編譯選單直接要求 script reload，並由 InitializeOnLoadMethod 寫入完成標記；不再用 eval 建立另一個暫時組件，也不只等待固定秒數。原 delayCall 版本未留下本次要求的完成標記，已改為直接要求；專屬日誌確認目前要求與完成均執行。未修改 SDK 套件。
 
@@ -199,8 +198,40 @@
 
 下一步：重跑 Editor 的真實雙瀏覽器套件與主要回歸／換圖，然後在 run_script 暫時組件已存在的情況下，再驗證建置前重載與最新獨立 RPC。
 
-## 第 13 輪：最終整合回歸與交接狀態（進行中）
+## 第 13 輪：整合回歸結果與剩餘驗收
 
 範圍：依序執行含自然繪製回呼的 Cctv、五組 Editor、33 項 Fruit、Assets 與 MapSwap。測試結束還原 peer mode、場景設定與臨時地圖；最後再建置 probe 7 並驗證獨立程序。
 
 代做決定：不重跑已完成的兩組 10 分鐘容量案例，因其 Editor 生成／輸入測量結果已保存；不把那些共用 Editor 數字當成最新獨立伺服器或 HMD 效能。修正指南中的舊 NPC 數量、必備 Recycle Bin、示範 Cube 與建置報告名稱，歷史量測保留並標明範圍。
+
+Editor 回歸：Cctv 13 項、Editor 五組、Fruit 33 項、Assets 與 MapSwap 全部通過。MapSwap.Restore 成功，`.tmp/MapSwapSettings.json` 與臨時測試場景已移除，peer mode／NetworkSceneSettings 無殘留差異。
+
+最終建置：在整批 run_script 已執行後，已編譯的準備選單再次產生新的重載要求與完成標記，隨後 probe 7 的 Windows Development Player 建置成功：0 error／3 warning、51.2 秒。這驗證了閘門不只依靠前一次程式修改觸發的編譯重載；沒有修改 SDK 來繞過反射錯誤。
+
+最終獨立程序：最新同版本 Server、Desktop、VR 預覽的 22 項檢查全部通過；含來源停用後拒絕舊姿態、同一連線恢復、三顆蘋果／共享完成／去重、每端 30 隻 NPC、30 秒持續、關服清理與日誌檢查。這不是實體 VR 控制器驗收。
+
+最終影片：`Fusion_CCTV_Browser_Report.json` 仍為 false。`.tmp/FusionStandalone-20261116-110956` 的自然捕捉顯示 URP／D3D11／Single Peer，5 個啟用相機的總自然完成回呼為 0；兩個 sender 的 stereo=false、active／enabled、有 RenderTexture、mask=-1，仍解碼黑影像且尚未過熱。Editor 的自然回呼對照與正常農場影像已通過，手動來源圖也曾正常；不能把隱藏程序的連線成功、圖形裝置存在或約 60 FPS 的 Update 當成實際 GPU 繪圖成功。
+
+### 最新驗收對照
+
+| 項目 | 結果與範圍 | 證據 |
+| --- | --- | --- |
+| Editor 連線／角色／載入／清理 | 五組通過 | Fusion_Map_DesktopFirst、VRFirst、World、LoadingEdge、Acceptance 報告與批次退出碼 0 |
+| 蘋果與來源失效 | 33 項通過 | Fruit_Gameplay_Acceptance_Report.json |
+| Editor 與真實雙瀏覽器 | 13 項通過；不同相機非黑影像、1/3、2/3、完成與重連 | Fusion_CCTV_Editor_Acceptance_Report.json、Fusion_CCTV_Editor_Browser_Report.json |
+| 資產／封存根節點契約 | 全部通過；根節點四種情況 | Fusion_Map_Asset_Report.json、Fusion_Asset_Contract_Report.json |
+| 替換地圖 | 通過，設定與副本均還原 | 最後一份 Fusion_Map_Acceptance_Report.json 的 configured scene 是臨時副本 |
+| 最新 Windows 建置 | 成功，0 error／3 warning | Fusion_Sync_Build_Report.json |
+| 最新獨立程序功能 | 22 項通過；VR 預覽、30 隻／30 秒 | Fusion_Map_Standalone_Report.json |
+| 隱藏 Player 的真實影片 | **未通過**；自然繪製總回呼 0 | Fusion_CCTV_Browser_Report.json 與上述 runRoot |
+| 實體 HMD／手把／裝置效能 | **未驗收** | 需實際設備操作 |
+
+完整地圖報告會由最近一次 Run 覆寫，因此此處最後保存的是 MapSwap 的副本路徑；這是測試證據，不表示正式 NetworkSceneSettings 仍指向已刪除的副本。先前三組弱網與 60／100 隻各 10 分鐘的報告保留在第 6 輪；它們早於後續生命週期修正，不宣告為最新 head 的 HMD／獨立伺服器效能。
+
+### 下一步與保留決定
+
+1. 在正常可視的圖形 Player 環境對照整個自然相機繪製鏈路，再以同一雙瀏覽器標準驗證；先確認是否為隱藏啟動環境差異，才決定是否修改正式渲染排程。未加入每幀手動 Render，也未保留可見性／targetDisplay 的失敗候選。
+2. 實體 HMD 驗證原 Menu、扳機／雙手 Ray、身體接近、追蹤失去與恢復、Run／Crouch／Jump、Player_UI；再驗證 HMD 與網頁同場完成／重連。
+3. 以裝置實際刷新率量測 CPU／GPU frame time；目前共享 Editor 與無自然繪製的隱藏程序數字都不替代這個門檻。
+
+收尾檢查：Editor stopped／非 compiling、無本輪 LiveStockFusion 程序、port 80 無本輪服務，建置快取與測試設定已還原。整體 E2E 尚未完成，不將剩餘兩個門檻標成通過。

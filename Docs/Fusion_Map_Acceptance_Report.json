@@ -32,7 +32,7 @@
   {
     "test": "All Runners use configured gameplay scene",
     "pass": true,
-    "evidence": "Assets/_Project/Scenes/_flow test/MainGame.unity"
+    "evidence": "Assets/_Project/Tests/MapSwapAcceptance.unity"
   },
   {
     "test": "Ready map waits without NPCs or demo objects",
@@ -68,15 +68,15 @@
     "pass": true,
     "evidence": [
       {
-        "runner": "Desktop Client 1 Runner",
-        "count": 30
-      },
-      {
         "runner": "Lobby Server Runner",
         "count": 30
       },
       {
         "runner": "ConnectionManager Runner",
+        "count": 30
+      },
+      {
+        "runner": "Desktop Client 1 Runner",
         "count": 30
       }
     ]
@@ -114,12 +114,12 @@
   {
     "test": "Remote IK receives the transmitted head target",
     "pass": true,
-    "evidence": 7.359886E-07
+    "evidence": 4.57604557E-07
   },
   {
     "test": "The complete skinned pose agrees after targets settle",
     "pass": true,
-    "evidence": 4.30042473E-06
+    "evidence": 2.23701431E-06
   },
   {
     "test": "Only authority accepts damage",

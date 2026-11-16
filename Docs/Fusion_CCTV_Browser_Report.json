@@ -5,7 +5,7 @@
   "completed": false,
   "reconnected": false,
   "errors": [
-    "Error: UNKNOWN: unknown error, open 'C:\\dataC\\元宇宙遊戲設計\\LiveStock\\Docs\\Fusion_CCTV_Browser_Report.json'\n    at writeFileSync (node:fs:2414:20)\n    at save (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:24:3)\n    at file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:120:5\n    at async waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:32:11)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:113:3"
+    "Error: Both browsers decode black video while cameras are not overheated.\n    at file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:133:13\n    at async waitFor (file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:43:11)\n    at async file:///C:/dataC/%E5%85%83%E5%AE%87%E5%AE%99%E9%81%8A%E6%88%B2%E8%A8%AD%E8%A8%88/LiveStock/Tools/ConnectionFlow/TestCctvBrowser.mjs:124:3"
   ],
   "samples": [],
   "browserVersion": "157.0.8103.52",
@@ -16,8 +16,8 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 148,
-      "droppedFrames": 2,
+      "frames": 150,
+      "droppedFrames": 4,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
@@ -31,8 +31,8 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 150,
-      "droppedFrames": 0,
+      "frames": 152,
+      "droppedFrames": 2,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
@@ -48,13 +48,13 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 13,
-      "droppedFrames": 2,
+      "frames": 12,
+      "droppedFrames": 4,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
       ],
-      "pixelRange": 1,
+      "pixelRange": 0,
       "nonBlackPixels": 0
     },
     {
@@ -63,13 +63,13 @@
       "blackout": false,
       "connection": "CONNECTED",
       "width": 1920,
-      "frames": 15,
-      "droppedFrames": 0,
+      "frames": 14,
+      "droppedFrames": 2,
       "missionHistory": [
         "等待任務資料",
         "羊方已收集 0/3 顆蘋果"
       ],
-      "pixelRange": 1,
+      "pixelRange": 0,
       "nonBlackPixels": 0
     }
   ]
