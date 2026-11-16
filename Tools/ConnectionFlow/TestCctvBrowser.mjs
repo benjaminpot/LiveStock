@@ -21,11 +21,22 @@ const save = () => {
   evidence.pass = evidence.ready && evidence.completed && evidence.reconnected && evidence.errors.length === 0;
   const json = JSON.stringify(evidence, null, 2);
   writeFileSync(output, json);
-  writeFileSync(path.join(root, 'Docs', reportName), json);
+  return json;
 };
 let browser;
 const pages = [];
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// Publish at the boundaries; repeatedly replacing a tracked report can collide with Windows file readers.
+async function publish() {
+  for (let attempt = 0; ; attempt++) {
+    try { writeFileSync(path.join(root, 'Docs', reportName), save()); return; }
+    catch (error) {
+      if (attempt >= 9 || !['UNKNOWN', 'EBUSY', 'EPERM'].includes(error.code)) throw error;
+      await delay(100);
+    }
+  }
+}
 
 async function waitFor(check, label, seconds = 120) {
   const deadline = Date.now() + seconds * 1000;
@@ -81,7 +92,7 @@ async function connect(page, cameraIndex = 0) {
 }
 
 try {
-  save();
+  await publish();
   await waitFor(async () => {
     try { return (await fetch('http://127.0.0.1/config')).ok; } catch { return false; }
   }, 'local signaling HTTP', 20);
@@ -113,7 +124,7 @@ try {
   await waitFor(async () => {
     samples = await Promise.all(pages.map(snapshot));
     evidence.latest = samples;
-    if (!evidence.firstDecoded && samples.every(s => s.frames > 0)) {
+    if (!evidence.firstDecoded && samples.some(s => s.frames > 0)) {
       evidence.firstDecoded = samples;
       writeFileSync(path.join(path.dirname(output), 'server.json.command'), 'capture-cctv');
     }
@@ -149,18 +160,21 @@ try {
   await pages[1].screenshot({ path: path.join(path.dirname(output), 'browser-reconnected.png') });
   evidence.reconnected = true;
   if (evidence.errors.length) throw new Error('Browser page errors were recorded.');
-  save();
+  await publish();
   await browser.close();
   browser = null;
   await waitFor(() => existsSync(output + '.stop'), 'standalone process cleanup', 180);
 } catch (error) {
   evidence.errors.push(error.stack ?? error.message);
+  // Keep the live sender state before closing pages, including failures during the second viewer's handshake.
+  writeFileSync(path.join(path.dirname(output), 'server.json.command'), 'capture-cctv');
+  await delay(1000);
   const states = await Promise.race([Promise.allSettled(pages.map(snapshot)), delay(5000).then(() => [])]);
   evidence.latest = states.map(s => s.status === 'fulfilled' ? s.value : { error: String(s.reason) });
   if (pages[0] && !pages[0].isClosed()) {
     try { await pages[0].screenshot({ path: path.join(path.dirname(output), 'browser-failure.png'), timeout: 5000 }); } catch {}
   }
-  save();
+  await publish();
   process.exitCode = 1;
 } finally {
   await browser?.close();

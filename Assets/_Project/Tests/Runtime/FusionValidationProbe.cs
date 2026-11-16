@@ -22,7 +22,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
     [Serializable]
     public sealed class Snapshot
     {
-        public int probeVersion = 5;
+        public int probeVersion = 7;
         public string role, phase;
         public bool connected, canStart, inputActive, runnerVisible;
         public int frame, tick, players, loaded, npcs, acceptedInputs;
@@ -212,6 +212,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
             .Where(r => NetworkRunner.GetRunnerForGameObject(r.gameObject) == runner).ToArray();
         File.WriteAllLines(prefix + "-diagnostics.txt", CameraDiagnostics()
             .Prepend($"Renderer count={renderers.Length} enabled={renderers.Count(r => r.enabled && r.gameObject.activeInHierarchy)}")
+            .Prepend($"All cameras={Camera.allCamerasCount} completed camera renders={renderedFrames.Values.Sum()}")
             .Prepend($"Pipeline={GraphicsSettings.currentRenderPipeline?.GetType().Name ?? "Built-in"} device={SystemInfo.graphicsDeviceType} batch={Application.isBatchMode} peer={runner.Config.PeerMode} quality={QualitySettings.GetQualityLevel()}")
             .Concat(renderers.Take(12).Select(r => $"{r.name} enabled={r.enabled} active={r.gameObject.activeInHierarchy} bounds={r.bounds} material={r.sharedMaterial?.name}")));
         int index = 0;
@@ -236,7 +237,7 @@ public sealed class FusionValidationProbe : MonoBehaviour
         .Where(c => c.name == "View 1" || c.name.StartsWith("CCTV_")).Select(c =>
         {
             renderedFrames.TryGetValue(c.GetInstanceID(), out int count);
-            return $"{c.name} active={c.gameObject.activeInHierarchy} enabled={c.enabled} rendered={count} mask={c.cullingMask} override={c.overrideSceneCullingMask} pos={c.transform.position} forward={c.transform.forward} texture={c.targetTexture != null} scene={c.gameObject.scene.name}";
+            return $"{c.name} active={c.gameObject.activeInHierarchy} enabled={c.enabled} rendered={count} display={c.targetDisplay} type={c.cameraType} stereo={c.stereoEnabled} eye={c.stereoTargetEye} mask={c.cullingMask} override={c.overrideSceneCullingMask} pos={c.transform.position} forward={c.transform.forward} texture={c.targetTexture != null} scene={c.gameObject.scene.name}";
         }).ToArray();
 
     /// <summary>Explicit diagnostic only: renders one authored source after recording the unmodified sender textures.</summary>

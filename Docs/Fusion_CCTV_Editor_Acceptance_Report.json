@@ -32,6 +32,11 @@
     "evidence": null
   },
   {
+    "test": "Both natural CCTV render callbacks are observed",
+    "pass": true,
+    "evidence": 2
+  },
+  {
     "test": "Shared gameplay request for apple 1",
     "pass": true,
     "evidence": null

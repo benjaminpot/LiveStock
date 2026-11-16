@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fusion;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 /// <summary>Exercises real browser video and mission snapshots against a visible Editor server world.</summary>
 public static class CctvGameplayAcceptance
@@ -48,6 +49,12 @@ public static class CctvGameplayAcceptance
         var first=ConnectionManager.Clients.Single();
         ConnectionManager second=null;
         ServerConnectionManager server=null;
+        var renderedViews=new HashSet<int>();
+        Action<ScriptableRenderContext,Camera> recordRender=(context,camera)=>
+        {
+            if(camera.name=="View 1")renderedViews.Add(camera.GetInstanceID());
+        };
+        RenderPipelineManager.endCameraRendering+=recordRender;
         try
         {
             LocalConnectionTestTools.StartServer();
@@ -81,6 +88,7 @@ public static class CctvGameplayAcceptance
             File.WriteAllText(output+".connect","connect");
             await Wait(()=>BrowserFlag(output,"ready"),"Two browsers show non-black advancing CCTV");
             Check("Two real browsers receive non-black CCTV and initial mission snapshot",true);
+            Check("Both natural CCTV render callbacks are observed",renderedViews.Count>=2,renderedViews.Count);
             var clients=new[]{first,second,first};
             for(int index=0;index<3;index++)
             {
@@ -118,6 +126,7 @@ public static class CctvGameplayAcceptance
         }
         finally
         {
+            RenderPipelineManager.endCameraRendering-=recordRender;
             if(second!=null)await second.DisconnectAsync();
             if(first!=null)await first.DisconnectAsync();
             if(server!=null)await server.StopServerAsync();

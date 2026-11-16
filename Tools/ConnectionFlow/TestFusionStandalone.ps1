@@ -66,7 +66,7 @@ try {
         $processes[$role] = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden -PassThru
     }
     Wait-For { (Read-Peer 'server').connected -and (Read-Peer 'desktop') -and (Read-Peer 'vr-preview') } 'process startup'
-    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 5}).Count -eq 0)
+    Check 'All processes expose the current acceptance probe' (@('server','desktop','vr-preview').Where({(Read-Peer $_).probeVersion -ne 7}).Count -eq 0)
     Check 'Three independent Players start with zero Lobby NPCs' ((Read-Peer 'server').npcs -eq 0 -and $processes.Count -eq 3)
     Send-Command 'desktop' 'connect'
     Wait-For { (Read-Peer 'server').loaded -eq 1 -and (Read-Peer 'desktop').connected } 'Desktop connection'

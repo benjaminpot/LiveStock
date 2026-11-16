@@ -24,7 +24,7 @@
 
 本機需已安裝 Unity CLI，且本專案 Editor 已開啟。Standalone 使用 `Builds/FusionValidation/LiveStockFusion.exe`，先透過 `LiveStock > Connection Test > Build Fusion Validation Player` 建置。專案保留這個驗收建置選單。
 
-建議使用可重複的建置入口；它先確認沒有未儲存場景、等待編譯及 domain reload，再呼叫已編譯的建置選單，避開暫時 Pipeline 組件造成的 SDK 反射例外。建置回呼產生的已知設定快取與暫存檔會還原成建置前內容。
+建議使用可重複的建置入口；它透過已編譯的準備選單檢查未儲存場景並要求 domain reload，等待初始化完成標記與 Editor 穩定後才建置，避開暫時 Pipeline 組件造成的 SDK 反射例外。建置回呼產生的已知設定快取與暫存檔會還原成建置前內容。
 
 ```powershell
 & ./Tools/ConnectionFlow/Build-Fusion.ps1

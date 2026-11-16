@@ -72,6 +72,8 @@
 - `a57adcca`：第 8 輪載入完成啟動 ServerOnly，兩位瀏覽器影像／逐顆進度／重連通過。
 - `cf338aa1`：第 9 輪最新 Player 的 21 項獨立程序回歸；影片失敗另存。
 - `81e547b5`：第 10 輪獨立 Server 保持世界可見；hidden／batch 影片仍失敗。
+- `63e9d623`：第 11 輪實際相機繪製診斷，撤回無重現依據的可見性變更；測試未完成。
+- `603a26b9`：已編譯的建置準備選單與真正重載完成標記，Windows 建置通過。
 
 ## 第 5 輪：獨立 Player 與瀏覽器整合驗收
 
@@ -174,3 +176,31 @@
 圖形 batch 的同版診斷也得到兩個 sender 自然繪製完成數 0，證據在 `.tmp/FusionStandalone-20261116-064649`。來源唯讀 audit 確認兩個實際 streamCamera 都指定 targetDisplay=1（第二個顯示器）、CameraType.Game、URP Base；動態輸出透過 CopyFrom 繼承設定。下一步候選是只對串流輸出取消副顯示器綁定，再用相同嚴格案例驗證，不修改原始相機。
 
 額度保存點：最後一批第 11 輪 commit／targetDisplay 候選修正／重建曾因自動核准審查的使用額度錯誤而完全未執行。重新唯讀核對後，最後 commit 仍是 81e547b5，九個檔案留有本輪修改。候選正式修正尚未套用；主要 Editor／換圖最終回歸尚待執行。
+
+後續：重新透過正常審查成功核對並建立 WIP 保存點 63e9d623；工具恢復可用後，依原授權繼續第 12 輪。
+
+## 第 12 輪：排除副顯示器假說與強化建置／證據發布
+
+修改：只在動態輸出相機 CopyFrom 後將 targetDisplay 設為 0；原始 CCTV、預覽相機與位置均保留。probe 版本 6 在診斷回報 display 與 cameraType。
+
+代做決定：串流輸出使用 RenderTexture，不應要求使用者先啟用組員相機原本指向的第二顯示器。不新增手動每幀渲染、不改 pipeline、過熱規則或編碼。
+
+驗證：待重建並執行同一嚴格雙瀏覽器案例。
+
+建置閘門：首次重建遇到 SDK／InputSystem 枚舉暫時組件時的字串轉換例外，保留失敗報告，沒有啟動舊 Player 代替驗收。準備流程改為已編譯選單直接要求 script reload，並由 InitializeOnLoadMethod 寫入完成標記；不再用 eval 建立另一個暫時組件，也不只等待固定秒數。原 delayCall 版本未留下本次要求的完成標記，已改為直接要求；專屬日誌確認目前要求與完成均執行。未修改 SDK 套件。
+
+實測反證：新建置 0 error／190 warning。targetDisplay=0 的兩個 sender 仍有 RenderTexture、active／enabled，但自然繪製完成數仍為 0，見 `.tmp/FusionStandalone-20261116-104624/cctv-1006-diagnostics.txt` 與 `cctv-1238-diagnostics.txt`。已撤回 targetDisplay 正式修改，不把候選保存成已修好；保留 display／cameraType 診斷，probe 升至 7，要求最終 Player 重建。
+
+另一個測試工具缺口：同輪發生 Windows `UNKNOWN` 錯誤，路徑是持續覆寫的公開 `Docs/Fusion_CCTV_Browser_Report.json`，原始錯誤在該次 runRoot 的 browser-evidence.json。改為執行中只更新 runRoot，開始／結束才發布公開報告，對觀察到的 Windows 檔案忙碌類錯誤作最多 10 次、每次 100 ms 的有界重試。失敗前先請 Server 捕捉仍存續的相機，避免斷線清理抹去診斷。這些只改驗收工具，不改遊戲邏輯。
+
+工具回歸：撤回正式候選後 Unity 編譯 0 error；新發布流程的 Editor／真實雙瀏覽器 12 項再次通過，無頁面錯誤。新增的診斷將額外記錄所有相機的總完成數，並在 Editor 套件直接檢查兩個自然繪製回呼，作為 Player 診斷的對照。
+
+繪製對照已通過：擴充後 Cctv 套件 13 項通過，兩個不同 `View 1` 的自然 SRP 完成回呼均被觀察到，且兩個真實瀏覽器仍取得影像、逐顆進度與重連。這確認目前的回呼診斷在正常 Editor 渲染環境可以觀察到實際繪製。
+
+下一步：重跑 Editor 的真實雙瀏覽器套件與主要回歸／換圖，然後在 run_script 暫時組件已存在的情況下，再驗證建置前重載與最新獨立 RPC。
+
+## 第 13 輪：最終整合回歸與交接狀態（進行中）
+
+範圍：依序執行含自然繪製回呼的 Cctv、五組 Editor、33 項 Fruit、Assets 與 MapSwap。測試結束還原 peer mode、場景設定與臨時地圖；最後再建置 probe 7 並驗證獨立程序。
+
+代做決定：不重跑已完成的兩組 10 分鐘容量案例，因其 Editor 生成／輸入測量結果已保存；不把那些共用 Editor 數字當成最新獨立伺服器或 HMD 效能。修正指南中的舊 NPC 數量、必備 Recycle Bin、示範 Cube 與建置報告名稱，歷史量測保留並標明範圍。
