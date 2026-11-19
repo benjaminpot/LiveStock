@@ -46,6 +46,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LiveStock.Items.ItemUseManager
   shopManager: {fileID: 0}
   useCooldown: 0.2
+  crazyGunProjectile: {fileID: 11400, guid: 40a2432ebdfb49349a9cff59aba3a290, type: 3}
+  crazyFireInterval: 0.2
   projectiles:
   - itemId: capture-ball
     prefab: {fileID: 11400, guid: 09bd6b5ff2d47974e9b089b81cad1bc3, type: 3}

@@ -27,7 +27,7 @@ namespace LiveStock.Economy.Tests
             uses = new ItemUseState(ItemIds, (player, item) => {
                 consumeCalls++;
                 return shop.TryConsumeItem(player, item);
-            });
+            }, trySpendMoney: money.TrySpendMoney);
             Register("A");
         }
 
@@ -379,6 +379,173 @@ namespace LiveStock.Economy.Tests
             Expect(immediate.Use("A", "capture-ball", 1, true, double.MaxValue), Status.Launched, true);
             Expect(immediate.Use("A", "capture-ball", 2, true, double.MaxValue), Status.Launched, true);
             Assert.That(Quantity(), Is.Zero);
+        }
+
+        [TestCase(99, Status.InsufficientFunds, 99, 0)]
+        [TestCase(100, Status.Launched, 0, 1)]
+        public void CrazyGunUsesWalletWithoutOwningAnyItems(int funds, Status status, int remaining, int launches)
+        {
+            money.AddMoney("A", funds);
+            Assert.That(uses.EnterCrazyMode(), Is.True);
+            int launched = 0;
+            money.BalanceChanged += (player, balance) => Assert.That(launched, Is.EqualTo(1));
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 1, true, 0, () => launched++),
+                status, launches == 1);
+            Assert.That(launched, Is.EqualTo(launches));
+            Assert.That(money.TryGetBalance("A", out int balance), Is.True);
+            Assert.That(balance, Is.EqualTo(remaining));
+            Assert.That(consumeCalls, Is.Zero);
+            foreach (string item in ItemIds) Assert.That(Quantity(item), Is.Zero);
+        }
+
+        [Test]
+        public void EnteringCrazyPreservesInventoryAndSharesNormalHistoryAndCooldown()
+        {
+            Buy(count: 2);
+            money.AddMoney("A", 300);
+            Expect(uses.Use("A", "capture-ball", 7, true, 0), Status.Launched, true);
+            Assert.That(uses.EnterCrazyMode(), Is.True);
+            Assert.That(uses.EnterCrazyMode(), Is.True);
+            Assert.That(uses.Mode, Is.EqualTo(ItemUseState.UseMode.Crazy));
+            Assert.That(Last(), Is.EqualTo(7));
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 7, true, 0.2), Status.InvalidRequest);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 8, true, 0.1), Status.Cooldown);
+            int launched = 0;
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 9, true, 0.2, () => launched++),
+                Status.Launched, true);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 9, true, 100, () => launched++),
+                Status.Launched);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 8, true, 100), Status.StaleRequest);
+            Expect(uses.Use("A", "capture-ball", 10, true, 100), Status.InvalidItem);
+            Assert.That(launched, Is.EqualTo(1));
+            Assert.That(Quantity(), Is.EqualTo(1));
+            Assert.That(consumeCalls, Is.EqualTo(1));
+            money.TryGetBalance("A", out int balance);
+            Assert.That(balance, Is.EqualTo(200));
+        }
+
+        [Test]
+        public void RejectedCrazyRequestsNeverChargeAndInsufficientFundsDoesNotStartCooldown()
+        {
+            money.AddMoney("A", 99);
+            uses.EnterCrazyMode();
+            int launches = 0;
+            Action launch = () => launches++;
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 0, true, 0, launch), Status.InvalidRequest);
+            Expect(uses.Use("unknown", ItemUseState.CrazyGunItemId, 1, true, 0, launch), Status.UnknownPlayer);
+            Expect(uses.Use("A", "bow", 1, true, 0, launch), Status.InvalidItem);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 2, false, 0, launch), Status.InvalidRequest);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 3, true, 0, launch), Status.InsufficientFunds);
+            money.TryGetBalance("A", out int unchanged);
+            Assert.That(unchanged, Is.EqualTo(99));
+            money.AddMoney("A", 101);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 3, true, 0, launch), Status.InsufficientFunds);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 4, true, 0, launch), Status.Launched, true);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 5, true, 0.1, launch), Status.Cooldown);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 5, true, 1, launch), Status.Cooldown);
+            money.TryGetBalance("A", out int balance);
+            Assert.That(balance, Is.EqualTo(100));
+            Assert.That(launches, Is.EqualTo(1));
+            Assert.That(consumeCalls, Is.Zero);
+        }
+
+        [Test]
+        public void CrazyIntervalIsIndependentButCannotResetThePreviousLaunchTime()
+        {
+            Buy();
+            var paced = new ItemUseState(ItemIds, shop.TryConsumeItem, 0,
+                money.TrySpendMoney, 0.5);
+            paced.RegisterPlayer("A");
+            Expect(paced.Use("A", "capture-ball", 1, true, 1), Status.Launched, true);
+            money.AddMoney("A", 200);
+            paced.EnterCrazyMode();
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 2, true, 1.49), Status.Cooldown);
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 3, true, 1.5), Status.Launched, true);
+            paced.EnterCrazyMode();
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 4, true, 1.99), Status.Cooldown);
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 5, true, 2), Status.Launched, true);
+        }
+
+        [Test]
+        public void EnteringCrazyCannotShortenAnOutstandingNormalCooldown()
+        {
+            Buy();
+            var paced = new ItemUseState(ItemIds, shop.TryConsumeItem, 1,
+                money.TrySpendMoney, 0.2);
+            paced.RegisterPlayer("A");
+            Expect(paced.Use("A", "capture-ball", 1, true, 0), Status.Launched, true);
+            money.AddMoney("A", 200);
+            paced.EnterCrazyMode();
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 2, true, 0.5), Status.Cooldown);
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 3, true, 1), Status.Launched, true);
+            Expect(paced.Use("A", ItemUseState.CrazyGunItemId, 4, true, 1.2), Status.Launched, true);
+        }
+
+        [Test]
+        public void BalanceCallbackSeesLaunchAndCannotReplayChargeBeforeEndingRound()
+        {
+            money.AddMoney("A", 300);
+            uses.EnterCrazyMode();
+            int launches = 0;
+            money.BalanceChanged += (player, balance) => {
+                Assert.That(launches, Is.EqualTo(1));
+                Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 1, true, 0), Status.Unavailable);
+                Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 2, true, 1), Status.Unavailable);
+                Assert.That(Last(), Is.EqualTo(1));
+                uses.EndRound();
+            };
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 1, true, 0, () => launches++),
+                Status.Launched, true);
+            Assert.That(uses.Mode, Is.EqualTo(ItemUseState.UseMode.Ended));
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 1, true, 1), Status.RoundEnded);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 2, true, 1), Status.RoundEnded);
+            money.TryGetBalance("A", out int balance);
+            Assert.That(balance, Is.EqualTo(200));
+            Assert.That(launches, Is.EqualTo(1));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void EndingIsTerminalAcrossClearAndLateRegistration(bool crazy)
+        {
+            Buy(count: 2);
+            money.AddMoney("A", 200);
+            if (crazy) uses.EnterCrazyMode();
+            uses.EndRound();
+            uses.EndRound();
+            Assert.That(uses.EnterCrazyMode(), Is.False);
+            Assert.That(uses.Mode, Is.EqualTo(ItemUseState.UseMode.Ended));
+            Expect(uses.Use("A", "capture-ball", 1, true, 0), Status.RoundEnded);
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 2, true, 0), Status.RoundEnded);
+            Assert.That(Quantity(), Is.EqualTo(2));
+            money.TryGetBalance("A", out int balance);
+            Assert.That(balance, Is.EqualTo(200));
+            uses.Clear();
+            uses.RegisterPlayer("B");
+            Expect(uses.Use("B", ItemUseState.CrazyGunItemId, 1, true, 0), Status.RoundEnded);
+            Assert.That(consumeCalls, Is.Zero);
+        }
+
+        [Test]
+        public void MissingWalletCannotEnterCrazyAndGunCannotBeANormalProduct()
+        {
+            var normal = new ItemUseState(ItemIds, shop.TryConsumeItem);
+            Assert.That(normal.EnterCrazyMode(), Is.False);
+            Assert.That(normal.Mode, Is.EqualTo(ItemUseState.UseMode.Normal));
+            Assert.Throws<ArgumentException>(() => new ItemUseState(
+                new[] { ItemUseState.CrazyGunItemId }, shop.TryConsumeItem));
+            Expect(uses.Use("A", ItemUseState.CrazyGunItemId, 1, true, 0), Status.InvalidItem);
+        }
+
+        [TestCase(double.NaN)]
+        [TestCase(double.PositiveInfinity)]
+        [TestCase(double.NegativeInfinity)]
+        [TestCase(0)]
+        [TestCase(-0.01)]
+        public void CrazyIntervalMustBeFiniteAndPositive(double interval)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new ItemUseState(
+                ItemIds, shop.TryConsumeItem, trySpendMoney: money.TrySpendMoney, crazyFireInterval: interval));
         }
 
         [TestCase(double.NaN)]

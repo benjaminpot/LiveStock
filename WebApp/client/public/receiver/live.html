@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,6 +47,11 @@
             <div><span class="eyebrow">PRIMARY FEED</span><h1 data-current>Waiting for signal</h1></div>
             <div class="viewer-count"><span aria-hidden="true">●</span> <b>1</b> WATCHING</div>
           </div>
+          <section class="round-mode" data-round-mode role="status" aria-live="polite" hidden>
+            <strong data-mode-name>瘋狂模式</strong>
+            <span data-gun-details>連發槍 · <span data-shot-cost></span></span>
+            <span>收入暫停</span>
+          </section>
           <div class="cctv-screens">
             <div class="cctv-screen main-screen">
               <div id="player"></div>
@@ -105,10 +110,10 @@
           <div id="interaction" class="interaction-bar">
             <div class="interaction-copy">
               <span class="eyebrow">LIVE INTERACTION</span>
-              <strong id="fireResult" role="status">Click inside the video to fire</strong>
-              <small data-item-use-hint>Place the pointer on a sheep. The shot fires immediately on click.</small>
+              <strong id="fireResult" role="status">點擊影片即可發射</strong>
+              <small data-item-use-hint>將游標移到羊的位置，點擊即可發射。</small>
             </div>
-            <span class="instant-fire-badge"><b>◎</b> CLICK TO FIRE</span>
+            <span class="instant-fire-badge" data-fire-action>點擊發射</span>
           </div>
         </section>
 
@@ -139,10 +144,10 @@
         <section id="store" class="store-panel" data-shop-panel aria-label="Hunting gear store and inventory">
           <div class="store-header"><div><span class="eyebrow">ARSENAL</span><h2>Hunting Gear</h2></div><span>4 ITEMS</span></div>
           <div class="store-grid">
-            <article class="store-item" data-shop-item="capture-ball"><span class="item-icon">◉</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-            <article class="store-item" data-shop-item="bow"><span class="item-icon">➶</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-            <article class="store-item rare" data-shop-item="sniper"><span class="item-icon">⌖</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-            <article class="store-item rare" data-shop-item="bomb"><span class="item-icon">✹</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+            <article class="store-item" data-shop-item="capture-ball"><span class="item-icon">◉</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>尚未開放</button></article>
+            <article class="store-item" data-shop-item="bow"><span class="item-icon">➶</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>尚未開放</button></article>
+            <article class="store-item rare" data-shop-item="sniper"><span class="item-icon">⌖</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>尚未開放</button></article>
+            <article class="store-item rare" data-shop-item="bomb"><span class="item-icon">✹</span><div><h3 data-shop-name>—</h3><p>持有 <span data-shop-quantity>—</span></p></div><strong>價格 <span data-shop-price>—</span></strong><button type="button" data-shop-buy disabled>尚未開放</button></article>
           </div>
           <p data-shop-status role="status" aria-live="polite">商店尚未開放，等待伺服器商品資料。</p>
         </section>

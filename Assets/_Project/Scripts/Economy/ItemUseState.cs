@@ -6,10 +6,16 @@ namespace LiveStock.Economy
     // Launch authorization only: impacts never consume or refund inventory.
     public sealed class ItemUseState
     {
+        public enum UseMode { Normal, Crazy, Ended }
+        public const string CrazyGunItemId = "crazy-gun";
+        public const int CrazyShotCost = 100;
+
+        public UseMode Mode { get; private set; }
+
         public enum UseStatus
         {
             Launched, NoStock, InvalidItem, InvalidRequest, UnknownPlayer,
-            Cooldown, StaleRequest, Unavailable
+            Cooldown, StaleRequest, Unavailable, InsufficientFunds, RoundEnded
         }
 
         public readonly struct UseResult
@@ -36,25 +42,33 @@ namespace LiveStock.Economy
             public bool consuming;
             public bool hasLaunched;
             public double lastUseSeconds;
+            public double lastCooldownSeconds;
         }
 
         private readonly HashSet<string> items = new HashSet<string>(StringComparer.Ordinal);
         private readonly Dictionary<string, Player> players = new Dictionary<string, Player>(StringComparer.Ordinal);
         private readonly Func<string, string, bool> tryConsumeItem;
         private readonly double cooldownSeconds;
+        private readonly Func<string, int, Action, bool> trySpendMoney;
+        private readonly double crazyFireInterval;
 
         public ItemUseState(IReadOnlyList<string> itemIds, Func<string, string, bool> tryConsumeItem,
-            double cooldownSeconds = 0.2)
+            double cooldownSeconds = 0.2, Func<string, int, Action, bool> trySpendMoney = null,
+            double crazyFireInterval = 0.2)
         {
             if (itemIds == null || itemIds.Count == 0) throw new ArgumentException(nameof(itemIds));
             this.tryConsumeItem = tryConsumeItem ?? throw new ArgumentNullException(nameof(tryConsumeItem));
             if (!IsFinite(cooldownSeconds) || cooldownSeconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(cooldownSeconds));
             this.cooldownSeconds = cooldownSeconds;
+            if (!IsFinite(crazyFireInterval) || crazyFireInterval <= 0)
+                throw new ArgumentOutOfRangeException(nameof(crazyFireInterval));
+            this.crazyFireInterval = crazyFireInterval;
+            this.trySpendMoney = trySpendMoney;
             for (int i = 0; i < itemIds.Count; i++)
             {
                 string itemId = itemIds[i];
-                if (string.IsNullOrWhiteSpace(itemId) || !items.Add(itemId))
+                if (string.IsNullOrWhiteSpace(itemId) || itemId == CrazyGunItemId || !items.Add(itemId))
                     throw new ArgumentException("Item IDs must be nonempty and unique.", nameof(itemIds));
             }
         }
@@ -79,10 +93,22 @@ namespace LiveStock.Economy
 
         public void Clear() => players.Clear();
 
-        public UseResult Use(string playerId, string itemId, int requestId, bool allowed, double nowSeconds)
+        public bool EnterCrazyMode()
+        {
+            if (Mode == UseMode.Ended || trySpendMoney == null) return false;
+            Mode = UseMode.Crazy;
+            return true;
+        }
+
+        public void EndRound() => Mode = UseMode.Ended;
+
+        public UseResult Use(string playerId, string itemId, int requestId, bool allowed, double nowSeconds,
+            Action onAuthorized = null)
         {
             if (!IsFinite(nowSeconds) || nowSeconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(nowSeconds));
+            if (Mode == UseMode.Ended)
+                return new UseResult(requestId, itemId, UseStatus.RoundEnded);
             if (!TryGetPlayer(playerId, out var player))
                 return new UseResult(requestId, itemId, UseStatus.UnknownPlayer);
             if (requestId <= 0)
@@ -100,27 +126,36 @@ namespace LiveStock.Economy
             player.lastRequestId = requestId;
             player.lastItemId = itemId;
             player.lastStatus = UseStatus.Unavailable;
-            if (itemId == null || !items.Contains(itemId))
+            bool crazy = Mode == UseMode.Crazy;
+            double interval = crazy ? crazyFireInterval : cooldownSeconds;
+            if (player.hasLaunched) interval = Math.Max(interval, player.lastCooldownSeconds);
+            if (itemId == null || (crazy ? itemId != CrazyGunItemId : !items.Contains(itemId)))
                 player.lastStatus = UseStatus.InvalidItem;
             else if (!allowed)
                 player.lastStatus = UseStatus.InvalidRequest;
             // Equality also guards positive cooldowns too small to change a large timestamp.
-            else if (player.hasLaunched && (nowSeconds < player.lastUseSeconds + cooldownSeconds ||
-                (cooldownSeconds > 0 && nowSeconds == player.lastUseSeconds)))
+            else if (player.hasLaunched && (nowSeconds < player.lastUseSeconds + interval ||
+                (interval > 0 && nowSeconds == player.lastUseSeconds)))
                 player.lastStatus = UseStatus.Cooldown;
             else
             {
                 player.consuming = true;
                 try
                 {
-                    if (tryConsumeItem(playerId, itemId))
+                    // Paid shots launch within the wallet transaction, before balance callbacks.
+                    bool accepted = crazy
+                        ? trySpendMoney(playerId, CrazyShotCost, onAuthorized)
+                        : tryConsumeItem(playerId, itemId);
+                    if (accepted)
                     {
                         player.lastUseSeconds = nowSeconds;
+                        player.lastCooldownSeconds = crazy ? crazyFireInterval : cooldownSeconds;
                         player.hasLaunched = true;
                         player.lastStatus = UseStatus.Launched;
+                        if (!crazy) onAuthorized?.Invoke();
                         return new UseResult(requestId, itemId, UseStatus.Launched, true);
                     }
-                    player.lastStatus = UseStatus.NoStock;
+                    player.lastStatus = crazy ? UseStatus.InsufficientFunds : UseStatus.NoStock;
                 }
                 finally { player.consuming = false; }
             }

@@ -28,7 +28,7 @@ Assets/_Project/Prefabs/Items/ItemUseManager.prefab
 | CCTV View Switcher 元件 | Shop Manager | ShopManager |
 | CCTV View Switcher 元件 | Item Use Manager | ItemUseManager |
 
-**CCTV View Switcher 是 Inspector 裡的元件名稱。** Hierarchy 物件可能叫 `CCTV Viewer ...`，在原本的 `ServerOnly → CCTV Points` 底下找。不是再新增一個 CCTV 或再掛一份管理器。
+**CCTV View Switcher 是 Inspector 裡的元件名稱。** 目前 Haohao 測試場景直接點 **ServerOnly → CCTV Points** 就能看到。其他場景的物件也可能叫 `CCTV Viewer ...`，以 Inspector 元件為準；不用再新增 CCTV 或再掛一份管理器。
 
 填好後按 **Ctrl＋S 儲存場景**。不用按 Apply All，也不要把這些場景物件存回共用 CCTV Prefab。
 
@@ -45,7 +45,7 @@ npm start
 
 ### 再開 Unity 主機
 
-1. 開 **Menu** 場景，按 Play。
+1. 開測試用的 `Assets/_Project/Scenes/_ALPHA_DEMO/Menu.unity`，按 Play。
 2. 在 Hierarchy 找到執行中的 **SessionLauncher**。
 3. 啟動主機前，把 Inspector 的 **Network Scene Path** 填成：
 
@@ -72,9 +72,28 @@ npm start
 5. 另開 <http://127.0.0.1/receiver/index.html> 並連線。第二頁應有自己的餘額和庫存，不會拿到第一頁的道具。
 6. 關閉第一頁再重連。它應重新開始，第二頁不受影響。現在沒有存檔，所以斷線後不保留庫存。
 
+## 4. 瘋狂模式怎麼接、怎麼測
+
+**不用再掛管理器。** 原本五個欄位接好後，用同一個 **CCTV View Switcher** 進入瘋狂模式。
+
+1. 先照上面連上網頁，等餘額夠用，也可以先買一件道具。
+2. Unity 保持 Play，在 CCTV View Switcher 元件右上角的選單，選 **測試 → 進入瘋狂模式**。
+3. 所有已連線網頁都應顯示「瘋狂模式、連發槍、100 元／發、收入暫停」。餘額不再自動增加；原本庫存保留，但不能買或使用一般道具。
+4. **按住監視器影片連發，放開就停。** 每次成功發射扣 100 元，射空也扣；不到 100 元不能射，不扣庫存。
+5. 試著切換監視器、切到其他視窗，或讓監視器過熱。連發都應停止，需要重新按住才能繼續。
+6. 在同一元件選 **測試 → 結束本局**。網頁應顯示本局結束，不能再射，還在飛的球也會回收。
+
+給負責遊戲流程的隊友：在決定進入瘋狂模式時，呼叫這個元件的 `EnterCrazyMode()`；勝負確定後，呼叫 `EndRound()`。**勝負判斷尚未接入，不能只切結算畫面卻忘了呼叫結束。**
+
+這局進入瘋狂模式後不會切回一般模式；測下一局請停止 Play，再重新啟動主機。
+
+連發間隔在 **ItemUseManager → Crazy Fire Interval** 調整，預設 0.2 秒。槍的速度、大小、傷害在 `Assets/_Project/Prefabs/Items/CrazyGunProjectile.prefab` 調整，沿用原本的球體碰撞，不是射線。
+
+已用真實 Unity 與兩個 Chromium 頁面測過扣款、停收入、晚加入同步、結束停射及回收球。[這次的測試紀錄](ItemUse.md#本次瘋狂模式的測試紀錄)。
+
 ## 目前做了什麼、還沒做什麼
 
-現在可以買道具、放進物品欄、選取後發射，並對 NPC 造成傷害。
+現在可以買道具、放進物品欄、選取後發射，並對 NPC 造成傷害；也可以由 Unity 切進瘋狂模式，改用每發付費的連發槍。
 
 **四種道具目前都用球體測試。寶貝球還不能捕捉、狙擊槍還不是射線、炸彈還沒有範圍爆炸。這個模組也還沒接 VR 玩家受擊與淘汰。**
 
@@ -96,5 +115,3 @@ Haohao 測試場景的商品價格目前有乘 100；從 Project 新拖的 ShopM
 - 這份說明及上面的設定文件。
 
 **不要傳或提交 `node_modules`、coverage。** 對方用套件清單安裝依賴。原本的 `WebApp/node_modules` 曾被 Git 追蹤，加入 ignore 不會自動解除追蹤；不要因此整包加入提交。
-
-前一輪實作及這次文件改寫都沒有執行 stage、commit 或 push。若要用 Git 交付，仍需整理並提交實際修改，不能只請隊友 pull 就當作已交付。

@@ -40,7 +40,10 @@ export class CCTVPanel {
     this.lastMonitorStatuses = null;
     this.slot.value = '0';
     this.slot.addEventListener('change', () => this.render());
-    this.next.addEventListener('click', () => this.send({ type: 'cctv-next', slot: Number(this.slot.value) }));
+    this.next.addEventListener('click', () => {
+      this.onViewChange?.();
+      this.send({ type: 'cctv-next', slot: Number(this.slot.value) });
+    });
     this.createRows(8);
     this.renderRows([]);
     this.setConnection('OFFLINE');
@@ -226,6 +229,7 @@ export class CCTVPanel {
       this.showDeniedSwitch();
       return;
     }
+    this.onViewChange?.();
     this.pendingIndex = index;
     this.pendingSlot = Number(this.slot.value);
     if (this.switching) this.switching.hidden = false;

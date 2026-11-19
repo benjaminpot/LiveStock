@@ -51,6 +51,11 @@
         <p class="inventory-status" data-inventory-status role="status" aria-live="polite">等待伺服器物品資料</p>
         <p class="inventory-hint">道具數量以伺服器資料為準；選取不會消耗道具。</p>
       </section>
+      <section class="round-mode" data-round-mode role="status" aria-live="polite" hidden>
+        <strong data-mode-name>瘋狂模式</strong>
+        <span data-gun-details>連發槍 · <span data-shot-cost></span></span>
+        <span>收入暫停</span>
+      </section>
       <p data-connection role="status">尚未連線</p>
       <p>目前鏡頭：<strong data-current>—</strong>　切換冷卻：<span data-cooldown>—</span></p>
       <button type="button" data-next disabled>下一台監視器</button>
@@ -69,10 +74,10 @@
     <section class="shop-panel" data-shop-panel aria-label="商店與個人庫存">
       <h2>商店與庫存</h2>
       <div class="shop-grid">
-        <article data-shop-item="capture-ball"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-        <article data-shop-item="bow"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-        <article data-shop-item="sniper"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
-        <article data-shop-item="bomb"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>COMING SOON</button></article>
+        <article data-shop-item="capture-ball"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>尚未開放</button></article>
+        <article data-shop-item="bow"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>尚未開放</button></article>
+        <article data-shop-item="sniper"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>尚未開放</button></article>
+        <article data-shop-item="bomb"><h3 data-shop-name>—</h3><p>價格 <strong data-shop-price>—</strong></p><p>持有 <span data-shop-quantity>—</span></p><button type="button" data-shop-buy disabled>尚未開放</button></article>
       </div>
       <p data-shop-status role="status" aria-live="polite">商店尚未開放，等待伺服器商品資料。</p>
     </section>

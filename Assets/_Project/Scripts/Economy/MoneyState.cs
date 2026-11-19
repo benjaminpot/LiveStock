@@ -15,6 +15,7 @@ namespace LiveStock.Economy
         private readonly Dictionary<string, Wallet> wallets = new Dictionary<string, Wallet>();
         private readonly int initialBalance;
         private readonly int incomePerSecond;
+        public bool IncomeSuspended { get; private set; }
 
         public event Action<string, int> BalanceChanged;
 
@@ -54,18 +55,22 @@ namespace LiveStock.Economy
             return true;
         }
 
-        public bool TrySpendMoney(string playerId, int amount)
+        public bool TrySpendMoney(string playerId, int amount) => TrySpendMoney(playerId, amount, null);
+
+        // Complete the accepted action before synchronous balance observers can end the round.
+        public bool TrySpendMoney(string playerId, int amount, Action onSpent)
         {
             if (amount <= 0 || !TryGetWallet(playerId, out var wallet) || wallet.balance < amount)
                 return false;
             wallet.balance -= amount;
+            onSpent?.Invoke();
             BalanceChanged?.Invoke(playerId, wallet.balance);
             return true;
         }
 
         public bool StartIncome(string playerId)
         {
-            if (!TryGetWallet(playerId, out var wallet)) return false;
+            if (IncomeSuspended || !TryGetWallet(playerId, out var wallet)) return false;
             wallet.earning = true;
             return true;
         }
@@ -78,10 +83,21 @@ namespace LiveStock.Economy
             return true;
         }
 
+        public void SuspendIncome()
+        {
+            IncomeSuspended = true;
+            foreach (var wallet in wallets.Values)
+            {
+                wallet.earning = false;
+                wallet.elapsedSeconds = 0;
+            }
+        }
+
         public void Tick(double deltaSeconds)
         {
             if (deltaSeconds < 0 || double.IsNaN(deltaSeconds) || double.IsInfinity(deltaSeconds))
                 throw new ArgumentOutOfRangeException(nameof(deltaSeconds));
+            if (IncomeSuspended) return;
 
             foreach (var entry in wallets)
             {
@@ -103,6 +119,7 @@ namespace LiveStock.Economy
                 if (wholeSeconds > (int.MaxValue - wallet.balance) / incomePerSecond) continue;
                 wallet.balance = (int)(wallet.balance + (long)wholeSeconds * incomePerSecond);
                 BalanceChanged?.Invoke(entry.Key, wallet.balance);
+                if (IncomeSuspended) return;
             }
         }
 

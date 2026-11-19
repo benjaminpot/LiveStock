@@ -45,13 +45,25 @@ const itemUseController = new ItemUseController({
   getSelectedItemId: () => inventoryPanel.selectedItemId,
   onResult: result => cctvAim.showResult(result),
   onFeedback: text => cctvAim.showFeedback(text),
-  onModeChange: active => {
+  onStopFiring: () => cctvAim.stopFiring(),
+  onModeChange: (active, state) => {
+    cctvAim.setItemState(state);
+    shopPanel.setMode(state);
+    inventoryPanel.setMode(state);
+    const modePanel = document.querySelector('[data-round-mode]');
+    modePanel.hidden = !active || state.mode === 'normal';
+    modePanel.querySelector('[data-mode-name]').textContent = state?.mode === 'ended' ? '本局已結束' : '瘋狂模式';
+    modePanel.querySelector('[data-gun-details]').hidden = state?.mode !== 'crazy';
+    modePanel.querySelector('[data-shot-cost]').textContent = state ? `${state.shotCost} 元／發` : '';
+    const fireAction = document.querySelector('[data-fire-action]');
+    if (fireAction) fireAction.textContent = state?.mode === 'crazy' ? '按住連發'
+      : state?.mode === 'ended' ? '本局已結束' : '點擊發射';
     for (const { element, legacyText } of itemUseHints) {
-      element.textContent = active
-        ? '球形投射物測試：選取道具後點監視器畫面使用；捕捉、射線與範圍爆炸尚未接入。'
-        : legacyText;
+      element.textContent = state?.mode === 'crazy'
+        ? '按住影片畫面即可使用連發槍；放開、移出畫面或切換監視器即停止。每發收費，未命中也會扣款。'
+        : state?.mode === 'ended' ? '本局已結束，無法發射或購買道具。'
+        : active ? '選取持有的道具後，點擊監視器影片使用。' : legacyText;
     }
-    if (active) cctvAim.result.textContent = 'Select an inventory item, then click inside the video';
   }
 });
 cctvPanel.onFireResult = result => {
@@ -59,12 +71,16 @@ cctvPanel.onFireResult = result => {
 };
 cctvPanel.onItemState = state => itemUseController.setState(state);
 cctvPanel.onItemResult = result => itemUseController.showResult(result);
-cctvPanel.onMoneyState = state => moneyPanel.setState(state);
+cctvPanel.onMoneyState = state => {
+  moneyPanel.setState(state);
+  itemUseController.setMoneyState(state);
+};
 cctvPanel.onShopState = state => {
   shopPanel.setState(state);
   inventoryPanel.setState(state);
 };
 cctvPanel.onShopResult = result => shopPanel.showResult(result);
+cctvPanel.onViewChange = () => cctvAim.stopFiring();
 cctvPanel.onReset = () => {
   cctvAim.reset();
   itemUseController.reset();

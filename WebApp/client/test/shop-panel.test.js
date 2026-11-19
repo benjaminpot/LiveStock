@@ -64,7 +64,7 @@ describe.each(['index.html', 'live.html'])('shop consumer on %s', pageName => {
   }
 
   test('waits for a complete server catalog without inventing prices or inventory', () => {
-    expect(buttons().every(button => button.disabled && button.textContent === 'COMING SOON')).toBe(true);
+    expect(buttons().every(button => button.disabled && button.textContent === '尚未開放')).toBe(true);
     for (const id of ids) {
       expect(text(id, 'price')).toBe('—');
       expect(text(id, 'quantity')).toBe('—');
