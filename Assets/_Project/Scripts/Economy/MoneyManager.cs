@@ -11,6 +11,7 @@ namespace LiveStock.Economy
 
         private MoneyState state;
         public event Action<string, int> BalanceChanged;
+        public bool IncomeSuspended => state.IncomeSuspended;
 
         private void Awake()
         {
@@ -23,6 +24,9 @@ namespace LiveStock.Economy
         public bool TryGetBalance(string playerId, out int balance) => state.TryGetBalance(playerId, out balance);
         public bool AddMoney(string playerId, int amount) => state.AddMoney(playerId, amount);
         public bool TrySpendMoney(string playerId, int amount) => state.TrySpendMoney(playerId, amount);
+        public bool TrySpendMoney(string playerId, int amount, Action onSpent) =>
+            state.TrySpendMoney(playerId, amount, onSpent);
+        public void SuspendIncome() => state.SuspendIncome();
         public bool StartIncome(string playerId) => state.StartIncome(playerId);
         public bool StopIncome(string playerId) => state.StopIncome(playerId);
         public void Clear() => state.Clear();

@@ -216,6 +216,87 @@ namespace LiveStock.Economy.Tests
         }
 
         [Test]
+        public void SuspensionPreservesBalancesAndPermanentlyStopsExistingAndLateWallets()
+        {
+            state.RegisterPlayer("A");
+            state.RegisterPlayer("B");
+            state.AddMoney("A", 100);
+            state.AddMoney("B", 99);
+            state.StartIncome("A");
+            state.StartIncome("B");
+            state.Tick(0.9);
+            changes.Clear();
+            state.SuspendIncome();
+            state.SuspendIncome();
+            Assert.That(state.IncomeSuspended, Is.True);
+            Assert.That(state.RegisterPlayer("A"), Is.False);
+            Assert.That(state.StartIncome("A"), Is.False);
+            Assert.That(state.StartIncome("B"), Is.False);
+            Assert.That(state.RegisterPlayer("late"), Is.True);
+            Assert.That(state.StartIncome("late"), Is.False);
+            state.Tick(1000);
+            Assert.That(Balance("A"), Is.EqualTo(100));
+            Assert.That(Balance("B"), Is.EqualTo(99));
+            Assert.That(Balance("late"), Is.Zero);
+            Assert.That(changes, Is.Empty);
+            Assert.That(state.TrySpendMoney("A", 100), Is.True);
+            Assert.That(Balance("A"), Is.Zero);
+            state.RemovePlayer("A");
+            state.RegisterPlayer("A");
+            Assert.That(state.StartIncome("A"), Is.False);
+            state.Clear();
+            state.RegisterPlayer("next");
+            Assert.That(state.StartIncome("next"), Is.False);
+            state.Tick(1);
+            Assert.That(Balance("next"), Is.Zero);
+        }
+
+        [Test]
+        public void SuspendingFromAnIncomeCallbackStopsTheBatchAndAllowsLateRegistration()
+        {
+            state.RegisterPlayer("A");
+            state.RegisterPlayer("B");
+            state.StartIncome("A");
+            state.StartIncome("B");
+            int notifications = 0;
+            state.BalanceChanged += (id, balance) => {
+                notifications++;
+                state.SuspendIncome();
+                Assert.That(state.RegisterPlayer("late"), Is.True);
+                Assert.That(state.StartIncome("late"), Is.False);
+            };
+            state.Tick(1);
+            Assert.That(notifications, Is.EqualTo(1));
+            Assert.That(Balance("A") + Balance("B"), Is.EqualTo(10000));
+            state.Tick(10);
+            Assert.That(notifications, Is.EqualTo(1));
+            Assert.That(Balance("late"), Is.Zero);
+        }
+
+        [TestCase(99, false)]
+        [TestCase(100, true)]
+        public void AcceptedActionRunsExactlyOnceBeforeBalanceObservers(int funds, bool accepted)
+        {
+            state.RegisterPlayer("A");
+            state.AddMoney("A", funds);
+            int actions = 0;
+            int notifications = 0;
+            state.BalanceChanged += (id, balance) => {
+                notifications++;
+                Assert.That(actions, Is.EqualTo(1));
+                Assert.That(balance, Is.Zero);
+            };
+            Assert.That(state.TrySpendMoney("A", 100, () => {
+                Assert.That(Balance("A"), Is.Zero);
+                actions++;
+                state.SuspendIncome();
+            }), Is.EqualTo(accepted));
+            Assert.That(actions, Is.EqualTo(accepted ? 1 : 0));
+            Assert.That(notifications, Is.EqualTo(actions));
+            Assert.That(Balance("A"), Is.EqualTo(accepted ? 0 : funds));
+        }
+
+        [Test]
         public void NegativeConfigurationIsRejected()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new MoneyState(-1, 0));

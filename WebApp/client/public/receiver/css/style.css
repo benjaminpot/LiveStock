@@ -147,3 +147,6 @@ body {
 .inventory-count { font-size: 11px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .inventory-status, .inventory-empty, .inventory-hint { margin: 0.75rem 0 0; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .inventory-hint { font-size: 12px; }
+.round-mode:not([hidden]) { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; padding: 0.75rem; margin: 1rem 0; border: 2px solid #bc4a22; }
+.round-mode[hidden] { display: none; }
+.cctv-screen.is-crazy video { touch-action: none; }

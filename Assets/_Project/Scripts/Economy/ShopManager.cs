@@ -26,6 +26,7 @@ namespace LiveStock.Economy
         private ShopState state;
 
         public int ProductCount => state == null ? 0 : state.ProductCount;
+        public MoneyManager Wallet => moneyManager;
         public ShopState.Product GetProduct(int index) => state.GetProduct(index);
 
         private void Awake()

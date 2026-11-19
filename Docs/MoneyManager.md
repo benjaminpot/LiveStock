@@ -2,6 +2,8 @@
 
 每支手機有自己的餘額。現在初始是 0，連線準備好後每秒加 10,000；斷線重連會重新開始，不會保留上次的錢。
 
+進入瘋狂模式或結束本局後，所有手機的收入都會停止，原有餘額保留。瘋狂模式每次成功發射另扣 100 元。
+
 ## 要拖什麼
 
 先停止 Play。
@@ -52,8 +54,9 @@
 | `TryGetBalance(id, out balance)` | 讀取餘額；找不到玩家時回 false，balance 為 0 |
 | `AddMoney(id, amount)` | 加錢；amount 必須是正整數 |
 | `TrySpendMoney(id, amount)` | 扣錢；餘額不足就回 false，不改餘額 |
-| `StartIncome(id)` | 開始收入；重複呼叫不會重算起點 |
+| `StartIncome(id)` | 開始收入；重複呼叫不重算起點，瘋狂模式或結束後也不會重新開啟收入 |
 | `StopIncome(id)` | 停止收入，保留餘額；未滿一秒的累計時間會清掉 |
+| `SuspendIncome()` | 停止所有玩家的收入，保留餘額；這局後加入的手機也不會開始收入 |
 | `RemovePlayer(id)` | 移除這個玩家的錢包 |
 | `Clear()` | 清除這個 MoneyManager 裡所有玩家的錢包 |
 | `BalanceChanged` | 餘額改變時通知，帶回玩家 ID 和新餘額 |
@@ -62,6 +65,6 @@
 
 只呼叫加扣錢，不等於已經發放道具。購買請走 ShopManager，使用道具請走 ItemUseManager。
 
-目前手機準備好後就開始收入，沒有接正式回合開始／結束。資料也沒有存進帳號、PlayerPrefs 或瀏覽器。
+一般模式在手機準備好後開始收入。遊戲流程要透過 CCTV View Switcher 的 `EnterCrazyMode()` 和 `EndRound()` 停止收入；目前沒有自行判斷勝負。資料沒有存進帳號、PlayerPrefs 或瀏覽器。
 
-前一次已驗證獨立餘額、斷線清除，以及重複準備訊息不會多發錢。[完整測試紀錄](ItemUse.md#前一次的測試紀錄) 保留在道具文件；這次只改說明，沒有重跑遊戲測試。
+先前的一般模式測試紀錄見 [道具文件](ItemUse.md#前一次的測試紀錄)；瘋狂模式的手動操作見 [交接文件](MobileModule-handover.md#4-瘋狂模式怎麼接怎麼測)。

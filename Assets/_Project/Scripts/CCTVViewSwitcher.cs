@@ -150,6 +150,10 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     {
         public string type = "item-state";
         public int lastRequestId;
+        public string mode;
+        public string gunItemId = LiveStock.Items.ItemUseManager.CrazyGunItemId;
+        public int shotCost = LiveStock.Items.ItemUseManager.CrazyShotCost;
+        public float fireInterval;
     }
 
     [Serializable]
@@ -278,6 +282,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         registered = true;
         if (moneyManager != null) moneyManager.BalanceChanged += OnMoneyChanged;
         if (itemUseManager != null) itemUseManager.Impact += OnItemImpact;
+        if (itemUseManager != null) itemUseManager.ModeChanged += OnItemModeChanged;
         foreach (var view in views) view.streamCamera.enabled = false;
         ApplyPreview();
     }
@@ -300,6 +305,22 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         if (!isActiveAndEnabled || state == null || index < 0 || index >= views.Length) return;
         previewIndex = index;
         ApplyPreview();
+    }
+
+    [ContextMenu("測試/進入瘋狂模式")]
+    public void EnterCrazyMode()
+    {
+        if (!Application.isPlaying) return;
+        if (!isActiveAndEnabled || shopManager == null || !shopManager.IsConfiguredFor(moneyManager) ||
+            itemUseManager == null || !itemUseManager.IsConfiguredFor(shopManager) ||
+            !itemUseManager.EnterCrazyMode())
+            Debug.LogWarning("[CCTVViewSwitcher] Crazy mode needs the scene's configured MoneyManager, ShopManager and ItemUseManager.", this);
+    }
+
+    [ContextMenu("測試/結束本局")]
+    public void EndRound()
+    {
+        if (Application.isPlaying && itemUseManager != null) itemUseManager.EndRound();
     }
 
     private void Update()
@@ -618,12 +639,22 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
         channel.Send(JsonUtility.ToJson(message));
     }
 
+    private void OnItemModeChanged()
+    {
+        foreach (var entry in sessions)
+            SendItemStatus(entry.Key, entry.Value, entry.Value.channel);
+    }
+
     private void SendItemStatus(string connectionId, Session session, RTCDataChannel channel)
     {
         if (!IsCurrentChannel(connectionId, session, channel) || itemUseManager == null ||
             !itemUseManager.IsConfiguredFor(shopManager) ||
             !itemUseManager.TryGetLastRequestId(connectionId, out int lastRequestId)) return;
-        channel.Send(JsonUtility.ToJson(new ItemStatusMessage { lastRequestId = lastRequestId }));
+        string mode = itemUseManager.Mode == LiveStock.Economy.ItemUseState.UseMode.Crazy ? "crazy"
+            : itemUseManager.Mode == LiveStock.Economy.ItemUseState.UseMode.Ended ? "ended" : "normal";
+        channel.Send(JsonUtility.ToJson(new ItemStatusMessage {
+            lastRequestId = lastRequestId, mode = mode, fireInterval = itemUseManager.CrazyFireInterval
+        }));
     }
 
     private void UseItem(string connectionId, Session session, Command command)
@@ -685,6 +716,8 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
             case LiveStock.Economy.ItemUseState.UseStatus.UnknownPlayer: return "unknown-player";
             case LiveStock.Economy.ItemUseState.UseStatus.Cooldown: return "cooldown";
             case LiveStock.Economy.ItemUseState.UseStatus.StaleRequest: return "stale-request";
+            case LiveStock.Economy.ItemUseState.UseStatus.InsufficientFunds: return "insufficient-funds";
+            case LiveStock.Economy.ItemUseState.UseStatus.RoundEnded: return "round-ended";
             default: return "unavailable";
         }
     }
@@ -692,7 +725,9 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     private void Purchase(string connectionId, Session session, Command command)
     {
         var channel = session.channel;
-        var result = shopManager != null && shopManager.IsConfiguredFor(moneyManager)
+        bool purchasingAllowed = itemUseManager == null ||
+            itemUseManager.Mode == LiveStock.Economy.ItemUseState.UseMode.Normal;
+        var result = purchasingAllowed && shopManager != null && shopManager.IsConfiguredFor(moneyManager)
             ? shopManager.Purchase(connectionId, command.itemId, command.requestId)
             : new LiveStock.Economy.ShopState.PurchaseResult(command.requestId, command.itemId,
                 LiveStock.Economy.ShopState.PurchaseStatus.Unavailable);
@@ -794,6 +829,7 @@ public sealed class CCTVViewSwitcher : SignalingHandlerBase,
     {
         if (moneyManager != null) moneyManager.BalanceChanged -= OnMoneyChanged;
         if (itemUseManager != null) itemUseManager.Impact -= OnItemImpact;
+        if (itemUseManager != null) itemUseManager.ModeChanged -= OnItemModeChanged;
         foreach (var connectionId in new List<string>(sessions.Keys)) RemoveSession(connectionId, false);
         if (registered && signalingManager != null) signalingManager.RemoveSignalingHandler(this);
         if (registered && sourceBroadcast != null)

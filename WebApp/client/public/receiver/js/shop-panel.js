@@ -26,6 +26,11 @@ export class ShopPanel {
     this.reset();
   }
 
+  setMode(state) {
+    this.mode = state?.mode ?? 'normal';
+    this.renderButtons();
+  }
+
   setState(state) {
     const items = readShopSnapshot(state, this.lastRequestId);
     if (!items) return;
@@ -43,7 +48,7 @@ export class ShopPanel {
   }
 
   buy(itemId) {
-    if (!this.available || this.pending || this.sequence >= MAX_INT) return;
+    if (this.mode !== 'normal' || !this.available || this.pending || this.sequence >= MAX_INT) return;
     const requestId = ++this.sequence;
     this.pending = { requestId, itemId };
     this.status.textContent = '購買處理中，請稍候…';
@@ -62,8 +67,15 @@ export class ShopPanel {
 
   renderButtons() {
     for (const card of this.cards) {
-      card.button.disabled = !this.available || !!this.pending || this.sequence >= MAX_INT;
-      card.button.textContent = !this.available ? 'COMING SOON' : this.pending ? '處理中…' : '購買 1 件';
+      card.button.disabled = this.mode !== 'normal' || !this.available || !!this.pending || this.sequence >= MAX_INT;
+      card.button.textContent = this.mode === 'ended' ? '本局已結束'
+        : this.mode === 'crazy' ? '暫停購買'
+        : !this.available ? '尚未開放' : this.pending ? '處理中…' : '購買 1 件';
+    }
+    if (this.mode !== 'normal') {
+      this.status.textContent = this.mode === 'crazy'
+        ? '瘋狂模式中，暫停購買；原有道具已保留。' : '本局已結束，無法購買。';
+      return;
     }
     if (this.available && !this.pending && this.sequence >= MAX_INT) {
       this.status.textContent += ' 請重新連線後繼續購買（請求編號已用完）。';
@@ -71,6 +83,7 @@ export class ShopPanel {
   }
 
   reset() {
+    this.mode = 'normal';
     this.available = false;
     this.pending = null;
     this.lastRequestId = 0;

@@ -20,6 +20,13 @@ namespace LiveStock.Items
 
         [SerializeField] private ShopManager shopManager;
         [SerializeField, Min(0f)] private float useCooldown = 0.2f;
+        [SerializeField] private ItemProjectile crazyGunProjectile;
+        [SerializeField, Min(0.01f)] private float crazyFireInterval = 0.2f;
+
+        public const string CrazyGunItemId = ItemUseState.CrazyGunItemId;
+        public const int CrazyShotCost = ItemUseState.CrazyShotCost;
+        public ItemUseState.UseMode Mode => state?.Mode ?? ItemUseState.UseMode.Ended;
+        public float CrazyFireInterval => crazyFireInterval;
         [SerializeField] private ProjectileBinding[] projectiles = {
             new ProjectileBinding("capture-ball"),
             new ProjectileBinding("bow"),
@@ -105,18 +112,33 @@ namespace LiveStock.Items
             }
         }
 
+        private struct LaunchRequest
+        {
+            public ProjectilePool pool;
+            public string playerId;
+            public string itemId;
+            public int requestId;
+            public Ray ray;
+            public int slot;
+            public int index;
+        }
+
         private readonly Dictionary<string, ProjectilePool> pools =
             new Dictionary<string, ProjectilePool>(StringComparer.Ordinal);
         private readonly List<ItemProjectile> active = new List<ItemProjectile>();
         private ItemUseState state;
         private string registrationItemId;
         private bool configured;
+        private LaunchRequest pendingLaunch;
+        private Action launchAuthorized;
 
         public event Action<string, ItemImpact> Impact;
+        public event Action ModeChanged;
         public int ActiveProjectileCount => active.Count;
 
         private void Awake()
         {
+            launchAuthorized = LaunchAuthorized;
             if (!TryInitialize(out string error))
             {
                 Debug.LogError("[ItemUseManager] " + error, this);
@@ -134,6 +156,11 @@ namespace LiveStock.Items
             if (!ItemProjectile.IsFinite(useCooldown) || useCooldown < 0f)
             {
                 error = "useCooldown must be finite and nonnegative.";
+                return false;
+            }
+            if (!ItemProjectile.IsFinite(crazyFireInterval) || crazyFireInterval <= 0f)
+            {
+                error = "連發間隔必須是大於零的有限數值。";
                 return false;
             }
             if (projectiles == null || projectiles.Length != shopManager.ProductCount)
@@ -155,11 +182,22 @@ namespace LiveStock.Items
                 if (!binding.prefab.ValidateConfiguration(out error)) return false;
                 definitions.Add(binding.itemId, binding.prefab);
             }
+            if (crazyGunProjectile != null &&
+                (!distinctPrefabs.Add(crazyGunProjectile) || !crazyGunProjectile.ValidateConfiguration(out error)))
+            {
+                error = "請為連發槍指定獨立且設定完整的發射物。";
+                return false;
+            }
 
             var itemIds = new string[shopManager.ProductCount];
             for (int i = 0; i < itemIds.Length; i++)
             {
                 string itemId = shopManager.GetProduct(i).Id;
+                if (itemId == CrazyGunItemId)
+                {
+                    error = "連發槍不可列為商店商品。";
+                    return false;
+                }
                 if (!definitions.ContainsKey(itemId))
                 {
                     error = "No projectile is configured for shop product '" + itemId + "'.";
@@ -168,12 +206,19 @@ namespace LiveStock.Items
                 itemIds[i] = itemId;
             }
 
-            state = new ItemUseState(itemIds, shopManager.TryConsumeItem, useCooldown);
+            state = new ItemUseState(itemIds, shopManager.TryConsumeItem, useCooldown,
+                shopManager.Wallet.TrySpendMoney, crazyFireInterval);
             registrationItemId = itemIds[0];
             foreach (var binding in projectiles)
             {
                 var pool = new ProjectilePool(this, binding.prefab);
                 pools.Add(binding.itemId, pool);
+                pool.Warm();
+            }
+            if (crazyGunProjectile != null)
+            {
+                var pool = new ProjectilePool(this, crazyGunProjectile);
+                pools.Add(CrazyGunItemId, pool);
                 pool.Warm();
             }
             configured = true;
@@ -182,7 +227,7 @@ namespace LiveStock.Items
         }
 
         public bool IsConfiguredFor(ShopManager shop) => configured && state != null && isActiveAndEnabled &&
-            shopManager != null && shopManager == shop && shopManager.isActiveAndEnabled &&
+            shopManager != null && shopManager == shop && shopManager.IsConfiguredFor(shopManager.Wallet) &&
             gameObject.scene.IsValid() && gameObject.scene.isLoaded;
 
         public bool RegisterPlayer(string playerId) => IsConfiguredFor(shopManager) &&
@@ -203,9 +248,31 @@ namespace LiveStock.Items
             return state != null && state.TryGetLastRequestId(playerId, out requestId);
         }
 
+        public bool EnterCrazyMode()
+        {
+            if (!IsConfiguredFor(shopManager) || Mode == ItemUseState.UseMode.Ended ||
+                !pools.TryGetValue(CrazyGunItemId, out var pool) || !pool.IsAvailable) return false;
+            shopManager.Wallet.SuspendIncome();
+            if (Mode == ItemUseState.UseMode.Crazy) return true;
+            state.EnterCrazyMode();
+            ModeChanged?.Invoke();
+            return true;
+        }
+
+        public void EndRound()
+        {
+            if (shopManager != null && shopManager.Wallet != null) shopManager.Wallet.SuspendIncome();
+            if (Mode == ItemUseState.UseMode.Ended) return;
+            state.EndRound();
+            while (active.Count > 0) CancelProjectile(active[active.Count - 1]);
+            ModeChanged?.Invoke();
+        }
+
         public ItemUseState.UseResult Use(string playerId, string itemId, int requestId, Ray ray,
             int slot, int index, bool allowed)
         {
+            if (Mode == ItemUseState.UseMode.Ended)
+                return new ItemUseState.UseResult(requestId, itemId, ItemUseState.UseStatus.RoundEnded);
             if (!IsConfiguredFor(shopManager))
                 return new ItemUseState.UseResult(requestId, itemId, ItemUseState.UseStatus.Unavailable, false);
 
@@ -213,14 +280,28 @@ namespace LiveStock.Items
             if (itemId != null) pools.TryGetValue(itemId, out pool);
             bool validRay = TryNormalizeRay(ray, out Ray launchRay);
             bool canLaunch = allowed && validRay && pool != null && pool.CanLaunch(launchRay.direction);
-            var result = state.Use(playerId, itemId, requestId, canLaunch, Time.unscaledTimeAsDouble);
-            if (!result.ShouldLaunch) return result;
+            // Save the context on the stack: a synchronous balance listener may use another player.
+            var previousLaunch = pendingLaunch;
+            pendingLaunch = new LaunchRequest {
+                pool = pool, playerId = playerId, itemId = itemId, requestId = requestId,
+                ray = launchRay, slot = slot, index = index
+            };
+            try
+            {
+                return state.Use(playerId, itemId, requestId, canLaunch, Time.unscaledTimeAsDouble,
+                    launchAuthorized);
+            }
+            finally { pendingLaunch = previousLaunch; }
+        }
 
-            var projectile = pool.Get();
+        private void LaunchAuthorized()
+        {
+            var request = pendingLaunch;
+            var projectile = request.pool.Get();
             projectile.ActiveIndex = active.Count;
             active.Add(projectile);
-            projectile.Launch(playerId, itemId, requestId, launchRay, slot, index);
-            return result;
+            projectile.Launch(request.playerId, request.itemId, request.requestId, request.ray,
+                request.slot, request.index);
         }
 
         private static bool TryNormalizeRay(Ray ray, out Ray normalized)
@@ -288,6 +369,7 @@ namespace LiveStock.Items
             pools.Clear();
             configured = false;
             Impact = null;
+            ModeChanged = null;
         }
     }
 }

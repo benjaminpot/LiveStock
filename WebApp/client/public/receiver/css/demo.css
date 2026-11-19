@@ -67,3 +67,6 @@ body{background:radial-gradient(circle at 50% -15%,rgba(45,83,88,.26),transparen
 .inventory-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.inventory-slots button{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0;min-height:70px;margin:0;padding:8px 4px;border:1px solid var(--line);border-radius:4px;color:var(--text);background:transparent;font-size:13px;overflow-wrap:anywhere;cursor:pointer}.inventory-slots button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);background:var(--panel)}.inventory-slots button:disabled{color:var(--muted);opacity:.55;cursor:default}.inventory-count{font-size:11px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .inventory-status,.inventory-empty,.inventory-hint{margin:10px 0 0;overflow-wrap:anywhere;font-size:12px;line-height:1.5}.inventory-status{color:var(--text)}.inventory-empty,.inventory-hint{color:var(--muted)}.inventory-hint{font-size:11px}
 @media(max-width:540px){.inventory-panel{padding:10px}.inventory-slots{gap:6px}.inventory-slots button{font-size:12px}}
+.round-mode:not([hidden]){display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px;padding:12px;border:1px solid var(--accent);border-radius:4px;color:var(--text);background:var(--panel)}
+.round-mode[hidden]{display:none}
+.cctv-screen.is-crazy video{touch-action:none}
