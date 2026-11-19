@@ -89,7 +89,9 @@ npm start
 
 連發間隔在 **ItemUseManager → Crazy Fire Interval** 調整，預設 0.2 秒。槍的速度、大小、傷害在 `Assets/_Project/Prefabs/Items/CrazyGunProjectile.prefab` 調整，沿用原本的球體碰撞，不是射線。
 
-已用真實 Unity 與兩個 Chromium 頁面測過扣款、停收入、晚加入同步、結束停射及回收球。[這次的測試紀錄](ItemUse.md#本次瘋狂模式的測試紀錄)。
+同步遠端後，網頁也會顯示蘋果收集進度。**看到「蘋果已收集完成」不代表已自動進入瘋狂模式或判定勝負**；遊戲流程仍要呼叫上面的兩個接口。
+
+已用真實 Unity 與兩個 Chromium 頁面測過扣款、停收入、晚加入同步、結束停射及回收球。[同步後的測試紀錄](ItemUse.md#同步遠端後的驗證)。
 
 ## 目前做了什麼、還沒做什麼
 
